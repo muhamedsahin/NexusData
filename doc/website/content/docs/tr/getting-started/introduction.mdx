@@ -1,0 +1,62 @@
+---
+title: Giriş
+description: NexusData nedir, kime hitap eder, bilinçli sınırlar ve Nexus ekosistemindeki yeri.
+status: stable
+order: 10
+locale: tr
+section: getting-started
+since: "1.0"
+---
+
+## NexusData nedir?
+
+**NexusData**, yapay zeka boru hatları için bağımsız bir **C++20** veri giriş (ingress) kütüphanesidir. Ham girdileri okur, hazırlar, indeksleri karıştırır (shuffle), sample'ları batch'ler ve `NDArray` yüklerini host veya (isteğe bağlı) CUDA cihaz belleğine teslim eder.
+
+```cpp
+#include "nexusdata/nexusdata.hpp"
+using namespace nexusdata;
+```
+
+## Neden var?
+
+Eğitim yığınları sıklıkla geçici ayrıştırıcılar ve batch döngüleriyle birbirine yapıştırılır. NexusData şunları standartlaştırır:
+
+- Map-style `Dataset` + `Sampler` + `DataLoader` üçlüsü
+- Deterministik RNG (`PCG32`; CUDA açıkken GPU tarafında `Philox`)
+- Sıfıra yakın kopya dostu görünümler (`Subset`, paylaşımlı `NDArray` depolama)
+- İsteğe bağlı CUDA — yalnızca **veri hazırlığı**; eğitim matematiği değil
+
+## Kime uygun?
+
+- Tam bir ML framework çekmeden DataLoader benzeri ergonomi isteyen C++ ekipleri
+- Batch sırasının makine ve `num_workers` sayısından bağımsız tekrarlanması gereken boru hatları
+- İleride tek yönlü bir adapter ile NexusFlash Pro bağlamayı düşünen projeler
+
+## Bilinçli sınırlar
+
+| Kapsam dışı | Nerede? |
+| --- | --- |
+| GEMM / matmul | NexusFlash Pro (ayrı) |
+| Autograd | Gelecek compute yığını |
+| Model / loss / optimizer / train loop | Planlanan Nexus\* modülleri |
+
+NexusData bu kütüphanelere **bağımlı değildir**.
+
+## Ekosistem
+
+```
+Sources → Dataset → Sampler → DataLoader → Batch/NDArray → tüketici
+                                              ↓ isteğe bağlı
+                                        NexusFlash Pro adapter
+```
+
+## Zihinsel model
+
+1. **Dataset** — `size()` / `get(i)`; yerinde shuffle edilmez
+2. **Sampler** — bir epoch için indeks dizisi
+3. **DataLoader** — fetch, collate, prefetch / pin / device
+4. **NDArray** — shape + dtype + bellek taşıyıcısı (compute yok)
+
+<Callout tone="tip" title="API dürüstlüğü">
+Örnekler NexusData **v1.0** public header'larıyla uyumludur. İsteğe bağlı CMake özellikleri (`NEXUSDATA_WITH_SQLITE`, `ARROW`, `HDF5`, `CUDA`) ilgili sayfalarda belirtilir.
+</Callout>

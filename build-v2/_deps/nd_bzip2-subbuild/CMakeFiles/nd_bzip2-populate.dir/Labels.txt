@@ -1,0 +1,14 @@
+# Target labels
+ nd_bzip2-populate
+# Source files and their labels
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/CMakeFiles/nd_bzip2-populate
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/CMakeFiles/nd_bzip2-populate.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/CMakeFiles/nd_bzip2-populate-complete.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-build.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-configure.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-download.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-install.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-mkdir.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-patch.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-test.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-update.rule

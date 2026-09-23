@@ -1,0 +1,101 @@
+---
+title: JSON records
+description: JsonDataset field paths, JSON Lines, and the numeric JSONLDataset reader.
+status: stable
+order: 30
+locale: en
+section: examples
+since: "1.0"
+---
+
+Two readers cover JSON.
+
+`JsonDataset` maps fields out of JSON Lines or a single JSON array. Paths can be dotted, and a field can be an input, a label, an extra tensor, or metadata. Records are parsed in parallel into columns. `get` copies one row.
+
+`JSONLDataset` is the narrower reader: each line is a numeric JSON array, and the last element is the label. Nested objects are not read by this class.
+
+## JSON Lines with named fields
+
+```json
+{"x": [1.0, 2.0], "y": 1, "id": "a"}
+{"x": [0.5, 1.5], "y": 0, "id": "b"}
+```
+
+```cpp
+#include "nexusdata/dataset/json.hpp"
+#include "nexusdata/loading/dataloader.hpp"
+
+nexusdata::JsonOptions opt;
+opt.format = nexusdata::JsonFormat::Lines;
+opt.fields = {
+    {"x", nexusdata::JsonRole::Input, nexusdata::DType::Float32, nexusdata::Shape{2}},
+    {"y", nexusdata::JsonRole::Label, nexusdata::DType::Float32},
+    {"id", nexusdata::JsonRole::Metadata},
+};
+opt.skip_invalid = true;
+opt.num_threads = 0;
+
+nexusdata::JsonDataset ds("rows.jsonl", opt);
+const auto dropped = ds.skipped();
+```
+
+`JsonRole::Input` fields are concatenated, in field order, into `Sample::input`. `Label` fields go to `Sample::label`. `Extra` goes to `Sample::extra_tensors[name]`. `Metadata` stores strings; non-strings are kept as JSON text.
+
+An empty `fields` vector infers an input field for every top-level number, boolean, or numeric array on the first record. Strings become metadata. `infer_json_fields` does that inference explicitly.
+
+`JsonFormat::Auto` treats a leading `[` as an array document and anything else as lines. For an array wrapped in an object, set `format` to `JsonFormat::Array` and `records_path` to the dotted path of the array, for example `"data.items"`. An empty `records_path` means the document root is the array.
+
+Paths: `"image.size[0]"`, `"meta.id"`, `"annotations[*].bbox"`. `[*]` collects every element and adds a leading dimension. A variable count becomes a ragged extra tensor. Numbers, booleans (1 or 0), and rectangular numeric arrays are accepted. `null` is NaN for floating dtypes. For integer dtypes, set `JsonField::default_value` or the missing field is an error. `categories` maps strings to indices.
+
+```cpp
+auto in_memory = nexusdata::JsonDataset::from_string(
+    R"([{"x": 1.0, "y": 0}, {"x": 2.0, "y": 1}])",
+    opt);
+```
+
+`from_string` parses during the call. The view does not need to outlive the dataset.
+
+## Stream a large JSONL file
+
+`JsonLinesIterable` keeps constant memory, including compressed input such as `.jsonl.zst`. It is an iterable dataset, not a random-access `Dataset`.
+
+```cpp
+nexusdata::JsonLinesIterable stream("huge.jsonl.zst", opt);
+```
+
+## Numeric arrays only
+
+```json
+[1.0, 2.5, 0.0, 3]
+[0.2, 1.1, 4.0, 1]
+```
+
+```cpp
+#include "nexusdata/dataset/jsonl.hpp"
+
+nexusdata::JSONLOptions narrow;
+narrow.array_with_label = true; // last element is the label
+narrow.feature_dtype = nexusdata::DType::Float32;
+narrow.label_dtype = nexusdata::DType::Float32;
+narrow.num_threads = 0;
+
+nexusdata::JSONLDataset ds("vectors.jsonl", narrow);
+```
+
+`array_with_label` is the only layout this class reads. Nested objects belong in `JsonDataset`.
+
+## Batches
+
+```cpp
+nexusdata::DataLoaderOptions load;
+load.batch_size = 64;
+load.shuffle = true;
+load.seed = 1;
+nexusdata::DataLoader loader(ds, load);
+for (const auto& batch : loader) {
+    const auto& x = batch.inputs;
+    const auto& y = batch.labels;
+}
+```
+
+Metadata keys are collated into `batch.metadata` as one string per sample. Extra tensors with a shared shape land in `batch.extras`. Variable-length extras land in `batch.ragged_extras`.

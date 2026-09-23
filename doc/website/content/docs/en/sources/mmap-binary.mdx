@@ -1,0 +1,25 @@
+---
+title: Raw binary / mmap
+description: MappedFile and raw binary access patterns.
+status: stable
+order: 95
+locale: en
+section: sources
+since: "1.0"
+---
+
+```cpp
+#include "nexusdata/io/mapped_file.hpp"
+
+MappedFile map("features.bin");
+// interpret bytes with known dtype/shape into NDArray / custom Dataset
+```
+
+## Guidance
+
+- Document endianness and record stride in your Dataset
+- Prefer mmap for large immutable blobs; copy only when mutating
+
+## See also
+
+- [Memory & ownership](/docs/concepts/memory-ownership)

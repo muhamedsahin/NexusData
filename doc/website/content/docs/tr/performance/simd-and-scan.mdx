@@ -1,0 +1,13 @@
+---
+title: SIMD byte tarama
+description: Parser'larda kullanılan AVX2/scalar runtime dispatch — NEXUSDATA_ENABLE_AVX2.
+status: stable
+order: 30
+locale: tr
+section: performance
+since: "1.0"
+---
+
+`simd/byte_scan.hpp` CSV tarzı ayırıcı taramayı hızlandırır. AVX2 çekirdekleri derlenir; CPU desteklemiyorsa scalar'a düşer.
+
+Ölçüm için `bench_suite` çalıştırın — dokümandaki rakamlar makineye özgüdür, garantili iddia değildir.

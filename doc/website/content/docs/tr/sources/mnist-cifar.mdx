@@ -1,0 +1,60 @@
+---
+title: MNIST ve CIFAR
+description: mmap destekli bayt okuyucuları ile klasik IDX ve CIFAR binary formatları.
+status: stable
+order: 85
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## MNIST / Fashion-MNIST
+
+```cpp
+MNISTOptions opt;
+opt.train = true;
+// opt.images_file / labels_file varsayılan IDX adlarını geçersiz kılar
+
+MNIST mnist("data/mnist", opt);
+Sample s = mnist.get(0);
+// input: [28, 28, 1] UInt8 HWC
+// label: skaler sınıf indeksi
+```
+
+| Ayrıntı | Değer |
+| --- | --- |
+| Düzen | IDX3 görüntü + IDX1 etiket |
+| Depolama | `MappedFile` üzerinde zero-copy görüntü baytları |
+| Varsayılanlar | `train-images-idx3-ubyte`, `train-labels-idx1-ubyte` (veya `t10k-*`) |
+
+`MNIST` sınıfı map-style **MnistDataset** okuyucusudur; Fashion-MNIST aynı IDX düzenini kullanır.
+
+## CIFAR-10 / CIFAR-100
+
+```cpp
+CIFAROptions opt;
+opt.cifar100 = false;
+opt.batch_files = {};  // boş => root altında standart batch adları
+
+CIFAR cifar("data/cifar", opt);
+Sample s = cifar.get(0);
+// input: [32, 32, 3] UInt8 HWC
+```
+
+CIFAR birden fazla batch dosyası tutar; her batch mmap edilir. CIFAR-100 içeride iki baytlık coarse/fine etiket kullanır (`label_bytes_`).
+
+`CIFAR` sınıfı **CifarDataset** okuyucusuna karşılık gelir.
+
+## Normalizasyon
+
+Reader'lar **ham UInt8** döndürür. Döngünüzde veya preprocessing pipeline'ında ölçekleme uygulayın:
+
+```cpp
+NDArray x = s.input;
+NDArray f = image_to_tensor(x);  // HWC üzerinde image helper ile float CHW [0,1]
+```
+
+## İlgili
+
+- [mmap binary](/docs/sources/mmap-binary)
+- [Image folder](/docs/sources/image)

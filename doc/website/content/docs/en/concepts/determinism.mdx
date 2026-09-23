@@ -1,0 +1,54 @@
+---
+title: Determinism
+description: PCG32/Philox seeds, worker-independent batch order, and what is not guaranteed.
+status: stable
+order: 60
+locale: en
+section: concepts
+since: "1.0"
+---
+
+## Promise
+
+For a fixed dataset and seed:
+
+> **Same seed ⇒ same sample index order**, independent of `num_workers` and host thread pool size.
+
+Workers only parallelize **materialization** (decode/collate), not index generation.
+
+## RNG
+
+| Context | Generator |
+| --- | --- |
+| Host sampling / shuffle | `PCG32` (`core/random.hpp`) |
+| GPU-side stochastic prep (when used) | `Philox` (`backend/philox.hpp`) |
+
+```cpp
+DataLoaderOptions lo;
+lo.shuffle = true;
+lo.seed = 42;
+lo.num_workers = 8; // must not change index order vs workers=0
+```
+
+## Epoch control
+
+```cpp
+loader.reset_epoch(new_seed);
+```
+
+## Guarantees vs non-guarantees
+
+| Guaranteed | Not guaranteed |
+| --- | --- |
+| Sampler index sequence for seed | Bit-identical float decode across all OS/CPU SIMD paths without pinning |
+| Batch membership / order of indices | Wall-clock timing / prefetch race observability |
+| `random_split` partition for seed | Third-party decoder nondeterminism if you plug one in |
+
+## Golden tests
+
+The library ships tests that assert identical index streams across worker counts. Re-run them when changing RNG code.
+
+## See also
+
+- [Sampler](/docs/concepts/sampler)
+- [DataLoader](/docs/concepts/dataloader)

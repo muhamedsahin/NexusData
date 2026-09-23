@@ -1,0 +1,80 @@
+---
+title: JSON kayıtları
+description: JsonDataset alan yolları, JSON Lines ve sayısal JSONLDataset okuyucusu.
+status: stable
+order: 30
+locale: tr
+section: examples
+since: "1.0"
+---
+
+İki okuyucu vardır.
+
+`JsonDataset`, JSON Lines veya tek bir JSON dizisinden alan çıkarır. Yol noktalı olabilir. Alan girdi, etiket, ek tensör veya metadata olur. Kayıtlar paralel sütunlara ayrıştırılır. `get` bir satır kopyalar.
+
+`JSONLDataset` daha dardır: her satır sayısal bir JSON dizisidir, son eleman etikettir. İç içe nesneleri bu sınıf okumaz.
+
+## Adlı alanlar
+
+```json
+{"x": [1.0, 2.0], "y": 1, "id": "a"}
+{"x": [0.5, 1.5], "y": 0, "id": "b"}
+```
+
+```cpp
+#include "nexusdata/dataset/json.hpp"
+
+nexusdata::JsonOptions opt;
+opt.format = nexusdata::JsonFormat::Lines;
+opt.fields = {
+    {"x", nexusdata::JsonRole::Input, nexusdata::DType::Float32, nexusdata::Shape{2}},
+    {"y", nexusdata::JsonRole::Label, nexusdata::DType::Float32},
+    {"id", nexusdata::JsonRole::Metadata},
+};
+opt.skip_invalid = true;
+opt.num_threads = 0;
+
+nexusdata::JsonDataset ds("rows.jsonl", opt);
+const auto dropped = ds.skipped();
+```
+
+`Input` alanları, alan sırasıyla `Sample::input` içinde birleşir. `Label` `Sample::label` olur. `Extra`, `Sample::extra_tensors[name]` olur. `Metadata` dizeleri saklar; dize olmayanlar JSON metni olarak kalır.
+
+`fields` boşsa ilk kayıttaki her üst düzey sayı, boolean veya sayısal dizi bir girdi alanı olur. Dizeler metadata olur.
+
+`JsonFormat::Auto`, baştaki `[` işaretini dizi belgesi sayar; geri kalanı satır sayar. Nesne içindeki dizi için `format = JsonFormat::Array` ve `records_path` ver, örneğin `"data.items"`. Boş `records_path` belgenin kökünün dizi olduğu anlamına gelir.
+
+Yollar: `"image.size[0]"`, `"meta.id"`, `"annotations[*].bbox"`. `[*]` her elemanı toplar ve öne bir boyut ekler. Değişken sayıda eleman parçalı bir ek tensör olur. `null`, kayan dtype'ta NaN'dır. Tamsayıda alan yoksa `JsonField::default_value` ver veya hata alırsın. `categories` dizeleri indekse çevirir.
+
+```cpp
+auto in_memory = nexusdata::JsonDataset::from_string(
+    R"([{"x": 1.0, "y": 0}, {"x": 2.0, "y": 1}])",
+    opt);
+```
+
+`from_string` çağrı sırasında ayrıştırır. Metnin veri kümesinden uzun yaşaması gerekmez.
+
+## Büyük dosyayı akıt
+
+`JsonLinesIterable` sabit bellek kullanır. `.jsonl.zst` gibi sıkıştırılmış girdiyi de açar. Rastgele erişimli `Dataset` değildir.
+
+```cpp
+nexusdata::JsonLinesIterable stream("huge.jsonl.zst", opt);
+```
+
+## Yalnızca sayı dizileri
+
+```cpp
+#include "nexusdata/dataset/jsonl.hpp"
+
+nexusdata::JSONLOptions narrow;
+narrow.array_with_label = true;
+narrow.feature_dtype = nexusdata::DType::Float32;
+narrow.label_dtype = nexusdata::DType::Float32;
+
+nexusdata::JSONLDataset ds("vectors.jsonl", narrow);
+```
+
+Nesne kayıtları `JsonDataset` içindir. Kaynak sayfası: [JSON / JSONL](/docs/sources/json).
+
+Metadata anahtarları `batch.metadata` içinde örnek başına bir dize olur. Ortak şekilli ek tensörler `batch.extras`, değişken uzunluklu olanlar `batch.ragged_extras` içindedir.

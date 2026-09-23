@@ -1,0 +1,24 @@
+---
+title: WebDataset / tar/zip
+description: WebDataset reader for sharded tar-like sample bundles.
+status: stable
+order: 120
+locale: en
+section: sources
+since: "1.0"
+---
+
+```cpp
+#include "nexusdata/dataset/webdataset.hpp"
+WebDatasetOptions opt;
+WebDataset ds("shards/data-{000000..000099}.tar", opt);
+```
+
+## Notes
+
+- Designed for large sharded corpora
+- Sample members map to tensors/bytes per options
+
+## See also
+
+- [Iterable datasets](/docs/concepts/dataset)

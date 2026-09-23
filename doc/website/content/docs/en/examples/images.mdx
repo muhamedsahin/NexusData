@@ -1,0 +1,80 @@
+---
+title: Image folder
+description: Class folders, decode options, resize, crop, flip, and batched tensors.
+status: stable
+order: 40
+locale: en
+section: examples
+since: "1.0"
+---
+
+`ImageFolder` scans `root/class_name/*`. Class names are sorted, and the label is the class index. Decoding happens in `get`, so construction only records paths. Concurrent `get` is safe when the filesystem allows concurrent reads. Each call allocates its own image.
+
+Default extensions are the common still-image suffixes. JPEG, PNG, BMP, TGA, and GIF decode through `load_image`. WebP, uncompressed TIFF, and optional AVIF go through `decode_media_image` when that path is built.
+
+## Layout
+
+```text
+data/train/cat/a.jpg
+data/train/cat/b.png
+data/train/dog/c.jpg
+```
+
+```cpp
+#include "nexusdata/dataset/image_folder.hpp"
+
+nexusdata::ImageFolderOptions opt;
+opt.decode.channels = nexusdata::ImageChannels::RGB; // Gray, RGBA, or Keep
+opt.decode.apply_exif_orientation = true;
+opt.decode.on_corrupt = nexusdata::CorruptImagePolicy::Skip;
+opt.recursive = false; // one level of class directories
+opt.extensions = {".jpg", ".jpeg", ".png"};
+
+nexusdata::ImageFolder folder("data/train", opt);
+const auto& classes = folder.classes(); // sorted names
+```
+
+`CorruptImagePolicy::Skip` drops a bad file at scan time. `Throw` fails on `get`. A decoded sample input is HWC `UInt8`, shape `[H, W, C]`.
+
+`load_image(path, options)` and `decode_image(bytes, size, options)` decode a single file or buffer without a dataset. `image_to_tensor` converts HWC `UInt8` to float CHW in `[0, 1]`.
+
+## Resize, crop, flip, normalize
+
+Image transforms expect HWC `UInt8`, except `NormalizeImage`, which also accepts float CHW. `NormalizeImage` on HWC `UInt8` performs the tensor conversion and the normalize in one pass and writes float CHW.
+
+```cpp
+#include "nexusdata/dataset/map.hpp"
+#include "nexusdata/pipeline/image.hpp"
+#include "nexusdata/pipeline/transform.hpp"
+#include "nexusdata/loading/dataloader.hpp"
+
+auto prep = std::make_shared<nexusdata::Compose>(
+    std::initializer_list<nexusdata::TransformConstPtr>{
+        std::make_shared<nexusdata::Resize>(256, 256, nexusdata::ResizeInterp::Bilinear),
+        std::make_shared<nexusdata::CenterCrop>(224, 224),
+        std::make_shared<nexusdata::RandomHorizontalFlip>(0.5f, /*seed=*/7),
+        std::make_shared<nexusdata::NormalizeImage>(
+            std::vector<float>{0.485f, 0.456f, 0.406f},
+            std::vector<float>{0.229f, 0.224f, 0.225f}),
+    });
+
+nexusdata::MapDataset mapped(std::move(folder), prep);
+
+nexusdata::DataLoaderOptions load;
+load.batch_size = 16;
+load.shuffle = true;
+load.seed = 7;
+load.num_workers = 4;
+load.prefetch_factor = 2;
+nexusdata::DataLoader loader(std::move(mapped), load);
+```
+
+`Resize(height, width, interp)` rejects a non-positive size. `ResizeInterp::Nearest` is the other mode. `CenterCrop` and `RandomCrop` take height and width. `RandomVerticalFlip` matches the horizontal flip: probability, then seed. `Grayscale` reduces channels. `Pad(padding, fill)` rejects a negative pad. `ToTensor` is only the HWC-to-CHW conversion; use it when you do not want `NormalizeImage` to do both.
+
+Random transforms implement `set_seed`. `DataLoader` reseeds them from the loader seed so a repeated epoch stays aligned with the sampler. Do not share one random transform across two loaders if you need independent streams.
+
+## What the batch contains
+
+`batch.inputs` is float32 `[B, 3, 224, 224]` after the normalize above. `batch.labels` is the class index, one per image. `folder.classes()[label]` is the folder name.
+
+Workers decode in parallel. `in_order` defaults to true, so batch `i` is still the `i`-th sample group from the sampler even if a slow JPEG finishes later.

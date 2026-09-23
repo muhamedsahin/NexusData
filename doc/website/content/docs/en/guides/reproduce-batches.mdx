@@ -1,0 +1,19 @@
+---
+title: Guide — Reproducible batches
+description: Fix seeds, prefer drop_last, and verify batch indices across worker counts.
+status: stable
+order: 40
+locale: en
+section: guides
+since: "1.0"
+---
+
+## Checklist
+
+1. Set `DataLoaderOptions::seed` (and transform seeds) explicitly
+2. Call `reset_epoch(seed)` the same way on every machine
+3. Prefer `drop_last = true` when comparing across shard sizes
+4. Change `num_workers` freely — index order must stay identical
+5. Fit preprocessors on train only; load the same pipeline file at eval
+
+Golden tests in the C++ suite lock PCG32 / sampler behavior — mirror those seeds in docs examples when asserting equality.

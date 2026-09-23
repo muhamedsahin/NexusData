@@ -1,0 +1,18 @@
+---
+title: CUDA ve pin_memory
+description: Opsiyonel CUDA veri hazırlama, pinned host ve Device yerleşimi.
+status: stable
+order: 20
+locale: tr
+section: performance
+since: "1.0"
+---
+
+CMake: `-DNEXUSDATA_WITH_CUDA=ON`. CUDA **yalnızca veri hazırlama / transfer** içindir; eğitim matematiği yoktur.
+
+```cpp
+lo.pin_memory = true;
+lo.device = Device::cuda(0);
+```
+
+GPU RNG: Philox. Host: PCG32. Bkz. [Determinizm](/docs/concepts/determinism).

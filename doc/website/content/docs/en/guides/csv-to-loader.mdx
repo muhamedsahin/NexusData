@@ -1,0 +1,35 @@
+---
+title: Guide — CSV to DataLoader
+description: End-to-end map-style CSV training loop with shuffle, workers, and epoch reset.
+status: stable
+order: 10
+locale: en
+section: guides
+since: "1.0"
+---
+
+```cpp
+#include "nexusdata/nexusdata.hpp"
+using namespace nexusdata;
+
+CSVOptions opt;
+opt.label_column = "target";
+auto ds = std::make_shared<CSVDataset>("train.csv", opt);
+
+DataLoaderOptions lo;
+lo.batch_size = 64;
+lo.shuffle = true;
+lo.seed = 42;
+lo.num_workers = 2;
+lo.drop_last = true;
+
+DataLoader loader(ds, lo);
+for (int epoch = 0; epoch < 3; ++epoch) {
+  loader.reset_epoch(42 + epoch);
+  for (const Batch& b : loader) {
+    // b.inputs, b.labels → your trainer
+  }
+}
+```
+
+See [CSV](/docs/sources/csv) and [DataLoader](/docs/concepts/dataloader).

@@ -1,0 +1,50 @@
+---
+title: Examples
+description: Small, compilable NexusData programs for CSV, JSON, images, and the loader.
+status: stable
+order: 10
+locale: en
+section: examples
+since: "1.0"
+---
+
+These pages are short programs, not feature lists. Each one uses types that exist in the public headers. NexusData stops at the batch: it does not train a model.
+
+## Start here
+
+| You have | Page |
+| --- | --- |
+| A table with a label column | [CSV to batches](/docs/examples/csv) |
+| JSON lines or a JSON array | [JSON records](/docs/examples/json) |
+| `root/class/*.jpg` | [Image folder](/docs/examples/images) |
+| Clip, scale, resize, split, shuffle | [Operators](/docs/examples/operators) |
+
+## What a program always does
+
+1. Open a source. `CSVDataset`, `JsonDataset`, or `ImageFolder` implements `Dataset`: `size()` and `get(i)` return a `Sample`.
+2. Optionally wrap it. `MapDataset` applies a `Transform`. `FilterDataset` drops samples. `random_split` returns `Subset` views.
+3. Build a `DataLoader`. It samples indices, collates samples into a `Batch`, and can prefetch on worker threads.
+4. Read `batch.inputs` and `batch.labels`. Both are `NDArray`. Default collate stacks along axis 0, so the first dimension is the batch size.
+
+The fluent chain is a thin wrapper over those types:
+
+```cpp
+#include "nexusdata/nexusdata.hpp"
+
+auto loader = nexusdata::from_csv("train.csv")
+    .shuffle(42)
+    .batches(32)
+    .workers(4)
+    .build();
+```
+
+`from_csv` returns a `DatasetChain`. `batches` returns a `BatchPlan`. `build` returns `std::unique_ptr<DataLoader>`. `DataLoader` is not movable, so the pointer is the value you keep. Range-for walks one epoch:
+
+```cpp
+for (const auto& batch : *loader) {
+    const auto& x = batch.inputs;
+    const auto& y = batch.labels;
+}
+```
+
+`loader->reset_epoch(seed)` starts another pass. The same seed and the same dataset produce the same sample indices in each batch, including when `num_workers` is greater than zero. Workers change when the bytes are decoded, not which rows land in which batch.

@@ -1,0 +1,3 @@
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/CMakeFiles/nd_zstd-populate.dir
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/CMakeFiles/edit_cache.dir
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/CMakeFiles/rebuild_cache.dir

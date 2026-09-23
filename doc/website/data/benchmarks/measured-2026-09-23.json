@@ -1,0 +1,207 @@
+[
+  {
+    "id": "standardize-f32-32mib",
+    "title": {
+      "en": "Standardize float32, 262144×32 (32 MiB)",
+      "tr": "Standardize float32, 262144×32 (32 MiB)"
+    },
+    "metric": "throughput",
+    "unit": "GiB/s",
+    "higherIsBetter": true,
+    "illustrative": false,
+    "date": "2026-09-23",
+    "libraryVersion": "1.0",
+    "commit": "9172965",
+    "hardware": {
+      "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+      "cores": 8,
+      "ram": "32 GB (31.9 GiB reported by Win32)",
+      "gpu": "NVIDIA GeForce RTX 3070 Laptop GPU present; this binary reported cuda=0 and did not use it",
+      "os": "Windows NT 10.0.26200",
+      "compiler": "GCC 15.2.0 MinGW (CLion 2026.2.1)",
+      "flags": "-O3 -DNDEBUG, Release, avx2=1, sse2=1, 16 hardware threads"
+    },
+    "methodology": {
+      "en": "bench_phase1, best of 5 timed calls after 1 warmup (nexusdata::bench::time_best default). Throughput is the harness printout, input bytes / best seconds. The v1 bar is the scalar as_double/set_double loop copied into the bench. This is not a comparison against another library.",
+      "tr": "bench_phase1, 1 ısınmadan sonra 5 ölçümün en iyisi (time_best varsayılanı). Hız, harness çıktısıdır: girdi baytı / en iyi saniye. v1 çubuğu, bench içine kopyalanmış as_double/set_double döngüsüdür. Başka bir kütüphaneyle karşılaştırma değildir."
+    },
+    "reproduce": "cmake --build build-v2 --config Release --target bench_phase1 && ./build-v2/bench_phase1.exe",
+    "chartKind": "bar",
+    "results": [
+      { "name": "v1 as_double loop", "value": 0.37, "stddev": 0, "runs": 5, "isBaseline": true },
+      { "name": "v2 scalar kernel", "value": 5.45, "stddev": 0, "runs": 5, "isBaseline": false },
+      { "name": "v2 AVX2", "value": 8.63, "stddev": 0, "runs": 5, "isBaseline": false }
+    ]
+  },
+  {
+    "id": "clip-f32-8m",
+    "title": {
+      "en": "Clip float32, 8,388,608 elements",
+      "tr": "Clip float32, 8.388.608 eleman"
+    },
+    "metric": "throughput",
+    "unit": "GiB/s",
+    "higherIsBetter": true,
+    "illustrative": false,
+    "date": "2026-09-23",
+    "libraryVersion": "1.0",
+    "commit": "9172965",
+    "hardware": {
+      "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+      "cores": 8,
+      "ram": "32 GB (31.9 GiB reported by Win32)",
+      "gpu": "NVIDIA GeForce RTX 3070 Laptop GPU present; this binary reported cuda=0 and did not use it",
+      "os": "Windows NT 10.0.26200",
+      "compiler": "GCC 15.2.0 MinGW (CLion 2026.2.1)",
+      "flags": "-O3 -DNDEBUG, Release, avx2=1, sse2=1, 16 hardware threads"
+    },
+    "methodology": {
+      "en": "bench_phase1. Best of 5 after 1 warmup. v1 clamps through as_double/set_double. v2 is simd::clip_inplace on the active ISA (AVX2 on this CPU). Not a comparison against another library.",
+      "tr": "bench_phase1. 1 ısınmadan sonra 5 ölçümün en iyisi. v1, as_double/set_double ile kıstırır. v2 bu CPU'da AVX2 olan simd::clip_inplace. Başka bir kütüphaneyle karşılaştırma değildir."
+    },
+    "reproduce": "cmake --build build-v2 --config Release --target bench_phase1 && ./build-v2/bench_phase1.exe",
+    "chartKind": "bar",
+    "results": [
+      { "name": "v1 as_double loop", "value": 0.38, "stddev": 0, "runs": 5, "isBaseline": true },
+      { "name": "v2 clip_inplace", "value": 14.74, "stddev": 0, "runs": 5, "isBaseline": false }
+    ]
+  },
+  {
+    "id": "fusion-tabular-65536x64",
+    "title": {
+      "en": "Clip, log1p, standardize, min-max on float32 [65536×64]",
+      "tr": "Clip, log1p, standardize, min-max; float32 [65536×64]"
+    },
+    "metric": "throughput",
+    "unit": "GiB/s",
+    "higherIsBetter": true,
+    "illustrative": false,
+    "date": "2026-09-23",
+    "libraryVersion": "1.0",
+    "commit": "9172965",
+    "hardware": {
+      "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+      "cores": 8,
+      "ram": "32 GB (31.9 GiB reported by Win32)",
+      "gpu": "NVIDIA GeForce RTX 3070 Laptop GPU present; this binary reported cuda=0 and did not use it",
+      "os": "Windows NT 10.0.26200",
+      "compiler": "GCC 15.2.0 MinGW (CLion 2026.2.1)",
+      "flags": "-O3 -DNDEBUG, Release, avx2=1, sse2=1, 16 hardware threads"
+    },
+    "methodology": {
+      "en": "bench_phase1. Best of 3 after 1 warmup. v1 does four allocating passes of as_double. v2 unfused is Compose(..., fuse=false): four SIMD passes. v2 fused is the default Compose: one multi-threaded pass. Bytes are the input batch. Best seconds were 0.323145, 0.024501, and 0.013560.",
+      "tr": "bench_phase1. 1 ısınmadan sonra 3 ölçümün en iyisi. v1, as_double ile dört ayırmalı geçiş yapar. v2 birleşmemiş, Compose(..., fuse=false): dört SIMD geçişi. v2 birleşik, varsayılan Compose: çok iş parçacıklı tek geçiş. Baytlar girdi batch'idir. En iyi süreler 0,323145, 0,024501 ve 0,013560 saniyedir."
+    },
+    "reproduce": "cmake --build build-v2 --config Release --target bench_phase1 && ./build-v2/bench_phase1.exe",
+    "chartKind": "bar",
+    "results": [
+      { "name": "v1, 4 scalar passes", "value": 0.05, "stddev": 0, "runs": 3, "isBaseline": true },
+      { "name": "v2 unfused, 4 SIMD passes", "value": 0.64, "stddev": 0, "runs": 3, "isBaseline": false },
+      { "name": "v2 fused, 1 pass", "value": 1.15, "stddev": 0, "runs": 3, "isBaseline": false }
+    ]
+  },
+  {
+    "id": "image-resize-224-x32",
+    "title": {
+      "en": "32 images, 480×640×3 uint8 to Resize(224), ToTensor, Normalize",
+      "tr": "32 görsel, 480×640×3 uint8 → Resize(224), ToTensor, Normalize"
+    },
+    "metric": "throughput",
+    "unit": "images/s",
+    "higherIsBetter": true,
+    "illustrative": false,
+    "date": "2026-09-23",
+    "libraryVersion": "1.0",
+    "commit": "9172965",
+    "hardware": {
+      "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+      "cores": 8,
+      "ram": "32 GB (31.9 GiB reported by Win32)",
+      "gpu": "NVIDIA GeForce RTX 3070 Laptop GPU present; this binary reported cuda=0 and did not use it",
+      "os": "Windows NT 10.0.26200",
+      "compiler": "GCC 15.2.0 MinGW (CLion 2026.2.1)",
+      "flags": "-O3 -DNDEBUG, Release, avx2=1, sse2=1, 16 hardware threads"
+    },
+    "methodology": {
+      "en": "bench_phase1. Best of 3 after 1 warmup. Each call processes 32 synthetic images already in memory (no JPEG decode). v1 is the scalar resize, HWC-to-CHW, and normalize loops in the bench file. v2 unfused is Compose with fuse=false. v2 fused collapses resize into the CHW conversion. Reported rates: 134.9, 835.1, and 1300.4 images/s. Best seconds: 0.237188, 0.038320, 0.024608.",
+      "tr": "bench_phase1. 1 ısınmadan sonra 3 ölçümün en iyisi. Her çağrı bellekteki 32 sentetik görseli işler (JPEG çözümü yok). v1, bench dosyasındaki skaler resize, HWC→CHW ve normalize döngüleridir. v2 birleşmemiş, fuse=false Compose. v2 birleşik, resize'ı CHW dönüşümüne katlar. Hızlar: 134,9, 835,1 ve 1300,4 görsel/s. En iyi süreler: 0,237188, 0,038320, 0,024608 saniye."
+    },
+    "reproduce": "cmake --build build-v2 --config Release --target bench_phase1 && ./build-v2/bench_phase1.exe",
+    "chartKind": "bar",
+    "results": [
+      { "name": "v1, 3 scalar transforms", "value": 134.9, "stddev": 0, "runs": 3, "isBaseline": true },
+      { "name": "v2 unfused", "value": 835.1, "stddev": 0, "runs": 3, "isBaseline": false },
+      { "name": "v2 fused resize to CHW", "value": 1300.4, "stddev": 0, "runs": 3, "isBaseline": false }
+    ]
+  },
+  {
+    "id": "newline-scan-32mib",
+    "title": {
+      "en": "Newline scan, 32 MiB, no quote bytes",
+      "tr": "Satır sonu taraması, 32 MiB, tırnak baytı yok"
+    },
+    "metric": "throughput",
+    "unit": "GiB/s",
+    "higherIsBetter": true,
+    "illustrative": false,
+    "date": "2026-09-23",
+    "libraryVersion": "1.0",
+    "commit": "9172965",
+    "hardware": {
+      "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+      "cores": 8,
+      "ram": "32 GB (31.9 GiB reported by Win32)",
+      "gpu": "NVIDIA GeForce RTX 3070 Laptop GPU present; this binary reported cuda=0 and did not use it",
+      "os": "Windows NT 10.0.26200",
+      "compiler": "GCC 15.2.0 MinGW (CLion 2026.2.1)",
+      "flags": "-O3 -DNDEBUG, Release, avx2=1, sse2=1, 16 hardware threads"
+    },
+    "methodology": {
+      "en": "bench_suite. Best of 3 after 1 warmup. Buffer is 32 MiB with a newline every 64 bytes and no '\"' byte, so find_csv_record_starts takes the SIMD newline path. csv_record_starts is slower because it also records offsets. This is not a CSV parse.",
+      "tr": "bench_suite. 1 ısınmadan sonra 3 ölçümün en iyisi. Tampon 32 MiB; her 64 baytta bir satır sonu var ve '\"' baytı yok, bu yüzden find_csv_record_starts SIMD satır sonu yolunu kullanır. csv_record_starts daha yavaştır çünkü ofsetleri de kaydeder. Bu bir CSV ayrıştırması değildir."
+    },
+    "reproduce": "cmake --build build-v2 --config Release --target bench_suite && ./build-v2/bench_suite.exe",
+    "chartKind": "bar",
+    "results": [
+      { "name": "find_bytes_scalar", "value": 3.93, "stddev": 0, "runs": 3, "isBaseline": true },
+      { "name": "find_bytes dispatch (AVX2)", "value": 8.66, "stddev": 0, "runs": 3, "isBaseline": false },
+      { "name": "find_csv_record_starts", "value": 0.83, "stddev": 0, "runs": 3, "isBaseline": false }
+    ]
+  },
+  {
+    "id": "loader-synthetic-cpu",
+    "title": {
+      "en": "DataLoader workers on 4096 synthetic CPU samples",
+      "tr": "4096 sentetik CPU örneğinde DataLoader worker sayısı"
+    },
+    "metric": "throughput",
+    "unit": "samples/s",
+    "higherIsBetter": true,
+    "illustrative": false,
+    "date": "2026-09-23",
+    "libraryVersion": "1.0",
+    "commit": "9172965",
+    "hardware": {
+      "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+      "cores": 8,
+      "ram": "32 GB (31.9 GiB reported by Win32)",
+      "gpu": "NVIDIA GeForce RTX 3070 Laptop GPU present; this binary reported cuda=0 and did not use it",
+      "os": "Windows NT 10.0.26200",
+      "compiler": "GCC 15.2.0 MinGW (CLion 2026.2.1)",
+      "flags": "-O3 -DNDEBUG, Release, avx2=1, sse2=1, 16 hardware threads"
+    },
+    "methodology": {
+      "en": "bench_phase1. Best of 5 after 1 warmup. Each get() fills 256 floats and runs 6000 sqrt iterations so the sample is CPU-bound on purpose. Batch size 64. Rates are samples/s from the harness (30789.9, 30153.3, 60794.0, 118464.4, 220255.3). Workers do not speed up the in-memory memcpy loader in bench_suite: sync 0.001737 s vs 2 workers 0.001884 s on 4096×32 floats. Use workers when get() does real work.",
+      "tr": "bench_phase1. 1 ısınmadan sonra 5 ölçümün en iyisi. Her get() 256 float doldurur ve bilerek CPU'ya yük bindirmek için 6000 sqrt çalıştırır. Batch boyutu 64. Hızlar harness'tan örnek/s (30789,9, 30153,3, 60794,0, 118464,4, 220255,3). Worker'lar bench_suite'deki bellek içi kopya loader'ını hızlandırmaz: 4096×32 float için eşzamanlı 0,001737 s, 2 worker 0,001884 s. Worker'ı get() gerçek iş yapıyorsa kullan."
+    },
+    "reproduce": "cmake --build build-v2 --config Release --target bench_phase1 && ./build-v2/bench_phase1.exe",
+    "chartKind": "bar",
+    "results": [
+      { "name": "0 workers", "value": 30789.9, "stddev": 0, "runs": 5, "isBaseline": true },
+      { "name": "1 worker", "value": 30153.3, "stddev": 0, "runs": 5, "isBaseline": false },
+      { "name": "2 workers", "value": 60794.0, "stddev": 0, "runs": 5, "isBaseline": false },
+      { "name": "4 workers", "value": 118464.4, "stddev": 0, "runs": 5, "isBaseline": false },
+      { "name": "8 workers", "value": 220255.3, "stddev": 0, "runs": 5, "isBaseline": false }
+    ]
+  }
+]

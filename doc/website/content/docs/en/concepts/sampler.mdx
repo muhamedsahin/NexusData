@@ -1,0 +1,51 @@
+---
+title: Sampler
+description: Index sequences for an epoch — Sequential, Random, Weighted, and advanced strategies.
+status: stable
+order: 48
+locale: en
+section: concepts
+since: "1.0"
+---
+
+## Interface
+
+```cpp
+class Sampler {
+public:
+  virtual ~Sampler() = default;
+  virtual std::size_t size() const = 0;
+  virtual std::vector<std::size_t> indices() const = 0;
+};
+```
+
+A sampler produces the **index list for one epoch**. `DataLoader` owns the sampler; it is **not** thread-safe across concurrent owners.
+
+## Built-ins
+
+| Sampler | Behavior |
+| --- | --- |
+| `SequentialSampler` | `0..n-1` |
+| `RandomSampler` | Shuffle via PCG32 seed |
+| `WeightedRandomSampler` | Weighted draws (with/without replacement) |
+| Advanced helpers | Stratified / distributed / bucket styles in `sampling/advanced.hpp` |
+
+```cpp
+WeightedRandomSampler w(weights, /*num_samples=*/n, /*seed=*/42, /*replacement=*/true);
+auto idx = w.indices();
+```
+
+## Why Sampler owns shuffle
+
+- Dataset remains a stable map (`get(i)` identity preserved)
+- Multiple loaders can share one dataset with different samplers
+- Epoch reseeding is explicit (`DataLoader::reset_epoch`)
+
+## Determinism
+
+Given the same seed and dataset size, `RandomSampler` / weighted variants must reproduce the same index vector. Worker count must **not** change that order — workers only parallelize materialization.
+
+## See also
+
+- [Determinism](/docs/concepts/determinism)
+- [DataLoader](/docs/concepts/dataloader)

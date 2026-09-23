@@ -1,0 +1,31 @@
+---
+title: Görüntü transform'ları
+description: HWC UInt8 örneklerde Resize, crop, flip, grayscale, normalize, ToTensor ve Pad.
+status: stable
+order: 20
+locale: tr
+section: preparation
+since: "1.0"
+---
+
+## Beklenti
+
+`nexusdata/pipeline/image.hpp` içindeki transform'lar **`Sample.input` = H×W×C `UInt8`** bekler.
+
+## Katalog
+
+| Sınıf | Not |
+| --- | --- |
+| `Resize` | Nearest veya bilinear |
+| `CenterCrop` / `RandomCrop` | Sabit çıkış H×W |
+| `RandomHorizontalFlip` / `RandomVerticalFlip` | Seed'li |
+| `Grayscale` | Kanal düzeni sınıf politikasına bağlı |
+| `NormalizeImage` | Kanal başına mean/std |
+| `ToTensor` | UInt8 HWC → Float32 CHW \[0,1\] |
+| `Pad` | Hedef boyuta kenar dolgu |
+
+Augmentation'ı reader içinde değil, `MapDataset` ile `get()` zamanında uygulayın.
+
+<Callout tone="tip" title="GPU">
+`NEXUSDATA_WITH_CUDA` ile opsiyonel CUDA görüntü çekirdekleri. Bkz. [CUDA ve pin_memory](/docs/performance/cuda-and-pin-memory).
+</Callout>

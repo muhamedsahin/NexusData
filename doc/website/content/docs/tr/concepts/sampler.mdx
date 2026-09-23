@@ -1,0 +1,90 @@
+---
+title: Sampler
+description: Epoch indeks dizileri — Sequential, Random, Weighted ve DataLoader entegrasyonu.
+status: in-development
+order: 48
+locale: tr
+section: concepts
+---
+
+## Sorumluluk
+
+**Sampler**, bir epoch boyunca hangi sample indekslerinin hangi sırada ziyaret edileceğini üretir. `Dataset` sırasını değiştirmez; yalnızca indeks listesi verir.
+
+```cpp
+class Sampler {
+public:
+  virtual std::size_t size() const = 0;
+  virtual std::vector<std::size_t> indices() const = 0;
+};
+```
+
+`DataLoader`, epoch başında sampler çıktısını batch boyutuna göre dilimler. Shuffle bayrağı sampler seçimini kontrol eder — `Dataset` üzerinde değil.
+
+## Yerleşik sampler'lar
+
+| Sınıf | Davranış |
+| --- | --- |
+| `SequentialSampler` | `0, 1, …, n-1` |
+| `RandomSampler` | Fisher–Yates shuffle (`PCG32`); aynı `seed` → aynı sıra |
+| `WeightedRandomSampler` | Ağırlıklı örnekleme (CDF); replacement varsayılan |
+| `advanced.hpp` | Distributed / bucket vb. genişletmeler |
+
+### RandomSampler
+
+```cpp
+RandomSampler smp(dataset_size, /*seed=*/42, /*replacement=*/false);
+std::vector<std::size_t> order = smp.indices();
+```
+
+| Parametre | Anlam |
+| --- | --- |
+| `n` | Epoch'taki mantıksal sample sayısı (genelde `dataset->size()`) |
+| `seed` | `PCG32` tohum değeri |
+| `replacement` | `false`: permütasyon; `true`: tekrarlı indeks |
+
+`set_seed` ile yeni epoch için tohum güncellenir; pratikte `DataLoader::reset_epoch(seed)` kullanılır.
+
+### WeightedRandomSampler
+
+```cpp
+std::vector<double> w = {1.0, 2.0, 0.5, 2.0};
+WeightedRandomSampler wr(w, /*num_samples=*/1000, /*seed=*/7);
+```
+
+Negatif ağırlık veya boş vektör hata fırlatır. Replacement kapalıyken `num_samples > population` geçersizdir.
+
+## DataLoader ile ilişki
+
+`DataLoaderOptions` içinde:
+
+| Alan | Sampler etkisi |
+| --- | --- |
+| `shuffle = false` | `SequentialSampler` benzeri sıra |
+| `shuffle = true` | `RandomSampler` + `seed` |
+| `batch_size` | `indices()` çıktısının batch'lere bölünmesi |
+| `drop_last` | Son eksik batch atılır |
+
+Determinism: aynı `seed` ile batch *i* her zaman aynı sample indekslerini içerir — `num_workers` yalnızca materialize hızını etkiler.
+
+```cpp
+DataLoaderOptions lo;
+lo.shuffle = true;
+lo.seed = 99;
+lo.num_workers = 4;  // sıra değişmez
+DataLoader loader(dataset, lo);
+loader.reset_epoch(100);  // yeni epoch tohumu
+```
+
+## std::shuffle yerine PCG32
+
+Header'larda `shuffle(vector, PCG32&)` ve `shuffled_indices` kullanılır; platformlar arası tekrarlanabilirlik için `std::shuffle` tercih edilmez.
+
+## Thread güvenliği
+
+Sampler örnekleri thread-safe değildir; `DataLoader` epoch başına tek sampler kullanır. Paralellik worker'larda **sample fetch + collate** aşamasındadır, indeks üretiminde değil.
+
+## İlgili sayfalar
+
+- [Determinism](/docs/concepts/determinism)
+- [DataLoader](/docs/concepts/dataloader)

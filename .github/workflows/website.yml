@@ -1,0 +1,46 @@
+name: Website CI
+
+on:
+  push:
+    paths:
+      - "doc/website/**"
+      - ".github/workflows/website.yml"
+  pull_request:
+    paths:
+      - "doc/website/**"
+      - ".github/workflows/website.yml"
+
+defaults:
+  run:
+    working-directory: doc/website
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: doc/website/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3001
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+      - name: E2E
+        run: npm run test:e2e
+        env:
+          CI: true
+          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3001

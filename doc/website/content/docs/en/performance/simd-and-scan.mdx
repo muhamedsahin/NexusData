@@ -1,0 +1,21 @@
+---
+title: SIMD byte scan
+description: Runtime-dispatched AVX2/scalar scan used by parsers — enable via NEXUSDATA_ENABLE_AVX2.
+status: stable
+order: 30
+locale: en
+section: performance
+since: "1.0"
+---
+
+## What it is
+
+`nexusdata/simd/byte_scan.hpp` provides fast newline / delimiter scanning used by CSV-style parsers. Kernels are **runtime dispatched** (AVX2 when available, else scalar).
+
+## CMake
+
+- `NEXUSDATA_ENABLE_AVX2` (default ON) — compile AVX2 kernels; still safe on non-AVX2 CPUs via dispatch
+
+## Measuring
+
+Build `bench_suite` (`NEXUSDATA_BUILD_BENCH=ON`) and run locally. Throughput depends on CPU and OS — **do not treat homepage or docs tables as guaranteed numbers** unless measured on your machine.

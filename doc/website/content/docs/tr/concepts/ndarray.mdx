@@ -1,0 +1,81 @@
+---
+title: NDArray
+description: NexusData tensor taşıyıcısının shape, dtype ve bellek modeli (compute yok).
+status: in-development
+order: 40
+locale: tr
+section: concepts
+---
+
+## Rol
+
+`NDArray` **shape + dtype + bellek** taşır. Matematik kernel'i çalıştırmaz; eğitim veya çıkarım kodunuz bu buffer'ları okur.
+
+## Zihinsel model
+
+| Konu | Sahiplik |
+| --- | --- |
+| Shape / stride meta | `NDArray` içinde |
+| Depolama | Host veya cihaz buffer'ı |
+| Compute | Kapsam dışı (NexusFlash Pro / sizin kod) |
+
+## Oluşturma ve erişim
+
+```cpp
+#include "nexusdata/core/ndarray.hpp"
+
+Shape s{{4, 784}};
+NDArray x(s, DType::Float32);           // host, yeni allocation
+NDArray pinned = NDArray::pinned(s, DType::Float32);
+
+float* ptr = x.data<float>();           // yalnızca host tensor
+std::size_t n = x.numel();
+Device dev = x.device();
+```
+
+| API | Anlam |
+| --- | --- |
+| `from_blob` | Harici pointer'ı sarmalar (sahiplik sizde kalır) |
+| `clone()` | Derin kopya (byte kopyası) |
+| `cpu()` / `cuda()` | Cihazlar arası kopya (CUDA build gerekir) |
+| `stack` / `concat` | Batch boyutu veya eksen birleştirme |
+| `pinned` | Sayfa-kilitli host (H2D için) |
+
+## Shape gezgini
+
+<ShapeExplorer />
+
+<ApiSignature
+  name="NDArray::reshape"
+  signature="void reshape(Shape new_shape);"
+>
+  Eleman sayısı korunmalıdır. Ardışık (contiguous) düzen varsayılır; paylaşımlı depolama üzerinde meta güncellenir.
+  Sabit metotlar eşzamanlı okuyucular için güvenlidir; aynı depolamayı yazan thread yokken.
+</ApiSignature>
+
+## Kopya kuralları
+
+- Varsayılan kopya / atama **sığ** (shared `AlignedBuffer`)
+- `clone()` tüm byte'ları kopyalar
+- `random_split` ile gelen `Subset` üst veriyi çoğaltmaz; `get()` parent'tan slice/view döndürebilir
+- CUDA tensor üzerinde `data<T>()` host erişimi hata fırlatır — kernel veya `cpu()` kullanın
+
+## Dtype ve güvenlik
+
+| DType (örnek) | Tipik kullanım |
+| --- | --- |
+| `Float32` | Özellikler, görseller |
+| `Float64` | Tabular hassasiyet |
+| `Int64` | Etiket indeksleri |
+| `UInt8` | Mask, ham byte |
+
+`data<T>()` çağrısında `sizeof(T)` dtype ile eşleşmelidir (`uint8_t` istisna).
+
+## Adapter yaşam döngüsü
+
+`shared_storage()` ve `from_shared` DLPack / MatrixFlash gibi adapter'ların buffer yaşamını NexusData ile hizalar. Adapter'a geçmeden önce `NDArray`'in scope dışına çıkmadığından emin olun.
+
+## İlgili sayfalar
+
+- [Batch ve collate](/docs/concepts/batch-collate)
+- [Bellek sahipliği](/docs/concepts/memory-ownership)

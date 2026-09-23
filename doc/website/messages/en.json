@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "siteName": "MatrixData",
+    "tagline": "The pipeline that turns raw data into tensors",
+    "description": "High-performance C++20 data loading library for AI — Source → Dataset → Sampler → DataLoader → Batch → NDArray."
+  },
+  "nav": {
+    "home": "Home",
+    "docs": "Docs",
+    "performance": "Performance",
+    "github": "GitHub",
+    "skipToContent": "Skip to content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "primaryNav": "Primary"
+  },
+  "locale": {
+    "label": "Language",
+    "en": "English",
+    "tr": "Türkçe",
+    "switchTo": "Switch to {locale}"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "status": {
+    "stable": "Stable",
+    "beta": "Beta",
+    "in-development": "In development",
+    "planned": "Planned",
+    "illustrative": "Illustrative sample data, not real results",
+    "notMeasured": "Not measured yet",
+    "designPreview": "Design preview"
+  },
+  "home": {
+    "title": "MatrixData",
+    "subtitle": "The pipeline that turns raw data into tensors",
+    "ctaStart": "Get Started",
+    "ctaDocs": "Documentation",
+    "ctaExamples": "Examples",
+    "lede": "NexusData is a C++20 library that reads files, splits and shuffles rows, and hands your training loop batches of NDArray tensors.",
+    "useTrain": "Training loops — CSV, JSON, and image folders into seeded, reproducible batches.",
+    "useTabular": "Tabular work — headers, missing values, clip, log1p, standardize, min-max.",
+    "useMedia": "Images — JPEG, PNG, BMP, TGA, and GIF, with resize, crop, flip, and normalize.",
+    "ctaGithub": "GitHub",
+    "statusNote": "Library and docs site are under active development. Feature badges reflect honest status.",
+    "pipeline": "Source → Dataset → Sampler → DataLoader → Batch → NDArray",
+    "privacyNote": "Country headers are used only for one-shot language choice and are never stored, logged, or sent to analytics.",
+    "ecosystem": "Ecosystem",
+    "scrollHint": "Scroll to explore",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "loader": {
+    "aria": "Loading MatrixData experience",
+    "skip": "Skip",
+    "loading": "Loading…",
+    "waiting": "> initializing …",
+    "hint": "Press Esc or S to skip",
+    "logs": {
+      "mmap": "> mmap assets.bin ... ok",
+      "shaders": "> loading shaders ... ok",
+      "rng": "> seeding rng (seed=42) ... ok",
+      "warmup": "> warming up scene ... ok",
+      "done": "> ready"
+    }
+  },
+  "story": {
+    "sources": {
+      "title": "Read every format",
+      "body": "CSVDataset, JsonDataset, and ImageFolder are in the default build. Parquet, SQLite, and HDF5 compile only when those libraries are enabled in CMake.",
+      "formats": {
+        "csv": { "label": "CSV / TSV", "hint": "Delimited tabular rows" },
+        "json": { "label": "JSON / JSONL", "hint": "Structured and line-delimited records" },
+        "image": { "label": "Image / Folder", "hint": "Decode and optional resize" },
+        "parquet": { "label": "Parquet", "hint": "Optional Arrow build" },
+        "sqlite": { "label": "SQLite", "hint": "Optional SQLite build" },
+        "npy": { "label": "NumPy npy", "hint": "Array files" }
+      }
+    },
+    "shuffle": {
+      "title": "Dataset, shuffle & seed",
+      "body": "The Sampler shuffles indices — the Dataset is never mutated. Same seed restores the exact order.",
+      "seed": "seed",
+      "note": "This visualization mimics a reference PCG32 Fisher–Yates. It stays illustrative until verified against C++ golden values."
+    },
+    "batch": {
+      "title": "Batch & DataLoader",
+      "body": "Indices pass a DataLoader gate in batch_size groups. Toggle drop_last to drop or keep the final incomplete batch."
+    },
+    "gpu": {
+      "title": "Prefetch & GPU",
+      "body": "While batch N is consumed, N+1 can prepare on another buffer. GPU is used only for data prep that wins — decode, resize, normalize, collate.",
+      "policy": "GPU is used only where it wins; otherwise it stays off.",
+      "chartEmpty": "CPU/GPU crossover chart: not measured yet. Real curves will load from data/benchmarks/*.json."
+    },
+    "ecosystem": {
+      "title": "Delivered as tensors",
+      "body": "Batches become NDArray/tensor payloads for consumers. MatrixData is the data plane — computation libraries remain separate and optional."
+    },
+    "features": {
+      "title": "Capabilities",
+      "body": "Honest status badges — nothing is marked ready before it ships.",
+      "items": {
+        "determinism": {
+          "title": "Determinism",
+          "body": "Same seed, same order — independent of thread count once verified."
+        },
+        "zerocopy": {
+          "title": "Zero-copy views",
+          "body": "Subsets and reshapes share memory when safe."
+        },
+        "streaming": {
+          "title": "Streaming",
+          "body": "Iterable sources with backpressure (planned)."
+        },
+        "preprocessing": {
+          "title": "Preprocessing",
+          "body": "fit/transform pipelines without leaking labels (planned)."
+        },
+        "split": {
+          "title": "Split strategies",
+          "body": "random_split, stratified, and fold helpers."
+        },
+        "cache": {
+          "title": "Cache",
+          "body": "RAM/disk caches with invalidation (planned)."
+        },
+        "formats": {
+          "title": "Many formats",
+          "body": "Readers grow behind a stable Dataset interface."
+        },
+        "gpu": {
+          "title": "Optional GPU",
+          "body": "CUDA backend for prep kernels — CPU path always works."
+        }
+      }
+    },
+    "performance": {
+      "title": "Measured on this machine",
+      "body": "Release build, 23 Sep 2026, Ryzen 7 5800H. Bars compare NexusData’s own scalar loops with the AVX2 kernels. They are not other libraries.",
+      "cta": "Full tables"
+    },
+    "code": {
+      "title": "From CSV to DataLoader",
+      "hoverHint": "These samples match the public headers.",
+      "tabs": {
+        "csv": "CSV",
+        "image": "Image",
+        "gpu": "GPU",
+        "flash": "MatrixFlash"
+      },
+      "snippets": {
+        "csv": "#include \"nexusdata/nexusdata.hpp\"\n\nauto loader = nexusdata::from_csv(\"train.csv\")\n    .shuffle(42)\n    .batches(32)\n    .workers(4)\n    .build();\nfor (const auto& batch : *loader) {\n    const auto& x = batch.inputs; // [B, features]\n    const auto& y = batch.labels;\n}",
+        "image": "#include \"nexusdata/dataset/image_folder.hpp\"\n#include \"nexusdata/dataset/map.hpp\"\n#include \"nexusdata/pipeline/image.hpp\"\n#include \"nexusdata/loading/dataloader.hpp\"\n\nnexusdata::ImageFolder folder(\"data/train\");\nauto mapped = nexusdata::MapDataset(\n    std::move(folder),\n    std::make_shared<nexusdata::Compose>({\n        std::make_shared<nexusdata::Resize>(224, 224),\n        std::make_shared<nexusdata::NormalizeImage>(\n            std::vector<float>{0.485f, 0.456f, 0.406f},\n            std::vector<float>{0.229f, 0.224f, 0.225f}),\n    }));\nnexusdata::DataLoaderOptions opt;\nopt.batch_size = 16;\nopt.shuffle = true;\nopt.seed = 7;\nnexusdata::DataLoader loader(std::move(mapped), opt);",
+        "gpu": "// Requires a CUDA build. Otherwise leave device on the host.\nnexusdata::DataLoaderOptions opt;\nopt.batch_size = 32;\nopt.num_workers = 4;\nopt.pin_memory = true;\nopt.device = nexusdata::Device::cuda();\nopt.transform_device = nexusdata::Device::auto_select();",
+        "flash": "// Planned — MatrixFlash Pro adapter (one-way dependency)\n// Status: planned"
+      }
+    },
+    "cta": {
+      "title": "Start building",
+      "body": "Pull MatrixData into your CMake project and follow the docs as chapters land."
+    }
+  },
+  "docs": {
+    "sidebar": "Documentation sidebar",
+    "toc": "Table of contents",
+    "onThisPage": "On this page",
+    "docsHome": "Docs home",
+    "version": "Version",
+    "searchPlaceholder": "Search docs…",
+    "searchHint": "Type to search titles and content",
+    "searching": "Searching…",
+    "noResults": "No results",
+    "readingTime": "{minutes} min read",
+    "lastUpdated": "Last updated {date}",
+    "editOnGithub": "Edit this page on GitHub",
+    "untranslatedTitle": "This page is not translated yet",
+    "untranslatedBody": "Showing the English version. Turkish translation will appear here when ready.",
+    "feedbackAsk": "Was this page helpful?",
+    "feedbackYes": "Yes",
+    "feedbackNo": "No",
+    "feedbackThanks": "Thanks — feedback stays on this device only.",
+    "sections": {
+      "getting-started": "Getting started",
+      "concepts": "Concepts",
+      "sources": "Data sources",
+      "preparation": "Preparation",
+      "performance": "Performance",
+      "integration": "Integration",
+      "guides": "Guides",
+      "examples": "Examples",
+      "reference": "Reference",
+      "about": "About"
+    }
+  },
+  "banner": {
+    "suggestTr": "Would you like to read this page in Turkish?",
+    "suggestEn": "Would you like to read this page in English?",
+    "switch": "Switch",
+    "dismiss": "Dismiss"
+  },
+  "footer": {
+    "rights": "MatrixData documentation site",
+    "license": "License: {license}",
+    "privacy": "Privacy note"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This page does not exist or has moved.",
+    "home": "Back to home"
+  }
+}

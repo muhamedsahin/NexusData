@@ -1,0 +1,21 @@
+# ninja log v7
+6	168	8118151770440985	nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-mkdir	6ccc0362990a9dc
+6	168	8118151770440985	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-mkdir	6ccc0362990a9dc
+169	2151	8118151790262964	nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-download	d63b673c5eab3935
+169	2151	8118151790262964	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-download	d63b673c5eab3935
+2151	2325	8118151792007374	nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-update	9fc60da1d87f943c
+2151	2325	8118151792007374	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-update	9fc60da1d87f943c
+2326	2497	8118151793690184	nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-patch	73fc686bb5c4cc0a
+2326	2497	8118151793690184	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-patch	73fc686bb5c4cc0a
+2497	2695	8118151795659890	nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-configure	ea00fb3b40f11409
+2497	2695	8118151795659890	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-configure	ea00fb3b40f11409
+2695	2906	8118151797802213	nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-build	8e426294ce84a419
+2695	2906	8118151797802213	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-build	8e426294ce84a419
+2907	3090	8118151799625455	nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-install	7f2e17e083f0fa68
+2907	3090	8118151799625455	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-install	7f2e17e083f0fa68
+3091	3328	8118151801971332	nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-test	7d876525a37c0649
+3091	3328	8118151801971332	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-test	7d876525a37c0649
+3329	3605	8118151804800501	CMakeFiles/nd_xz-populate-complete	ff6f97a1c263201f
+3329	3605	8118151804800501	nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-done	ff6f97a1c263201f
+3329	3605	8118151804800501	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/CMakeFiles/nd_xz-populate-complete	ff6f97a1c263201f
+3329	3605	8118151804800501	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-done	ff6f97a1c263201f

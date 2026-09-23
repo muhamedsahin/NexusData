@@ -1,0 +1,31 @@
+---
+title: Workers & prefetch
+description: num_workers, prefetch_factor, persistent_workers, and the determinism contract.
+status: stable
+order: 10
+locale: en
+section: performance
+since: "1.0"
+---
+
+## Knobs
+
+| Option | Effect |
+| --- | --- |
+| `num_workers = 0` | Synchronous fetch + collate on the caller thread |
+| `num_workers > 0` | Background workers fill a bounded queue |
+| `prefetch_factor` | Queue capacity ≈ `num_workers * factor` (minimum 2 when workers &gt; 0) |
+| `persistent_workers` | Keep worker threads across `reset_epoch` |
+| `timeout_ms` | Wait budget when pulling from the prefetch queue |
+
+## Determinism
+
+Batch *i* contains the **same sample indices** for a given seed **regardless of `num_workers`**. Worker count affects wall time, not index order.
+
+## Practical tips
+
+- Start with `num_workers = 0` when debugging transforms
+- Raise workers until CPU or disk saturates; watch RAM (each worker holds live samples)
+- Prefer `shared_ptr` datasets so worker lifetimes stay safe
+
+See [DataLoader](/docs/concepts/dataloader).

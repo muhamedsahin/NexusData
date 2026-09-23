@@ -1,0 +1,25 @@
+# Build
+build/
+cmake-build-*/
+Testing/
+out/
+.vs/
+.idea/
+
+# Artifacts
+*.o
+*.obj
+*.a
+*.lib
+*.exe
+*.dll
+*.pdb
+
+# Generated test CSVs in cwd
+train.csv
+test_*.csv
+test.tsv
+
+# OS
+Thumbs.db
+.DS_Store

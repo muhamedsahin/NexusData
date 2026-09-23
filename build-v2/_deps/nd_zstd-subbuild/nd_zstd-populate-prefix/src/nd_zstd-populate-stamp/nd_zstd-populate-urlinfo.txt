@@ -1,0 +1,12 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The download step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+method=url
+command=C:/Program Files/JetBrains/CLion 2026.2.1/bin/cmake/win/x64/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/download-nd_zstd-populate.cmake;COMMAND;C:/Program Files/JetBrains/CLion 2026.2.1/bin/cmake/win/x64/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/verify-nd_zstd-populate.cmake;COMMAND;C:/Program Files/JetBrains/CLion 2026.2.1/bin/cmake/win/x64/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/extract-nd_zstd-populate.cmake
+source_dir=C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-src
+work_dir=C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps
+url(s)=https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz
+hash=SHA256=eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3
+      no_extract=
+

@@ -1,0 +1,16 @@
+---
+title: DLPack
+description: NDArray'i DLManagedTensor ile dışa/içe aktarma.
+status: stable
+order: 10
+locale: tr
+section: integration
+since: "1.0"
+---
+
+```cpp
+DLManagedTensor* m = ndarray_to_dlpack(array);
+NDArray back = ndarray_from_dlpack(m, /*take_ownership=*/false);
+```
+
+Deleter çalışana kadar `NDArray` depolaması canlı kalır. C tarafı: [C API](/docs/integration/c-api).

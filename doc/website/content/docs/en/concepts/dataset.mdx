@@ -1,0 +1,89 @@
+---
+title: Dataset
+description: Map-style Dataset interface, Sample, Subset, composition helpers, and writing your own dataset.
+status: stable
+order: 45
+locale: en
+section: concepts
+since: "1.0"
+---
+
+## Map-style interface
+
+```cpp
+class Dataset {
+public:
+  virtual ~Dataset() = default;
+  virtual std::size_t size() const = 0;
+  virtual Sample get(std::size_t index) const = 0;
+  bool empty() const { return size() == 0; }
+};
+
+using DatasetPtr = std::shared_ptr<Dataset>;
+using DatasetConstPtr = std::shared_ptr<const Dataset>;
+```
+
+Prefer `shared_ptr` when composing `Subset`, `DataLoader`, and `random_split` so views outlive safely.
+
+## Sample
+
+A `Sample` typically holds feature `NDArray` input(s) and label `NDArray`. Concrete datasets document exact layouts (for example CSV → `[F]` features + scalar/vector label).
+
+## Why shuffle is not on Dataset
+
+Mutating row order inside a dataset breaks sharing (`Subset`, caches, multi-loader). **Sampler** owns permutation; Dataset stays a stable random-access table.
+
+## Subset & random_split
+
+```cpp
+auto [train, val] = random_split(dataset, {0.8, 0.2}, /*seed=*/42);
+// train / val are Subset views — no deep copy of parent storage
+```
+
+`Subset` indexes into a parent `DatasetConstPtr`.
+
+## Composition helpers
+
+| Helper | Role |
+| --- | --- |
+| `Map` / mapped datasets | Transform samples lazily |
+| `Concat` / compose helpers | Chain datasets |
+| `CachedDataset` | Wrap with LRU/disk cache |
+| `InMemoryDataset` | Own samples in RAM |
+
+Exact type names live under `nexusdata/dataset/*.hpp` and `compose.hpp`.
+
+## Writing a custom Dataset
+
+<Steps>
+  <Step title="Inherit Dataset">
+    Implement `size()` and `get(index)`.
+  </Step>
+  <Step title="Document concurrency">
+    If `get` is read-only after construction, say so — DataLoader workers may call it concurrently.
+  </Step>
+  <Step title="Return Sample">
+    Fill inputs/labels as `NDArray`s with stable dtypes.
+  </Step>
+  <Step title="Hold as DatasetPtr">
+    Share ownership when wrapping with Subset/loaders.
+  </Step>
+</Steps>
+
+```cpp
+class MyDataset : public Dataset {
+public:
+  std::size_t size() const override { return n_; }
+  Sample get(std::size_t i) const override {
+    // build Sample for index i
+  }
+private:
+  std::size_t n_;
+};
+```
+
+## See also
+
+- [Sampler](/docs/concepts/sampler)
+- [CSV source](/docs/sources/csv)
+- [Adding a reader](/docs/sources/adding-readers)

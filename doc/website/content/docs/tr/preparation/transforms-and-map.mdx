@@ -1,0 +1,47 @@
+---
+title: Transform ve MapDataset
+description: Sample düzeyinde Transform, Compose, RandomApply ve tembel MapDataset sarmalayıcı.
+status: stable
+order: 10
+locale: tr
+section: preparation
+since: "1.0"
+---
+
+## Transform sözleşmesi
+
+`Transform`, bir `Sample` alır ve yeni bir `Sample` döndürür. `is_random()` true ve seed verilmedikçe deterministiktir.
+
+```cpp
+#include "nexusdata/pipeline/transform.hpp"
+#include "nexusdata/dataset/map.hpp"
+
+auto compose = std::make_shared<Compose>(std::initializer_list<TransformConstPtr>{
+    std::make_shared<Resize>(224, 224),
+    std::make_shared<ToTensor>(),
+});
+MapDataset mapped(dataset, compose);
+```
+
+## Yapı taşları
+
+| Tip | Rol |
+| --- | --- |
+| `Compose` | Transform'ları sırayla uygular |
+| `RandomApply` | Alt transform'u `p` olasılığıyla uygular |
+| Özel `Transform` alt sınıfı | Kendi `apply()` |
+| `MapDataset` / `map()` | Tembel `get(i)` → `transform->apply(...)` |
+
+## Seed
+
+Rastgele transform'larda (veya `Compose` üzerinde) `set_seed` çağırın. Worker başına ayrı kopya tercih edin.
+
+## Pipeline oluşturucu
+
+<PipelineBuilder />
+
+## Ayrıca bakın
+
+- [Görüntü transform'ları](/docs/preparation/image-transforms)
+- [Tablo transform'ları](/docs/preparation/tabular-transforms)
+- [Pipeline kalıcılığı](/docs/preparation/pipeline-persist)

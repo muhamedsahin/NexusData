@@ -1,0 +1,51 @@
+---
+title: SQLite
+description: NEXUSDATA_WITH_SQLITE ile bellek içi Dataset olarak sorgu sonuçları — SqliteDataset.
+status: stable
+order: 105
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## CMake özellik bayrağı
+
+SQLite açıkken amalgamation derlemesi kullanılır:
+
+```bash
+cmake -DNEXUSDATA_WITH_SQLITE=ON ...
+```
+
+SQLite olmadan:
+
+- Constructor yönlendirme ile throw eder
+- `sqlite_support_enabled()` → `false`
+
+<Callout tone="warning" title="NEXUSDATA_WITH_SQLITE">
+Tek binary'yi farklı derleme türlerinde dağıtıyorsanız çalışma zamanında mutlaka `sqlite_support_enabled()` ile koruyun.
+</Callout>
+
+## SqliteDataset
+
+```cpp
+SqliteOptions opt;
+opt.sql = "SELECT f1, f2, label FROM examples ORDER BY id";
+opt.label_column = -1;  // -1 => seçilen son sütun etiket
+
+SqliteDataset db("data.db", opt);
+for (std::size_t i = 0; i < db.size(); ++i) {
+  Sample s = db.get(i);
+}
+```
+
+| Seçenek | Açıklama |
+| --- | --- |
+| `sql` | Tam SELECT (açılışta materialize) |
+| `label_column` | Satırdaki etiket indeksi; `-1` = son sütun |
+
+Satırlar sorgu çalıştıktan sonra RAM'de `float` feature + etiket olarak saklanır — küçük/orta tablolar için uygundur, streaming warehouse için değil.
+
+## İlgili
+
+- [CSV](/docs/sources/csv)
+- [Parquet](/docs/sources/parquet)

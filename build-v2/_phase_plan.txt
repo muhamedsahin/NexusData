@@ -1,0 +1,35 @@
+## 15. FAZ PLANI (Cursor bu sırayla ilerlesin, her fazın sonunda derlenebilir + test edilebilir bir durum bırak)
+
+**Faz 1 — Temel performans altyapısı** (GPU olmadan da büyük kazanım):
+SIMD numeric ops (5.1), arena/object pool (3.1-3.2), N-aşamalı pipeline iskeleti (4.1-4.2), CostModel iskeleti (2.1, henüz basit heuristic ile).
+
+**Faz 2 — Gerçek GPU kernelleri**:
+`.cu` implementasyonları (6.1), multi-stream pipeline, CostModel'i gerçek GPU ölçümleriyle besleme (2.1 tam versiyon).
+
+**Faz 3 — Format patlaması**:
+Sıkıştırma katmanı (7.5, her şeyin temeli), gerçek JSON (7.1), gerçek Parquet/Arrow (7.1), PostgreSQL + genel ODBC (7.2), S3/HTTP streaming (7.3).
+
+**Faz 4 — Medya genişleme**:
+libjpeg-turbo/WebP/AVIF (7.4), video/FFmpeg (7.4), ses codec'leri (7.4), gerçek tokenizer (7.4).
+
+**Faz 5 — Eklenebilirlik**:
+Registry + dynamic plugin (8.2-8.3), function/generator dataset yardımcıları (8.4), config-driven pipeline (9), reflection (8.6).
+
+**Faz 6 — Cilalama**:
+Fluent API (10.1), C API genişletme (11), metrikler (10.3), kapsamlı benchmark/CI (13), dokümantasyon + örnek pipeline'lar (her formattan en az bir "hello world" örneği).
+
+---
+
+## 16. KABUL KRİTERLERİ (Definition of Done)
+
+Her faz için:
+- [ ] Yeni kod mevcut kod stiliyle tutarlı (`[[nodiscard]]`, RAII, `nexusdata::Error` hiyerarşisi, namespace yapısı).
+- [ ] Opsiyonel bağımlılık yoksa net, anlaşılır derleme-zamanı hata (mevcut Hdf5/Parquet/Sqlite deseni).
+- [ ] En az bir doğruluk testi + en az bir benchmark eklendi.
+- [ ] Fuzz harness'a yeni format için bir `try_X` fonksiyonu eklendi (parse edilebilir formatlar için).
+- [ ] Yeni public API Doxygen-tarzı `///` yorumlarla belgelendi.
+- [ ] Geriye dönük uyumluluk ihlali yok (Bölüm 14 kontrol edildi).
+- [ ] GPU kod yolu, GPU yokken/kapalıyken sorunsuz CPU'ya düşüyor.
+
+---
+

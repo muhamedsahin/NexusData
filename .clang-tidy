@@ -1,0 +1,13 @@
+# NexusData clang-tidy checks (v0.7 hardening baseline).
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-pro-type-member-init,
+  modernize-use-nullptr,
+  modernize-use-override,
+  performance-unnecessary-copy-initialization,
+  readability-braces-around-statements
+WarningsAsErrors: ''
+HeaderFilterRegex: 'nexusdata/.*'
+FormatStyle: none

@@ -1,0 +1,64 @@
+---
+title: Dokümantasyon
+description: NexusData dokümantasyon ana sayfası — AI boru hatları için C++20 veri yükleme.
+status: stable
+order: 0
+locale: tr
+section: getting-started
+since: "1.0"
+---
+
+**NexusData** dokümanlarına hoş geldiniz (v1.0). Her sayfada dürüst durum rozeti bulunur.
+
+## Başlangıç
+
+1. [Giriş](/docs/getting-started/introduction)
+2. [Kurulum](/docs/getting-started/installation)
+3. [Hızlı başlangıç](/docs/getting-started/quickstart)
+4. [Proje yapısı ve kavramlar](/docs/getting-started/project-structure)
+
+## Temel kavramlar
+
+- [NDArray, DType, Shape](/docs/concepts/ndarray)
+- [Dataset](/docs/concepts/dataset)
+- [Sampler](/docs/concepts/sampler)
+- [DataLoader](/docs/concepts/dataloader)
+- [Batch & collate](/docs/concepts/batch-collate)
+- [Determinizm](/docs/concepts/determinism)
+- [Bellek ve sahiplik](/docs/concepts/memory-ownership)
+
+## Veri kaynakları
+
+- [CSV / TSV](/docs/sources/csv)
+- [Image / ImageFolder](/docs/sources/image)
+- [JSON / JSONL](/docs/sources/json)
+- [MNIST / CIFAR](/docs/sources/mnist-cifar)
+- [NumPy npy/npz](/docs/sources/numpy)
+- [Ham binary / mmap](/docs/sources/mmap-binary)
+- [Parquet / Arrow](/docs/sources/parquet)
+- [SQLite](/docs/sources/sqlite)
+- [Text](/docs/sources/text)
+- [Audio (WAV)](/docs/sources/audio)
+- [WebDataset / tar/zip](/docs/sources/webdataset)
+- [HDF5](/docs/sources/hdf5)
+- [Yeni reader ekleme](/docs/sources/adding-readers)
+
+## Boru hattı
+
+`Source → Dataset → Sampler → DataLoader → Batch → NDArray`
+
+NexusData veriyi hazırlar ve teslim eder; matmul, backprop, model veya training loop **içermez**.
+
+<Callout tone="note" title="Opsiyonel backend'ler">
+Parquet, SQLite ve HDF5 için ilgili CMake bayrakları gerekir (`NEXUSDATA_WITH_ARROW`, `NEXUSDATA_WITH_SQLITE`, `NEXUSDATA_WITH_HDF5`).
+</Callout>
+
+## Örnekler
+
+| Program | Sayfa |
+| --- | --- |
+| Genel bakış | [Örnekler](/docs/examples) |
+| Tablo | [CSV'den batch'e](/docs/examples/csv) |
+| Kayıtlar | [JSON kayıtları](/docs/examples/json) |
+| Sınıf klasörleri | [Görsel klasörü](/docs/examples/images) |
+| Dönüşüm ve bölme | [Operatörler](/docs/examples/operators) |

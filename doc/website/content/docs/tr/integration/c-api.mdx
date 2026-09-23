@@ -1,0 +1,18 @@
+---
+title: C API
+description: FFI için kararlı ABI — NexusNDArray, dtype, DLPack köprüleri.
+status: stable
+order: 20
+locale: tr
+section: integration
+since: "1.0"
+---
+
+Başlık: `nexusdata/adapter/c_api.h`. Dönüş: `NexusStatus`; ayrıntı: `nexus_last_error()` (thread-local).
+
+```c
+NexusNDArray* a = NULL;
+int64_t shape[2] = {2, 3};
+nexus_ndarray_create(shape, 2, NEXUS_DTYPE_FLOAT32, &a);
+nexus_ndarray_destroy(a);
+```

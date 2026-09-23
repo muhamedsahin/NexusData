@@ -1,0 +1,27 @@
+{
+  "id": "dataloader-thread-scaling",
+  "title": {
+    "en": "DataLoader thread scaling (illustrative)",
+    "tr": "DataLoader thread ölçekleme (örnek)"
+  },
+  "metric": "batches_per_sec",
+  "unit": "batch/s",
+  "higherIsBetter": true,
+  "illustrative": true,
+  "date": null,
+  "libraryVersion": null,
+  "commit": null,
+  "hardware": null,
+  "methodology": {
+    "en": "Illustrative throughput vs worker count. Ideal linear line is drawn for reference only — not a measured claim.",
+    "tr": "Worker sayısına göre örnek throughput. İdeal doğrusal çizgi yalnızca referans — ölçülmüş iddia değil."
+  },
+  "reproduce": "./build/bench_suite  # filter dataloader if available",
+  "chartKind": "scaling",
+  "results": [
+    { "name": "workers=1", "value": 100, "stddev": 0, "runs": 0, "isBaseline": true },
+    { "name": "workers=2", "value": 170, "stddev": 0, "runs": 0, "isBaseline": false },
+    { "name": "workers=4", "value": 260, "stddev": 0, "runs": 0, "isBaseline": false },
+    { "name": "workers=8", "value": 320, "stddev": 0, "runs": 0, "isBaseline": false }
+  ]
+}

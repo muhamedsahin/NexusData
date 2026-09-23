@@ -1,0 +1,101 @@
+---
+title: Batch ve collate
+description: Batch yapısı, collate_stack, pad_sequence, ragged batch ve mask.
+status: in-development
+order: 55
+locale: tr
+section: concepts
+---
+
+## Batch
+
+`DataLoader`'ın her adımında üretilen mini-batch:
+
+```cpp
+struct Batch {
+  NDArray inputs;  // [B, ...]
+  NDArray labels;  // [B] veya [B, ...]
+  NDArray mask;    // isteğe bağlı: [B, T], 1=geçerli, 0=pad
+};
+```
+
+| Alan | Tipik shape | Not |
+| --- | --- | --- |
+| `inputs` | `[B, F]` tabular; `[B, C, H, W]` görüntü | Collate fonksiyonuna bağlı |
+| `labels` | `[B]` skaler etiket | Çok boyutlu etiketler desteklenir |
+| `mask` | `[B, T]` | `collate_pad_sequence` ile |
+
+## Varsayılan: collate_stack
+
+```cpp
+[[nodiscard]] Batch collate_stack(const std::vector<Sample>& samples);
+```
+
+Sample'ların `input` ve `label` `NDArray`'lerini eksen 0 boyunca `NDArray::stack` ile birleştirir. Tüm sample'ların uyumlu shape/dtype beklenir.
+
+```cpp
+DataLoader loader(ds, {.batch_size = 32}, collate_stack);
+```
+
+## Değişken uzunluk: collate_pad_sequence
+
+Sekans batch'leri için padding:
+
+```cpp
+PadCollateOptions po;
+po.pad_value = 0.0;
+po.pad_labels = false;
+po.mask_dtype = DType::UInt8;
+
+Batch b = collate_pad_sequence(samples, po);
+// b.inputs: [B, T_max, F] veya [B, T_max]
+// b.mask: geçerlik maskesi
+```
+
+| Koşul | Açıklama |
+| --- | --- |
+| Rank-1 input | Her sample `[T]` |
+| Rank-2 input | Aynı `F` ile `[T, F]` |
+| `pad_labels` | Etiketleri de pad et (nadir) |
+
+## Ragged: collate_ragged
+
+Stack etmeden her sample input'unu ayrı tutar:
+
+```cpp
+struct RaggedBatch {
+  std::vector<NDArray> inputs;
+  NDArray labels;
+};
+
+RaggedBatch rb = collate_ragged(samples);
+```
+
+Özel attention veya liste tabanlı modeller için uygundur; `DataLoader` varsayılanı `Batch` döndürdüğünden `CollateFn` lambda ile `RaggedBatch`'i sarmalamanız gerekir.
+
+## Özel CollateFn
+
+```cpp
+auto my_collate = [](const std::vector<Sample>& batch) -> Batch {
+  Batch out = collate_stack(batch);
+  // örn. ek metadata NDArray ekleme — Batch yalnızca üç alan; genişletme map/transform ile
+  return out;
+};
+
+DataLoader loader(ds, opts, my_collate);
+```
+
+Collate, worker thread'lerinde çalışabilir; yakalanan veriler thread-safe olmalıdır.
+
+## drop_last etkisi
+
+`drop_last = true` iken son batch `batch_size`'tan küçükse atılır; collate hiç çağrılmaz. Eksik batch'i eğitimde kullanmak istiyorsanız `drop_last = false`.
+
+## Cihaz ve dtype
+
+Collate çıktısı genelde host'ta oluşur; `DataLoaderOptions::device` sonrasında CUDA'ya taşınabilir. Pin memory, host batch buffer'ını H2D için hazırlar.
+
+## İlgili sayfalar
+
+- [DataLoader](/docs/concepts/dataloader)
+- [NDArray](/docs/concepts/ndarray)

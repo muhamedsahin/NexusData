@@ -1,0 +1,62 @@
+---
+title: Memory-mapped binary
+description: MappedFile, zero-copy view'lar ve dataset'lerin ne zaman mmap vs eager yüklediği.
+status: stable
+order: 95
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## MappedFile
+
+NexusData genelinde kullanılan salt okunur OS eşlemesi:
+
+```cpp
+MappedFile map("large.bin");
+const std::uint8_t* p = map.data();
+std::size_t n = map.size();
+```
+
+| Özellik | Ayrıntı |
+| --- | --- |
+| Değiştirilebilirlik | Map sonrası değişmez |
+| Thread safety | Eşzamanlı okuma güvenli |
+| Platformlar | Windows + POSIX uygulamaları |
+
+Dataset'ler `MappedFile` üyeleri gömer; view'lar dataset yaşam süresi boyunca geçerli kalır.
+
+## Kim neyi mmap eder?
+
+| Reader | mmap rolü |
+| --- | --- |
+| `CSVDataset` | Map üzerinden isteğe bağlı parse (`use_mmap`) |
+| `JSONLDataset` | Map üzerinde satır taraması |
+| `MNIST` / `CIFAR` | IDX / batch baytları |
+| `NpyFile` | Dizi payload'ı |
+| `WebDataset` | Tar shard baytları |
+| `load_npy(..., copy=false)` | `NpyFile` ile kullanıcı yönetimi |
+
+Eager loader'lar (CSV/JSONL parse sonrası `InMemoryDataset`) sahip olunan `NDArray`'e **kopyalar** — tepe RAM dataset boyutuna eşittir.
+
+## Zero-copy sample kalıbı
+
+Binary dataset'ler sıklıkla map'e işaret eden `NDArray::from_blob` dilimleri döndürür:
+
+```cpp
+// get(index) içindeki örnek kalıp:
+const std::uint8_t* row = base + index * record_size;
+NDArray input = NDArray::from_blob(const_cast<std::uint8_t*>(row), shape, DType::UInt8);
+```
+
+Üst dataset'in `MappedFile`'ı tüm batch'lerden önce yaşamalı. `DataLoader`'da `DatasetConstPtr` tutmak bunu sağlar.
+
+<Callout tone="warning" title="Harici view'lar">
+Blob view çıkarıp dataset'i yok ederseniz view dangling olur. Loader grafiği dışında sample önbelleğe alırken klonlayın veya kopyalayın.
+</Callout>
+
+## İlgili
+
+- [Bellek sahipliği](/docs/concepts/memory-ownership)
+- [NumPy](/docs/sources/numpy)
+- [MNIST / CIFAR](/docs/sources/mnist-cifar)

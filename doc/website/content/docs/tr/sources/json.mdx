@@ -1,0 +1,51 @@
+---
+title: JSON Lines
+description: mmap ve paralel parse ile sayısal NDJSON dizileri için JSONLDataset.
+status: stable
+order: 80
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## Format
+
+**JSONLDataset** (JsonlDataset), **satır başına bir JSON değeri** okur (JSONL / NDJSON). v1.0'da satır başına **düz sayısal dizi** desteklenir:
+
+```json
+[1.0, 2.5, 0.0, 3]
+```
+
+`JSONLOptions::array_with_label` **true** (varsayılan) iken **son eleman** etiket, öncekiler feature'dır.
+
+İç içe nesneler bu sınıfta okunmaz. Alan yolları, etiket ve metadata için `JsonDataset` kullanın. Adım adım örnek: [JSON kayıtları](/docs/examples/json).
+
+## Kullanım
+
+```cpp
+JSONLOptions opt;
+opt.array_with_label = true;
+opt.feature_dtype = DType::Float32;
+opt.label_dtype = DType::Float32;
+opt.num_threads = 0;
+
+JSONLDataset data("train.jsonl", opt);
+std::size_t F = data.num_features();
+```
+
+## Uygulama notları
+
+| Özellik | Ayrıntı |
+| --- | --- |
+| IO | `MappedFile` + satır sonu taraması (SIMD destekli) |
+| Depolama | Parse sonrası eager `InMemoryDataset` |
+| Thread safety | Yüklemeden sonra salt okunur |
+
+<Callout tone="note" title="Şema disiplini">
+Dosya başına sabit feature genişliği tutun. Düzensiz JSON farklı bir kaynak veya özel parser gerektirir.
+</Callout>
+
+## İlgili
+
+- [CSV](/docs/sources/csv)
+- [Metin satırları](/docs/sources/text)

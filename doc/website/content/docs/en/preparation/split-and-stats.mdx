@@ -1,0 +1,35 @@
+---
+title: Split & dataset stats
+description: random_split, k-fold helpers, Subset views, and DatasetStats summaries.
+status: stable
+order: 60
+locale: en
+section: preparation
+since: "1.0"
+---
+
+## Splits
+
+`nexusdata/dataset/split.hpp` returns `Subset` views — no data copy of parent storage.
+
+```cpp
+#include "nexusdata/dataset/split.hpp"
+
+auto [train, val] = random_split(dataset, 0.8, 0.2, /*seed=*/42);
+// or: random_split(ds, {0.7, 0.15, 0.15}, seed) → vector<Subset>
+```
+
+`Fold` pairs (`train` / `test`) support k-fold style helpers in the same header.
+
+## Visualizer
+
+<SplitVisualizer />
+
+## Stats
+
+`nexusdata/dataset/stats.hpp` summarizes label / feature distributions for diagnostics — use after split so you do not peek at held-out folds when deciding preprocessing.
+
+## See also
+
+- [Subset & memory](/docs/concepts/memory-ownership)
+- [Determinism](/docs/concepts/determinism)

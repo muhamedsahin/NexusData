@@ -1,0 +1,20 @@
+---
+title: Worker ve prefetch
+description: num_workers, prefetch_factor, persistent_workers ve determinizm sözleşmesi.
+status: stable
+order: 10
+locale: tr
+section: performance
+since: "1.0"
+---
+
+| Seçenek | Etki |
+| --- | --- |
+| `num_workers = 0` | Senkron fetch + collate |
+| `num_workers > 0` | Arka plan kuyruğu |
+| `prefetch_factor` | Kapasite ≈ workers × factor |
+| `persistent_workers` | Epoch'lar arası worker tutma |
+
+Aynı seed için batch *i* **worker sayısından bağımsız** aynı indeksleri içerir.
+
+Hata ayıklarken `num_workers = 0` ile başlayın. Bkz. [DataLoader](/docs/concepts/dataloader).

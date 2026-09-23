@@ -1,0 +1,194 @@
+---
+title: CSV'den batch'e
+description: Etiketli CSV yükleyen, bölen, öznitelikleri standardize eden ve batch'leri gezen tam program.
+status: stable
+order: 20
+locale: tr
+section: examples
+since: "1.0"
+---
+
+Bu sayfa, adım adım anlatılan tek bir programdır. Tırnak kuralları, kayıt bölme ve `Skip`'in tam davranışı [CSV ve TSV](/docs/sources/csv) sayfasındadır. Kurucu fırlatınca oraya bak. Yükleme başarılı olduktan sonra eldeki nesneler için burada kal.
+
+## Dosya
+
+```text
+sepal_length,sepal_width,petal_length,petal_width,species
+5.1,3.5,1.4,0.2,0
+4.9,3.0,1.4,0.2,0
+4.7,3.2,1.3,0.2,0
+7.0,3.2,4.7,1.4,1
+6.4,3.2,4.5,1.5,1
+6.9,3.1,4.9,1.5,1
+6.3,3.3,6.0,2.5,2
+5.8,2.7,5.1,1.9,2
+7.1,3.0,5.9,2.1,2
+```
+
+Dokuz veri satırı, dört öznitelik, bir tamsayı etiket. Etiket adlıdır ve tesadüfen sondadır. Adlandırmak yine de önemlidir. Sağa bir sütun eklenirse `label_column = "species"` hedefi korur. Varsayılan "son sütun" kayar.
+
+## Yükle ve şekilleri oku
+
+```cpp
+#include "nexusdata/nexusdata.hpp"
+
+nexusdata::CSVOptions opt;
+opt.label_column = "species";
+opt.feature_dtype = nexusdata::DType::Float32;
+opt.label_dtype = nexusdata::DType::Int64;
+opt.use_mmap = true;
+opt.num_threads = 0;
+
+auto ds = std::make_shared<nexusdata::CSVDataset>("iris_tiny.csv", opt);
+```
+
+Veri kümesini `shared_ptr` içinde tut. İki argümanlı `random_split`, `DatasetConstPtr` alır; bu `std::shared_ptr<const Dataset>` demektir. `shared_ptr<CSVDataset>` buna dönüşür. Bölmeden sonra yerel işaretçi durur, ölçeği uydururken `features()` okunabilir. `{0.8, 0.2}` ilklendirici listesini alan yükleme, veri kümesini değere göre alıp yeni bir `shared_ptr` içine taşır ve yerel nesneyi taşınmış bırakır. Ondan sonra o nesnede `features()` çağırma.
+
+Kurulumdan sonra:
+
+- `ds->size()` 9'dur.
+- `ds->num_features()` 4'tür.
+- `ds->features()` `[9, 4]` `Float32`'dir. Etiket sütunu bu matriste yoktur. Öznitelik `j` paketlidir; dosyanın ortasındaki etiket delik bırakmaz.
+- `ds->labels()` `[9]` `Int64`'tür.
+- `ds->column_names()` beş dizedir, `"species"` dahil.
+- `ds->get(0).input` yeni bir `[4]` dizidir. Baytlar matristen kopyalanır. Görünüm değildir.
+- `ds->get(0).label` yeni bir `[1]` dizidir. 0. satırın değeri `0`'dır.
+- `ds->get(9)` `IndexError` fırlatır. İleti indeks ve boyutu adlandırır.
+
+`get` ayırır çünkü dönüşümler `sample.input`'u değiştirir ve saklanan tabloyu yazmamalıdır. `Sample::with_input` etiketi, ek tensörleri ve metadata'yı yeni örneğe taşır. `StandardizeTransform` öznitelikleri ölçekler, `species`'e dokunmaz.
+
+`features()` referans döndürür. O `NDArray`'i kopyalamak depoyu paylaşır. Başka bir iş parçacığı `get` çağırırken içine yazma.
+
+## Bölme satır kopyalamaz
+
+```cpp
+auto [train, val] = nexusdata::random_split(ds, 0.8, 0.2, /*seed=*/42);
+```
+
+`ds`, önceki bloktaki `shared_ptr`'dir.
+
+Oranlar `1e-6` içinde 1'e toplanmalıdır. Negatif oran `InvalidArgumentError` fırlatır. Boş liste de fırlatır.
+
+Son oran dışındaki her oran `llround(oran * N)` ile sayıya döner. Son parça kalanı alır; taşma önceki parçalardan geri alınır. 9 satırda `llround(0.8 * 9)` 7'dir, doğrulama 2 alır.
+
+İki `Subset` de öznitelik baytı kopyalamaz. Her biri ebeveyne bir `shared_ptr` ve `indices()` ile okunan bir `std::vector<std::size_t>` tutar. `train.get(0)`, karıştırmada ilk düşen ebeveyn indeksinde `ds->get` çağırır. `train.size()` 7'dir. Bu yedi konum dosyanın `0..6` satırları değildir.
+
+Permütasyon `PCG32(seed)` ile Fisher–Yates'tir. Aynı uzunluk ve aynı tohum aynı indeksleri üretir. Aynı satır sayısı ve aynı tohuma sahip başka bir dosya aynı permütasyonu alır; satırlar ancak dosyalar aynıysa aynıdır. Loader'daki `num_workers` bunu yeniden karıştırmaz. İndeksler zaten vardır.
+
+`random_split(dataset, {0.8, 0.2}, seed)` başka bir yüktür. İlklendirici listede tam iki oran olmalıdır. Veri kümesi değere göre alınıp `shared_ptr` içine taşınır. Yerel nesneyle işin bittiyse bu biçimi kullan. Bu sayfadaki çağrı, sonraki bölümde `ds->features()` çalışsın diye `shared_ptr` yükünü kullanır.
+
+`stratified_split(ds, ds->labels(), 0.8, 42)` tamsayı etiketleri gruplar, her sınıfın içinde karıştırır ve her sınıfı `llround` ile keser. İki veya daha çok satırlı bir sınıf, her yana en az bir satır kalacak şekilde kıstırılır. Bu dosyada sınıf başına üç satır vardır; yuvarlama kıstırmasıyla her sınıf kabaca iki eğitim ve bir doğrulama satırı verir. Düz karıştırma nadir bir sınıfı eğitimden düşürebiliyorsa bunu kullan. Etiket dizisi sayısal, rank 1 ve uzunluğu `size()` olmalıdır. `CSVDataset::labels()` bu dizidir. Görsel etiketleri değildir. Onlar her `Sample` üzerindedir.
+
+## Ölçeği yalnızca eğitim indekslerinde uydur
+
+`StandardizeTransform` kurucuları veri kümesini taramaz. Ortalamayı dokuz satırın tümünde ölçersen, iki doğrulama satırı kendilerine uygulanacak ölçeği değiştirir.
+
+```cpp
+const auto& x = ds->features();
+const auto& ids = train.indices();
+std::vector<double> mean(4, 0.0);
+std::vector<double> scale(4, 0.0);
+for (std::size_t col = 0; col < 4; ++col) {
+    double sum = 0.0;
+    for (std::size_t parent : ids) {
+        sum += x.data<float>()[parent * 4 + col];
+    }
+    mean[col] = sum / static_cast<double>(ids.size());
+    double acc = 0.0;
+    for (std::size_t parent : ids) {
+        const double d = x.data<float>()[parent * 4 + col] - mean[col];
+        acc += d * d;
+    }
+    scale[col] = std::sqrt(acc / static_cast<double>(ids.size()));
+}
+```
+
+Sıfır veya NaN ölçek, `StandardizeTransform` içinde `1` yapılır. Sabit sütun sıfıra bölme yerine `x - mean` olur. Aldığın fırlatma, `sample.input` tam olarak `mean.size()` eleman değilse `ShapeError`'dur. Burada bu sayı 4'tür ve `num_features()` ile uyar.
+
+```cpp
+auto scaled = nexusdata::MapDataset(
+    train,
+    std::make_shared<nexusdata::StandardizeTransform>(mean, scale));
+```
+
+`MapDataset` ebeveyni ve dönüşümü saklar. `size()`, `train.size()` kadardır. `get(i)`, `transform.apply(train.get(i))` demektir. Bir şey satırı isteyene kadar hiçbir şey ölçeklenmez. `apply`, öznitelik başına `(x - mean) / scale` çalıştırır ve `sample.with_input(...)` döndürür.
+
+Aynı `mean` ve `scale`'i `val`'a uygula. Doğrulama satırlarında ikinci bir dönüşüm uydurmak başka bir deneydir.
+
+## Batch'ler
+
+```cpp
+nexusdata::DataLoaderOptions load;
+load.batch_size = 4;
+load.shuffle = true;
+load.seed = 42;
+load.drop_last = false;
+load.num_workers = 0;
+
+nexusdata::DataLoader loader(std::move(scaled), load);
+// loader.size() batch sayısıdır, satır sayısı değil.
+// 7 satır, batch 4, drop_last false → 2 batch (4 ve 3).
+
+for (const nexusdata::Batch& batch : loader) {
+    // batch.inputs: Float32 [B, 4]
+    // batch.labels: Int64   [B, 1]
+    const float* xrow = batch.inputs.data<float>();
+    const std::int64_t* y = batch.labels.data<std::int64_t>();
+    (void)xrow;
+    (void)y;
+}
+```
+
+Buradaki `shuffle`, loader'ın 7 altküme konumu üzerinde ikinci bir permütasyondur. Bölme permütasyonu değildir. Tohumu `load.seed`'dir. 0. epoch'un 0. batch'i, o tohum için sabit dört altküme indeksidir. `num_workers` bu indekslerin hangileri olduğunu değiştirmez. Hangi iş parçacığının onları maddeleştirdiğini değiştirir.
+
+Bu boyutlarda `drop_last = true` tek bir 4'lük batch verir ve o epoch için son 3 altküme satırını düşürür. Veri kümesinden silinmezler. Sonraki epoch, karıştırma onları öne alırsa içerebilir.
+
+`num_workers = 0`, getirme ve collate'i çağıran iş parçacığında çalıştırır. Yineleyiciyi iki iş parçacığından ilerletmek güvenli değildir. `num_workers > 0` iken yıkıcı worker'ları birleştirir. İkinci geçiş `loader.reset_epoch(seed)` ister. Bitmiş bir loader üzerinde range-for kendi kendine yeniden başlamaz.
+
+Varsayılan collate `collate_stack`'tir. `Sample::input`'u 0. eksende yığar. Şekli `[1]` olan etiketler `[B, 1]` olur. Özel bir `CollateFn` bunun yerine geçer. Bir batch için `const std::vector<Sample>&` alır ve `Batch` döndürür.
+
+## Aynı hat, zincir olarak
+
+```cpp
+auto loader2 = nexusdata::from_csv("iris_tiny.csv", opt)
+    .map(nexusdata::ClipTransform{0.0, 10.0})
+    .map(nexusdata::Log1pTransform{})
+    .shuffle(42)
+    .batches(4, /*drop_last=*/false)
+    .workers(2)
+    .prefetch(2)
+    .build();
+
+for (const auto& batch : *loader2) {
+    const auto n = batch.inputs.shape()[0];
+    (void)n;
+}
+```
+
+`from_csv`, `shared_ptr` içinde bir `CSVDataset` kurar ve `DatasetChain` ile sarar. Her `map` bir dönüşüm ekler. `batches` sırasında zincir `realize()` çağırır: tek dönüşüm kendisi kalır, iki veya daha fazlası `Compose` olur. `Compose` içindeki tablo adımları tek geçişe birleşir; clip ve `log1p` iki ayırma değildir. Gerçekleşen nesne CSV üzerindeki bir `MapDataset`'tir. `shuffle` yalnızca `DataLoaderOptions::shuffle` ve `seed` ayarlar. Zincir kurulurken karıştırmaz. `batches` bir `BatchPlan` döndürür çünkü `DataLoader` taşınamaz. `workers` ve `prefetch` bu planı değiştirir. `build`, `std::unique_ptr<DataLoader>` döndürür.
+
+`prefetch(0)` fırlatır. `workers(-1)` fırlatır. `batches(0)` fırlatır.
+
+Bu zincir hiçbir şeyi standardize etmez. Clip ve `log1p` eğitim istatistiği istemez. `StandardizeTransform` eklediğin anda yukarıdaki indeks döngüsüne dön ve yalnızca eğitim altkümesinde uydur. Uydurmayı `random_split`'ten önce, dosyanın tamamı üzerinde `map` içine koymak doğrulama satırlarını ölçeğe sızdırır.
+
+## İkinci epoch
+
+```cpp
+loader.reset_epoch(42); // aynı tohum → ilk geçişle aynı batch indeks kümeleri
+std::size_t seen = 0;
+for (const auto& batch : loader) {
+    seen += batch.inputs.shape()[0];
+}
+// drop_last false → seen == train.size()
+```
+
+`reset_epoch` örnekleyici sırasını yeniden kurar. Rastgele görsel dönüşümlerin varsa bir sonraki geçişte loader tohumundan yeniden tohumlanırlar. Bu CSV hattında böyle bir dönüşüm yok.
+
+## Sayılar yanlış görünüyorsa
+
+- `Float32` etiket dtype'ı `0`, `1`, `2` değerlerini `0.f`, `1.f`, `2.f` saklar. Float etiket üzerinde `data<std::int64_t>()` okuyan kod, çağrıda tür hatasıdır ya da işaretçiyi yanlış okur. İşaretçiyi `label_dtype` ile eşle.
+- `column_names().size()` dosya genişliğidir. `num_features()` bir eksiktir. Adlar üzerinde dönüp `get(i).input` indeksleyen döngü etiket adını atlamalıdır.
+- `Skip`, alan sayısı yanlış olan satırı atar. Sayıya çevirmesi başarısız olan satırı atmaz. O satır kalır; yazılmamış hücreler sıfırdır. Ayrıntı kaynak sayfasındadır. Sınıf sayısı kısa görünüyorsa bölmeden önce `size()` bas.
+- Ölçeği tüm satırlarda uyduran doğrulama metriği, ölçeği yalnızca `train.indices()` üzerinde uyduran metrikle karşılaştırılamaz.
+
+Sayıların dikdörtgeni olmayan dosya için [JSON kayıtları](/docs/examples/json). Clip, `log1p`, min-max ve loader alanları için [Operatörler](/docs/examples/operators).

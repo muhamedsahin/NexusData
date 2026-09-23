@@ -1,0 +1,21 @@
+# ninja log v6
+18	247	8118191101673880	nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-mkdir	fe7e7256cd1a325c
+249	2089	8118191120068495	nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-download	39b2bfc5640fc99c
+18	247	8118191101673880	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-mkdir	fe7e7256cd1a325c
+3533	3863	8118191137823864	CMakeFiles/nd_zlib-populate-complete	2fda85d569964a72
+2390	2614	8118191125325069	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-patch	9684b7ed424591f
+2615	2835	8118191127545181	nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-configure	b65a01647ccf7e9d
+249	2089	8118191120068495	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-download	39b2bfc5640fc99c
+2094	2388	8118191123005644	nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-update	cb0cc0ae58bee090
+2836	3055	8118191129747437	nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-build	73017d6899ea714b
+2094	2388	8118191123005644	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-update	cb0cc0ae58bee090
+2390	2614	8118191125325069	nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-patch	9684b7ed424591f
+2615	2835	8118191127545181	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-configure	b65a01647ccf7e9d
+2836	3055	8118191129747437	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-build	73017d6899ea714b
+3056	3289	8118191132085265	nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-install	66b37173594615b0
+3056	3289	8118191132085265	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-install	66b37173594615b0
+3290	3532	8118191134497075	nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-test	352dbdd35fe07cfb
+3290	3532	8118191134497075	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-test	352dbdd35fe07cfb
+3533	3863	8118191137823864	nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-done	2fda85d569964a72
+3533	3863	8118191137823864	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/CMakeFiles/nd_zlib-populate-complete	2fda85d569964a72
+3533	3863	8118191137823864	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/nd_zlib-populate-done	2fda85d569964a72

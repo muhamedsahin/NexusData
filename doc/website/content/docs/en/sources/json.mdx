@@ -1,0 +1,40 @@
+---
+title: JSON / JSONL
+description: JsonDataset field mapping and the numeric JSONLDataset reader.
+status: stable
+order: 80
+locale: en
+section: sources
+since: "1.0"
+---
+
+## JsonDataset
+
+`JsonDataset` reads JSON Lines or one JSON array. Each `JsonField` has a path, a `JsonRole` (`Input`, `Label`, `Extra`, `Metadata`), a dtype, and an optional shape. Empty `fields` infers inputs from the first record. `skip_invalid` drops bad records and `skipped()` reports how many. `JsonLinesIterable` streams lines, including compressed files, at constant memory.
+
+Named fields, array documents, and `from_string` are walked through in [JSON records](/docs/examples/json).
+
+## JSONLDataset
+
+`JSONLDataset` reads one numeric JSON array per line. With `array_with_label` (the default) the last element is the label. Nested objects are not parsed here; use `JsonDataset` for objects.
+
+```cpp
+#include "nexusdata/dataset/jsonl.hpp"
+
+nexusdata::JSONLOptions opt;
+opt.array_with_label = true;
+opt.feature_dtype = nexusdata::DType::Float32;
+opt.label_dtype = nexusdata::DType::Float32;
+opt.num_threads = 0;
+
+nexusdata::JSONLDataset data("train.jsonl", opt);
+std::size_t features = data.num_features();
+```
+
+The file is memory-mapped, newlines are scanned, and rows are stored in an `InMemoryDataset`. After construction, `get` is read-only and safe to call from multiple threads.
+
+## See also
+
+- [JSON examples](/docs/examples/json)
+- [CSV](/docs/sources/csv)
+- [Text](/docs/sources/text)

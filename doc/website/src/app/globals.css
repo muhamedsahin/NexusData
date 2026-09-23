@@ -1,0 +1,345 @@
+@import "tailwindcss";
+
+/* ─── Fonts ─────────────────────────────────────────────────────────────── */
+:root {
+  --font-display: var(--font-sora);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ─── Light Theme — warm paper, one mineral accent ─────────────── */
+  --bg: #f4f1ea;
+  --bg-elevated: #fffcf7;
+  --fg: #1c1915;
+  --fg-muted: #5c564c;
+  --surface: #eae6dc;
+  --surface-2: #e0dbd0;
+  --border: color-mix(in oklab, #1c1915 10%, transparent);
+  --border-strong: color-mix(in oklab, #1c1915 18%, transparent);
+  --ring: #0f766e;
+
+  --accent: #0f766e;
+  --accent-fg: #f4f1ea;
+  --accent-soft: color-mix(in oklab, #0f766e 14%, transparent);
+  --accent-2: #0f766e;
+  --accent-3: #0f766e;
+  --amber: #a16207;
+
+  --grad-a: #1c1915;
+  --grad-b: #1c1915;
+  --grad-c: #1c1915;
+
+  --status-stable: #047857;
+  --status-stable-bg: color-mix(in oklab, #047857 12%, transparent);
+  --status-stable-border: color-mix(in oklab, #047857 28%, transparent);
+  --status-beta: #1d4ed8;
+  --status-beta-bg: color-mix(in oklab, #1d4ed8 12%, transparent);
+  --status-beta-border: color-mix(in oklab, #1d4ed8 28%, transparent);
+  --status-dev: #0f766e;
+  --status-dev-bg: color-mix(in oklab, #0f766e 12%, transparent);
+  --status-dev-border: color-mix(in oklab, #0f766e 28%, transparent);
+  --status-planned: #6b7280;
+  --status-planned-bg: color-mix(in oklab, #6b7280 12%, transparent);
+  --status-planned-border: color-mix(in oklab, #6b7280 28%, transparent);
+  --status-warn: #b45309;
+  --status-warn-bg: color-mix(in oklab, #b45309 12%, transparent);
+  --status-warn-border: color-mix(in oklab, #b45309 28%, transparent);
+  --status-preview: #7c3aed;
+  --status-preview-bg: color-mix(in oklab, #7c3aed 12%, transparent);
+  --status-preview-border: color-mix(in oklab, #7c3aed 28%, transparent);
+
+  --callout-note-bg: color-mix(in oklab, #0f766e 8%, transparent);
+  --callout-note-border: color-mix(in oklab, #0f766e 30%, transparent);
+  --callout-tip-bg: color-mix(in oklab, #1d4ed8 8%, transparent);
+  --callout-tip-border: color-mix(in oklab, #1d4ed8 30%, transparent);
+  --callout-warn-bg: color-mix(in oklab, #d97706 10%, transparent);
+  --callout-warn-border: color-mix(in oklab, #d97706 32%, transparent);
+  --callout-danger-bg: color-mix(in oklab, #dc2626 10%, transparent);
+  --callout-danger-border: color-mix(in oklab, #dc2626 32%, transparent);
+}
+
+/* ─── Dark Theme ────────────────────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  --bg: #090a0c;
+  --bg-elevated: #121418;
+  --fg: #f3eee6;
+  --fg-muted: #a39c92;
+  --surface: #16181d;
+  --surface-2: #1e2128;
+  --border: color-mix(in oklab, #f3eee6 12%, transparent);
+  --border-strong: color-mix(in oklab, #f3eee6 22%, transparent);
+  --ring: #2fbfb0;
+  --accent: #2fbfb0;
+  --accent-fg: #06211e;
+  --accent-soft: color-mix(in oklab, #2fbfb0 16%, transparent);
+  --accent-2: #2fbfb0;
+  --accent-3: #2fbfb0;
+  --amber: #c6a15b;
+
+  --grad-a: #f3eee6;
+  --grad-b: #f3eee6;
+  --grad-c: #f3eee6;
+
+  --status-stable: #34d399;
+  --status-stable-bg: color-mix(in oklab, #34d399 14%, transparent);
+  --status-stable-border: color-mix(in oklab, #34d399 32%, transparent);
+  --status-beta: #60a5fa;
+  --status-beta-bg: color-mix(in oklab, #60a5fa 14%, transparent);
+  --status-beta-border: color-mix(in oklab, #60a5fa 32%, transparent);
+  --status-dev: #2fbfb0;
+  --status-dev-bg: color-mix(in oklab, #2fbfb0 14%, transparent);
+  --status-dev-border: color-mix(in oklab, #2fbfb0 32%, transparent);
+  --status-planned: #94a3b8;
+  --status-planned-bg: color-mix(in oklab, #94a3b8 14%, transparent);
+  --status-planned-border: color-mix(in oklab, #94a3b8 32%, transparent);
+  --status-warn: #fbbf24;
+  --status-warn-bg: color-mix(in oklab, #fbbf24 14%, transparent);
+  --status-warn-border: color-mix(in oklab, #fbbf24 32%, transparent);
+  --status-preview: #c084fc;
+  --status-preview-bg: color-mix(in oklab, #c084fc 14%, transparent);
+  --status-preview-border: color-mix(in oklab, #c084fc 32%, transparent);
+
+  --callout-note-bg: color-mix(in oklab, #2fbfb0 10%, transparent);
+  --callout-note-border: color-mix(in oklab, #2fbfb0 34%, transparent);
+  --callout-tip-bg: color-mix(in oklab, #60a5fa 10%, transparent);
+  --callout-tip-border: color-mix(in oklab, #60a5fa 34%, transparent);
+  --callout-warn-bg: color-mix(in oklab, #fbbf24 12%, transparent);
+  --callout-warn-border: color-mix(in oklab, #fbbf24 36%, transparent);
+  --callout-danger-bg: color-mix(in oklab, #f87171 12%, transparent);
+  --callout-danger-border: color-mix(in oklab, #f87171 36%, transparent);
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ─── Keyframes ──────────────────────────────────────────────────────────── */
+@keyframes aurora-drift {
+  0%   { transform: translate(0, 0)     rotate(0deg)   scale(1); }
+  33%  { transform: translate(4%, 3%)   rotate(8deg)   scale(1.06); }
+  66%  { transform: translate(-3%, 5%)  rotate(-6deg)  scale(0.97); }
+  100% { transform: translate(0, 0)     rotate(0deg)   scale(1); }
+}
+@keyframes aurora-drift-2 {
+  0%   { transform: translate(0, 0)     rotate(0deg)   scale(1); }
+  40%  { transform: translate(-5%, -4%) rotate(-10deg) scale(1.08); }
+  80%  { transform: translate(3%, 6%)   rotate(5deg)   scale(0.95); }
+  100% { transform: translate(0, 0)     rotate(0deg)   scale(1); }
+}
+@keyframes aurora-drift-3 {
+  0%   { transform: translate(0, 0)     rotate(0deg)   scale(1); }
+  50%  { transform: translate(6%, -3%)  rotate(12deg)  scale(1.1); }
+  100% { transform: translate(0, 0)     rotate(0deg)   scale(1); }
+}
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0%   50%; }
+  50%       { background-position: 100% 50%; }
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+@keyframes neon-pulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; }
+}
+@keyframes scan-line {
+  0%   { top: -2px; }
+  100% { top: 100%; }
+}
+@keyframes border-spin {
+  to { --border-angle: 360deg; }
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+html {
+  color-scheme: light dark;
+}
+
+body {
+  min-height: 100%;
+  background:
+    radial-gradient(
+      880px 420px at 78% -8%,
+      color-mix(in oklab, var(--accent) 7%, transparent),
+      transparent 68%
+    ),
+    var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 40%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ─── Aurora Orbs (CSS-only, behind canvas layer) ────────────────────────── */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.aurora-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+:root[data-theme="dark"] .aurora-orb { opacity: 1; }
+
+.aurora-orb-1 {
+  width: 65vw;
+  height: 65vw;
+  top: -20%;
+  left: -15%;
+  background: radial-gradient(circle, #00f5dc55, #00f5dc11 60%, transparent 80%);
+  animation: aurora-drift 18s ease-in-out infinite;
+}
+.aurora-orb-2 {
+  width: 70vw;
+  height: 70vw;
+  top: -10%;
+  right: -20%;
+  background: radial-gradient(circle, #a855f744, #a855f711 55%, transparent 80%);
+  animation: aurora-drift-2 24s ease-in-out infinite;
+}
+.aurora-orb-3 {
+  width: 55vw;
+  height: 55vw;
+  bottom: 10%;
+  left: 20%;
+  background: radial-gradient(circle, #ff784933, #ff784911 55%, transparent 80%);
+  animation: aurora-drift-3 20s ease-in-out infinite;
+}
+
+/* ─── Gradient Text ──────────────────────────────────────────────────────── */
+.gradient-text {
+  color: var(--fg);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* ─── Neon Glow Card ─────────────────────────────────────────────────────── */
+.glow-card {
+  position: relative;
+  background: color-mix(in oklab, var(--bg-elevated) 86%, transparent);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition: border-color 0.35s var(--ease-out);
+}
+.glow-card:hover {
+  border-color: color-mix(in oklab, var(--accent) 42%, var(--border));
+}
+
+/* ─── Floating animation for decorative items ───────────────────────────── */
+.float-anim {
+  animation: float-y 4s ease-in-out infinite;
+}
+
+/* ─── Neon Line Divider ──────────────────────────────────────────────────── */
+.neon-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--border-strong),
+    transparent
+  );
+}
+
+/* ─── Animated gradient border (hero badge etc.) ─────────────────────────── */
+.animated-border {
+  position: relative;
+  isolation: isolate;
+}
+.animated-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--border-angle, 0deg),
+    var(--grad-a),
+    var(--grad-b),
+    var(--grad-c),
+    var(--grad-a)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: border-spin 4s linear infinite;
+  @property --border-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+}
+
+/* ─── Skip link ──────────────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  z-index: 100;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: var(--accent-fg);
+  padding: 0.5rem 0.75rem;
+  transition: top 0.2s var(--ease-out);
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 1rem;
+}
+
+/* Homepage stage stays obsidian even if the document theme is light. */
+.home-stage {
+  --bg: #090a0c;
+  --bg-elevated: #121418;
+  --fg: #f3eee6;
+  --fg-muted: #a39c92;
+  --surface: #16181d;
+  --surface-2: #1e2128;
+  --border: color-mix(in oklab, #f3eee6 12%, transparent);
+  --border-strong: color-mix(in oklab, #f3eee6 22%, transparent);
+  --ring: #2fbfb0;
+  --accent: #2fbfb0;
+  --accent-fg: #06211e;
+  --accent-soft: color-mix(in oklab, #2fbfb0 16%, transparent);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* ─── Docs long-form: defer offscreen paint ─────────────────────────────── */
+.docs-article {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 1200px;
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

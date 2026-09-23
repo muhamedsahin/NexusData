@@ -1,0 +1,25 @@
+---
+title: API genel bakış
+description: NexusData v1.0 genel başlık haritası — core, dataset, loading, pipeline, adaptörler.
+status: stable
+order: 10
+locale: tr
+section: reference
+since: "1.0"
+---
+
+```cpp
+#include "nexusdata/nexusdata.hpp"
+```
+
+| Alan | Başlıklar |
+| --- | --- |
+| Core | `core/ndarray.hpp`, `dtype`, `shape`, `error`, `random`, `allocator` |
+| Dataset | `dataset/*`, `map`, `compose`, `iterable` |
+| Sampling | `sampling/*` |
+| Loading | `loading/dataloader.hpp`, `batch.hpp` |
+| Pipeline / preprocess | `pipeline/*`, `preprocessing/*` |
+| Backend / cache | `backend/*`, `cache/*` |
+| Adaptörler | `adapter/c_api.h`, `dlpack.hpp`, `matrixflash.hpp` |
+
+Kararlılık: repodaki `doc/api_stability_v1.0.md`.

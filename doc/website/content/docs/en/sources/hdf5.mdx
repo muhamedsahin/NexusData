@@ -1,0 +1,23 @@
+---
+title: HDF5
+description: Hdf5Dataset — requires NEXUSDATA_WITH_HDF5.
+status: stable
+order: 125
+locale: en
+section: sources
+since: "1.0"
+---
+
+<Callout tone="warning" title="Optional dependency">
+Enable `NEXUSDATA_WITH_HDF5=ON` and link libhdf5.
+</Callout>
+
+```cpp
+#include "nexusdata/dataset/hdf5.hpp"
+Hdf5Options opt;
+Hdf5Dataset ds("data.h5", opt);
+```
+
+## See also
+
+- [NumPy npy](/docs/sources/numpy)

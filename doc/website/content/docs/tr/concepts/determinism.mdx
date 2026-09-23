@@ -1,0 +1,97 @@
+---
+title: Determinism
+description: seed, PCG32, Philox, shuffle, split ve DataLoader batch sırası garantileri.
+status: in-development
+order: 60
+locale: tr
+section: concepts
+---
+
+## Neden önemli?
+
+ML boru hatlarında aynı kod + aynı veri + aynı **seed** → aynı batch sırası beklenir. NexusData v1.0, indeks permütasyonu ve split'lerde platformlar arası tekrarlanabilir RNG kullanır; worker sayısı sonucu değiştirmez.
+
+## RNG katmanları
+
+| Bileşen | RNG | Kullanım |
+| --- | --- | --- |
+| CPU shuffle / split | `PCG32` | `RandomSampler`, `random_split`, `k_fold` shuffle |
+| GPU prep (CUDA) | `Philox4x32` | Counter-based; CPU/GPU aynı counter → aynı çıktı |
+| std::shuffle | Kullanılmaz | Tekrarlanabilirlik için bilinçli olarak yok |
+
+```cpp
+PCG32 rng(42);
+auto idx = shuffled_indices(n, rng);
+```
+
+`PCG32` aynı `(seed, stream)` için deterministiktir; instance thread-safe değildir — thread başına ayrı RNG.
+
+## DataLoader garantisi
+
+```cpp
+DataLoaderOptions lo;
+lo.batch_size = 32;
+lo.shuffle = true;
+lo.seed = 7;
+lo.num_workers = 8;
+
+DataLoader a(dataset, lo);
+DataLoader b(dataset, lo);
+// Aynı seed: a ve b aynı batch indeks dizilerini üretir
+```
+
+Header yorumu: batch *i* her zaman aynı sample indekslerini içerir, **`num_workers`'tan bağımsız**. Paralellik yalnızca materialize (fetch + collate) içindir; tüketim sırası korunur.
+
+Yeni epoch:
+
+```cpp
+loader.reset_epoch(/*seed=*/1000 + epoch);
+```
+
+## Split ve CV
+
+| API | seed etkisi |
+| --- | --- |
+| `random_split` | İndeks permütasyonu |
+| `stratified_split` | Sınıf oranı koruyarak permütasyon |
+| `k_fold(..., shuffle=true, seed)` | Fold ataması |
+| `train_val_test_split` | Üç yollu permütasyon |
+
+```cpp
+auto [train, val] = random_split(data, {0.8, 0.2}, 42);
+auto [train2, val2] = random_split(data, {0.8, 0.2}, 42);
+// train.indices() == train2.indices()
+```
+
+`Subset` veriyi kopyalamaz; yalnızca indeks listesi seed'e bağlıdır.
+
+## Sampler seed'i
+
+`RandomSampler` doğrudan kullanıldığında:
+
+```cpp
+RandomSampler s(n, seed);
+s.set_seed(new_seed);
+```
+
+`DataLoader` içinde `shuffle` + `seed` bu sampler'ı besler.
+
+## Philox (CUDA)
+
+GPU tarafında augmentation veya prep kernel'leri counter-based `Philox4x32` ile hizalanabilir; `(key, counter)` eşleşmesi CPU referansı ile aynı uint32 quad çıktısını verir.
+
+## Pratik kontrol listesi
+
+1. `DataLoaderOptions::seed` ve split seed'lerini sabitleyin
+2. Epoch başına `reset_epoch` veya artan seed kullanın
+3. `num_workers` değişiminin batch içeriğini değiştirmediğini test edin (`loader.size()` ve ilk batch shape)
+4. Global `std::random_device` ile karıştırmayın — NexusData yolları `PCG32` kullanır
+
+## Sınırlar
+
+Determinism, **NexusData'nın kontrol ettiği** indeks ve RNG akışını kapsar. Harici thread'lerin `Dataset::get` içinde rastgele davranması, farklı CSV satır sırası veya non-deterministic CUDA kernel'ler (NexusData dışı) sonuçları bozabilir.
+
+## İlgili sayfalar
+
+- [Sampler](/docs/concepts/sampler)
+- [DataLoader](/docs/concepts/dataloader)

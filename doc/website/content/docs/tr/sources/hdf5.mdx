@@ -1,0 +1,46 @@
+---
+title: HDF5
+description: Diskteki dizi dataset'leri için NEXUSDATA_WITH_HDF5 arkasındaki Hdf5Dataset.
+status: stable
+order: 125
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## CMake özellik bayrağı
+
+```bash
+cmake -DNEXUSDATA_WITH_HDF5=ON ...
+```
+
+Varsayılan kapalı derlemeler türü gösterir ancak construction'da throw eder:
+
+```cpp
+if (hdf5_support_enabled()) {
+  Hdf5Options opt;
+  opt.dataset_path = "/data";
+  opt.label_path = "/labels";  // boş => yalnızca indeks etiketi
+
+  Hdf5Dataset h5("file.h5", opt);
+}
+```
+
+<Callout tone="warning" title="NEXUSDATA_WITH_HDF5">
+Parquet/SQLite gibi taşınabilir kod yollarında `hdf5_support_enabled()` ile kontrol edin.
+</Callout>
+
+## Hdf5Options
+
+| Alan | Varsayılan | Anlam |
+| --- | --- | --- |
+| `dataset_path` | `"/data"` | Feature dizisinin HDF5 yolu |
+| `label_path` | boş | Ayrı etiket dataset'i; boşsa sample indeksi |
+
+Backend bağlıyken map-style `size()` / `get()` diğer tensor dataset'leriyle uyumludur.
+
+## İlgili
+
+- [NumPy](/docs/sources/numpy)
+- [Parquet](/docs/sources/parquet)
+- [Kurulum](/docs/getting-started/installation)

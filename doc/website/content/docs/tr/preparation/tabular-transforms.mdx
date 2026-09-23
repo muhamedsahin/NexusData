@@ -1,0 +1,20 @@
+---
+title: Tablo transform'ları
+description: Öznitelik vektörleri için Clip, Log1p, Standardize ve MinMax tarzı ölçekleme.
+status: stable
+order: 30
+locale: tr
+section: preparation
+since: "1.0"
+---
+
+`nexusdata/pipeline/tabular.hpp` — `Sample.input` üzerinde çalışır.
+
+| Sınıf | Davranış |
+| --- | --- |
+| `ClipTransform` | \[min, max\] kırpma |
+| `Log1pTransform` | Eleman bazlı `log1p` |
+| `StandardizeTransform` | `(x - mean) / scale` |
+| `MinMaxTransform` | Fitted min/max ile ölçekleme |
+
+İstatistik gerektiren adımlar için önce [Ön işleme](/docs/preparation/preprocessing) ile fit edin, sabitleri bu transform'lara aktarın.

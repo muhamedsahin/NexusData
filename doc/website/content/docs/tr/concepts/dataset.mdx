@@ -1,0 +1,103 @@
+---
+title: Dataset
+description: Map-style Dataset arayüzü, Sample, CSVDataset ve bileşim (Subset, split).
+status: in-development
+order: 45
+locale: tr
+section: concepts
+---
+
+## Map-style Dataset
+
+NexusData v1.0'da ana erişim modeli **map-style**'dır: sabit boyutlu bir koleksiyon ve rastgele erişim.
+
+```cpp
+class Dataset {
+public:
+  virtual std::size_t size() const = 0;
+  virtual Sample get(std::size_t index) const = 0;
+};
+```
+
+| Kural | Açıklama |
+| --- | --- |
+| Shuffle yok | Karıştırma `Dataset` içinde yapılmaz; `Sampler` / `DataLoader` sorumludur |
+| `get(i)` | Tek supervised `Sample` (`input` + `label` `NDArray`) |
+| Yaşam süresi | `DatasetPtr` / `DatasetConstPtr` ile paylaşımlı sahiplik önerilir |
+
+## Sample
+
+```cpp
+struct Sample {
+  NDArray input;
+  NDArray label;
+};
+```
+
+Batch collate, sample vektörünü eksen 0 boyunca yığarak `Batch` üretir (varsayılan `collate_stack`).
+
+## CSVDataset örneği
+
+Tabular CSV/TSV için tipik giriş noktası:
+
+```cpp
+CSVOptions opt;
+opt.label_column = "target";
+opt.use_mmap = true;       // büyük dosyalar için önerilir
+opt.num_threads = 0;       // 0 = donanım eşzamanlılığı (mmap yolunda)
+opt.feature_dtype = DType::Float32;
+
+CSVDataset train("data/train.csv", opt);
+std::size_t n = train.size();
+Sample s = train.get(0);
+// train.features() ve train.labels() tüm tabloyu NDArray olarak da verir
+```
+
+| `CSVOptions` | Etki |
+| --- | --- |
+| `delimiter` | `,` veya `\t` (TSV) |
+| `has_header` | İlk satır sütun adları |
+| `na_values` | Eksik değer token'ları |
+| `error_policy` | `Throw` veya `Skip` |
+| `use_mmap` | Dosyayı `MappedFile` ile okuma |
+
+Yüklemeden sonra `CSVDataset` salt okunurdur; eşzamanlı `get()` güvenlidir.
+
+## Bileşim ve bölme
+
+| API | Dönüş | Not |
+| --- | --- | --- |
+| `random_split(ds, {0.8, 0.2}, seed)` | `pair<Subset, Subset>` | İndeks permütasyonu; veri kopyası yok |
+| `stratified_split` | `pair<Subset, Subset>` | Sınıf oranlarını korur |
+| `k_fold` / `stratified_k_fold` | `vector<Fold>` | Çapraz doğrulama |
+| `train_val_test_split` | `tuple<Subset, Subset, Subset>` | Üç yollu |
+| `time_series_split` | `vector<Fold>` | Zaman sıralı; contiguous test blokları |
+
+```cpp
+auto base = std::make_shared<CSVDataset>("all.csv");
+auto [tr, va] = random_split(base, 0.8, 0.2, 42);
+
+Subset view = tr;  // parent shared_ptr tutulur — dangling yok
+```
+
+## Subset
+
+`Subset`, parent `DatasetConstPtr` ve indeks listesi tutar. `get(k)` → `parent->get(indices[k])`.
+
+## Diğer Dataset türleri (v1.0 ailesi)
+
+Header ağacında Image folder, JSONL, NPY, MNIST/CIFAR, Parquet/SQLite/HDF5 (CMake bayraklarına bağlı) ve `MapDataset` / `CachedDataset` gibi sarmalayıcılar bulunur. Hepsi aynı `size` / `get` sözleşmesini uygular.
+
+## DataLoader'a bağlama
+
+```cpp
+DataLoader loader(tr, {.batch_size = 64, .shuffle = true, .seed = 1});
+```
+
+`DataLoader` constructor'ı `DatasetConstPtr` alır; geçici bir `CSVDataset` verirseniz içeride `shared_ptr`'a sarılır.
+
+## İlgili sayfalar
+
+- [Sampler](/docs/concepts/sampler)
+- [DataLoader](/docs/concepts/dataloader)
+- [Bellek sahipliği](/docs/concepts/memory-ownership)

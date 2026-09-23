@@ -1,0 +1,25 @@
+---
+title: Ön işleme (fit / transform)
+description: Sklearn tarzı Transformer API — scaler, encoder, imputer, normalizer, binarizer.
+status: stable
+order: 40
+locale: tr
+section: preparation
+since: "1.0"
+---
+
+`Transformer`, tabular **`[N, F]`** `NDArray` üzerinde çalışır: `fit` → `transform` → `save`/`load`.
+
+```cpp
+StandardScaler scaler(true, true);
+scaler.fit(train_X);
+NDArray Xn = scaler.transform(val_X);
+```
+
+| Sınıf | Not |
+| --- | --- |
+| `StandardScaler` / `MinMaxScaler` / `RobustScaler` / `MaxAbsScaler` | `scaler.hpp` |
+| `LabelEncoder` / `OneHotEncoder` / `OrdinalEncoder` | `encoder.hpp` |
+| `Imputer` / `Binarizer` / `Normalizer` | `imputer.hpp` |
+
+**Sızıntı kuralı:** Yalnızca eğitim katlarında fit edin; çıkarımda aynı pipeline dosyasını yükleyin.

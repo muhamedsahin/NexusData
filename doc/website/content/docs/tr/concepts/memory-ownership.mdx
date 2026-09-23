@@ -1,0 +1,96 @@
+---
+title: Bellek sahipliği
+description: NDArray paylaşımlı depolama, Subset/DatasetPtr, mmap, pin ve cihaz buffer'ları.
+status: in-development
+order: 65
+locale: tr
+section: concepts
+---
+
+## Genel ilke
+
+NexusData veriyi **hazırlar ve taşır**; eğitim matematiği yapmaz. Bellek modeli, gereksiz kopyayı azaltmak ve adapter'larla güvenli paylaşım için reference-counted depolama kullanır.
+
+## NDArray sahipliği
+
+```cpp
+// Header özeti:
+// Ownership: storage is reference-counted (shared_ptr).
+// Copy/assignment are shallow. Use clone() for deep copy.
+```
+
+| İşlem | Etki |
+| --- | --- |
+| Kopya / atama | Aynı `AlignedBuffer`'ı paylaşır |
+| `clone()` | Yeni buffer, byte kopyası |
+| `from_blob` | Harici pointer; NexusData sahiplenmez |
+| `from_shared` | Mevcut buffer + adapter yaşam döngüsü |
+| `shared_storage()` | DLPack / MatrixFlash için handle |
+
+Değişmez `NDArray` üzerinde eşzamanlı okuma güvenlidir; bir thread `reshape` veya yazıcı erişimi yaparken diğerleri okumamalıdır.
+
+## Dataset ve Subset
+
+```cpp
+DatasetConstPtr parent = std::make_shared<CSVDataset>("big.csv");
+Subset train(parent, indices);
+```
+
+`Subset` parent için `shared_ptr` tutar — parent yok olmaz. `random_split` dönüş değerleri `Subset`'tir; satır verisinin derin kopyası yapılmaz.
+
+| Bileşen | Sahiplik |
+| --- | --- |
+| `CSVDataset` | Yükleme sonrası `InMemoryDataset` + `NDArray` feature/label tabloları |
+| `get(i)` | Genelde tablo içinde slice veya view; yeni allocation minimal |
+| `DataLoader` | `DatasetConstPtr` kopyası epoch boyunca dataset'i yaşatır |
+
+Uzun ömürlü grafiklerde dataset'i `shared_ptr` ile oluşturup split/view'ları ona bağlayın.
+
+## mmap (CSVDataset)
+
+`CSVOptions::use_mmap = true` dosyayı `MappedFile` ile salt okunur eşler:
+
+```cpp
+MappedFile map(path);
+const std::uint8_t* bytes = map.data();
+```
+
+Windows'ta Win32 mapping; POSIX'te `mmap`. Parse sonrası sayısal veri yine bellekte `NDArray` tablolarına alınır — mmap ağırlıklı olarak **okuma ve parse** aşamasını hızlandırır.
+
+## Batch ve collate
+
+`collate_stack` yeni batch tensor'ları allocate eder; sample buffer'larından okuyup yığar. Worker prefetch batch'leri kuyrukta tutar; tüketilene kadar yaşar.
+
+`pin_memory = true` host batch depolamasını page-locked yapar — sahiplik hâlâ `NDArray` / `AlignedBuffer` üzerindedir.
+
+## Cihaz belleği
+
+| API | Davranış |
+| --- | --- |
+| `NDArray::cuda()` | H2D kopya (CUDA build) |
+| `NDArray::cpu()` | D2H veya host'ta no-op |
+| `device()` | `Device::host()` veya CUDA index |
+
+CUDA tensor'da typed host `data<T>()` çağrısı reddedilir; kernel veya `cpu()` kullanın.
+
+## Adapter yaşam döngüsü
+
+DLPack tensor export/import sırasında underlying buffer NexusData `shared_ptr` ile hizalanmalıdır. Export edilen pointer geçerliliğini kaybetmemesi için kaynak `NDArray` veya `Dataset` scope'ta kalmalıdır.
+
+## Thread pool ve worker'lar
+
+`num_workers > 0` iken sample fetch ve collate worker'larda çalışır; sıralı prefetch kuyruğu batch sırasını korur. Destructor tüm thread'leri join eder — yarım kalmış iterate sırasında loader'ı bırakmayın.
+
+## Ne zaman clone()?
+
+- Batch'i async pipeline'da mutasyona uğrayacaksanız
+- Adapter harici kod buffer'ı yazacaksa
+- Shape değişimi contiguous olmayan düzeni gerektiriyorsa
+
+View yeterliyse `Subset` ve sığ `NDArray` kopyası tercih edilir.
+
+## İlgili sayfalar
+
+- [NDArray](/docs/concepts/ndarray)
+- [Dataset](/docs/concepts/dataset)
+- [DataLoader](/docs/concepts/dataloader)

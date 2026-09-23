@@ -1,0 +1,52 @@
+---
+title: Quick start
+description: Five-minute path from CSVDataset to DataLoader batches with random_split.
+status: stable
+order: 30
+locale: en
+section: getting-started
+since: "1.0"
+---
+
+## Goal
+
+```cpp
+#include "nexusdata/nexusdata.hpp"
+using namespace nexusdata;
+
+CSVOptions opt;
+opt.label_column = "target";
+CSVDataset data("train.csv", opt);
+
+auto [train, val] = random_split(data, {0.8, 0.2}, /*seed=*/42);
+
+DataLoaderOptions lo;
+lo.batch_size = 32;
+lo.shuffle = true;
+lo.drop_last = true;
+lo.seed = 42;
+
+DataLoader loader(train, lo);
+for (const Batch& b : loader) {
+  // b.inputs [B, F], b.labels [B]
+}
+```
+
+## Line by line
+
+1. Configure `CSVOptions` (label, dtypes, mmap, threads)
+2. Construct `CSVDataset` — read-only after load
+3. `random_split` → `Subset` views (no row deep-copy)
+4. Configure `DataLoaderOptions` and iterate `Batch`es
+
+## Guarantees to expect
+
+- Same seed → same index order, **independent of `num_workers`**
+- `drop_last` drops incomplete final batch
+- Prefer `DatasetPtr` when composing long-lived graphs
+
+## Next
+
+- [Project structure](/docs/getting-started/project-structure)
+- [DataLoader](/docs/concepts/dataloader)
+- [CSV source](/docs/sources/csv)

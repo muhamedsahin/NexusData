@@ -1,0 +1,85 @@
+---
+title: NDArray, DType, Shape
+description: Memory model of NexusData's tensor carrier — shape, dtype, clone vs shallow copy, host/device.
+status: stable
+order: 40
+locale: en
+section: concepts
+since: "1.0"
+---
+
+## Role
+
+`NDArray` is a **data carrier**: shape + dtype + memory. It does **not** run matmul or elementwise kernels.
+
+```cpp
+#include "nexusdata/core/ndarray.hpp"
+using namespace nexusdata;
+
+NDArray a(Shape{32, 128}, DType::Float32);           // host
+NDArray b = NDArray::pinned(Shape{32, 128}, DType::Float32); // page-locked when CUDA available
+```
+
+## Shape & DType
+
+| Type | Responsibility |
+| --- | --- |
+| `Shape` | Rank + extents; helpers for numel / broadcasting checks |
+| `DType` | Element type (`Float32`, `Float64`, `Int64`, `UInt8`, …) |
+| `Device` | Host or CUDA device index |
+
+## Shape explorer
+
+<ShapeExplorer />
+
+```cpp
+a.shape();   // Shape
+a.dtype();   // DType
+a.numel();   // product of extents
+a.nbytes();  // numel * size_of(dtype)
+a.device();  // Device
+```
+
+## Ownership
+
+- Storage is **reference-counted** (`shared_ptr`-backed)
+- Copy / assignment are **shallow**
+- `clone()` deep-copies bytes
+- `from_blob` / `from_shared` wrap existing buffers (adapters, DLPack)
+
+```cpp
+NDArray view = a;          // shares storage
+NDArray deep = a.clone();  // independent buffer
+a.reshape(Shape{16, 256}); // in-place metadata when contiguous layout allows
+```
+
+## Stack / concat
+
+```cpp
+NDArray batched = NDArray::stack(arrays);          // new axis 0
+NDArray joined  = NDArray::concat(arrays, /*axis=*/0);
+```
+
+## Host ↔ device
+
+```cpp
+NDArray on_cpu = gpu_tensor.cpu();   // synchronizing copy if needed
+NDArray on_gpu = host_tensor.cuda(/*index=*/0); // requires CUDA build
+```
+
+## Errors
+
+| Situation | Exception |
+| --- | --- |
+| Bad reshape | `ShapeError` |
+| Typed `data<T>()` mismatch | type check failure / error |
+| Invalid args | `InvalidArgumentError` |
+
+<Callout tone="tip" title="Thread-safety">
+Concurrent **reads** of an immutable `NDArray` are safe. Do not mutate storage from multiple writers.
+</Callout>
+
+## See also
+
+- [Memory & ownership](/docs/concepts/memory-ownership)
+- [Batch & collate](/docs/concepts/batch-collate)

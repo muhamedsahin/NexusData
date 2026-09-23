@@ -1,0 +1,45 @@
+---
+title: WebDataset (tar shard)
+description: Anahtar önekiyle görüntü ve cls üyelerini gruplayan WebDataset tar okuyucusu.
+status: stable
+order: 120
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## Düzen
+
+**WebDataset** bir **ustar** tar shard okur (bugün tek dosya yolu). Üyeler anahtar önekine göre gruplanır (uzantısız dosya adı):
+
+```
+sample000.jpg
+sample000.cls   # isteğe bağlı ASCII tamsayı etiket
+sample001.png
+```
+
+```cpp
+WebDatasetOptions opt;
+opt.image_decode.channels = ImageChannels::RGB;
+opt.image_suffix = ".jpg";
+
+WebDataset wds("shard.tar", opt);
+Sample s = wds.get(0);
+```
+
+| Üye | Rol |
+| --- | --- |
+| `*.jpg` / `*.png` | `ImageDecodeOptions` ile HWC UInt8 decode |
+| `*.cls` | İsteğe bağlı tamsayı etiket dosyası |
+
+`.cls` yoksa etiket indekse düşebilir — shard sözleşmenizi testlerde doğrulayın.
+
+## Uygulama
+
+- Açılışta tar indeksi; payload **mmap** (`MappedFile`) ile
+- `get()` sırasında görüntü baytları decode (yeni tensor allocate)
+
+## İlgili
+
+- [Görüntüler](/docs/sources/image)
+- [Memory-mapped binary](/docs/sources/mmap-binary)

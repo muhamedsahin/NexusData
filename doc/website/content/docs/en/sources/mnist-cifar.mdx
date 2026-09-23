@@ -1,0 +1,26 @@
+---
+title: MNIST / CIFAR
+description: Built-in MNIST and CIFAR dataset readers.
+status: stable
+order: 85
+locale: en
+section: sources
+since: "1.0"
+---
+
+```cpp
+#include "nexusdata/dataset/mnist.hpp"
+#include "nexusdata/dataset/cifar.hpp"
+
+MnistDataset mnist("data/mnist", /*train=*/true);
+CifarDataset cifar("data/cifar-10", /*train=*/true);
+```
+
+## Notes
+
+- Expect standard binary layouts from the official distributions
+- Returns image tensors + labels suitable for classification loaders
+
+## See also
+
+- [ImageFolder](/docs/sources/image)

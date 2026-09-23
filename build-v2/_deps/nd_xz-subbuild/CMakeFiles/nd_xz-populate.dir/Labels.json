@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/CMakeFiles/nd_xz-populate"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/CMakeFiles/nd_xz-populate.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/CMakeFiles/nd_xz-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-build.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-download.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-install.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-test.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"nd_xz-populate"
+		],
+		"name" : "nd_xz-populate"
+	}
+}

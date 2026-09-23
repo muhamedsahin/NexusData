@@ -1,0 +1,14 @@
+# Target labels
+ nd_xz-populate
+# Source files and their labels
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/CMakeFiles/nd_xz-populate
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/CMakeFiles/nd_xz-populate.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/CMakeFiles/nd_xz-populate-complete.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-build.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-configure.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-download.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-install.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-mkdir.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-patch.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-test.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_xz-subbuild/nd_xz-populate-prefix/src/nd_xz-populate-stamp/nd_xz-populate-update.rule

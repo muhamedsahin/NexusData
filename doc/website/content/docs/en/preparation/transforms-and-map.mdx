@@ -1,0 +1,51 @@
+---
+title: Transforms & MapDataset
+description: Sample-level Transform, Compose, RandomApply, and lazy MapDataset wrapping.
+status: stable
+order: 10
+locale: en
+section: preparation
+since: "1.0"
+---
+
+## Transform contract
+
+A `Transform` takes a `Sample` and returns a new `Sample`. Deterministic unless `is_random()` is true and seeded.
+
+```cpp
+#include "nexusdata/pipeline/transform.hpp"
+#include "nexusdata/dataset/map.hpp"
+
+auto compose = std::make_shared<Compose>(std::initializer_list<TransformConstPtr>{
+    std::make_shared<Resize>(224, 224),
+    std::make_shared<ToTensor>(),
+});
+MapDataset mapped(dataset, compose);
+```
+
+## Building blocks
+
+| Type | Role |
+| --- | --- |
+| `Compose` | Apply transforms in order |
+| `RandomApply` | Apply child with probability `p` |
+| Custom `Transform` subclass | Your own `apply()` |
+| `MapDataset` / `map()` | Lazy `get(i)` → `transform->apply(parent->get(i))` |
+
+## Seeding
+
+Call `set_seed` on random transforms (or on `Compose`, which derives per-child streams). Prefer non-const shared ownership when children must re-seed.
+
+## Thread-safety
+
+Immutable after construction except RNG state on random transforms — treat random transforms as **single-threaded** per instance, or give each worker its own copy.
+
+## Pipeline builder
+
+<PipelineBuilder />
+
+## See also
+
+- [Image transforms](/docs/preparation/image-transforms)
+- [Tabular transforms](/docs/preparation/tabular-transforms)
+- [Pipeline persist](/docs/preparation/pipeline-persist)

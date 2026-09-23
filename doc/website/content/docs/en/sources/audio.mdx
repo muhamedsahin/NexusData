@@ -1,0 +1,24 @@
+---
+title: Audio (WAV)
+description: WavDataset for PCM WAV samples.
+status: stable
+order: 115
+locale: en
+section: sources
+since: "1.0"
+---
+
+```cpp
+#include "nexusdata/dataset/audio.hpp"
+WavOptions opt;
+WavDataset ds("wavs/", opt);
+```
+
+## Notes
+
+- Inspect `WavInfo` for rate/channels
+- Downstream transforms handle resampling/feature extraction
+
+## See also
+
+- [Dataset](/docs/concepts/dataset)

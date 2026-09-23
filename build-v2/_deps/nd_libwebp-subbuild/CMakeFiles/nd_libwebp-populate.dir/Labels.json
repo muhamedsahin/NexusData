@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/nd_libwebp-populate"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/nd_libwebp-populate.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/nd_libwebp-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-build.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-download.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-install.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-test.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"nd_libwebp-populate"
+		],
+		"name" : "nd_libwebp-populate"
+	}
+}

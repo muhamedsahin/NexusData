@@ -1,0 +1,26 @@
+---
+title: CMake options
+description: Feature flags for CUDA, SQLite, Arrow/Parquet, HDF5, Python, AVX2, benches, and fuzz.
+status: stable
+order: 20
+locale: en
+section: reference
+since: "1.0"
+---
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `NEXUSDATA_BUILD_TESTS` | ON | Unit tests |
+| `NEXUSDATA_BUILD_EXAMPLES` | ON | Examples |
+| `NEXUSDATA_BUILD_BENCH` | ON | `bench_suite` |
+| `NEXUSDATA_BUILD_FUZZ` | ON | Fuzz smoke targets |
+| `NEXUSDATA_ENABLE_AVX2` | ON | Compile AVX2 scan kernels |
+| `NEXUSDATA_WITH_CUDA` | OFF | CUDA data-prep backend |
+| `NEXUSDATA_WITH_SQLITE` | OFF | SqliteDataset |
+| `NEXUSDATA_WITH_ARROW` | OFF | Parquet/Arrow |
+| `NEXUSDATA_WITH_HDF5` | OFF | HDF5 dataset |
+| `NEXUSDATA_WITH_PYTHON` | OFF | pybind11 module |
+| `NEXUSDATA_WITH_MATRIXFLASH` | OFF | Declare Flash SDK link |
+| `NEXUSDATA_WARNINGS_AS_ERRORS` | OFF | `-Werror` style |
+
+Default build aims for **zero required third-party deps**.

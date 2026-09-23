@@ -1,0 +1,28 @@
+---
+title: Benchmarking
+description: How to build and run the microbenchmark harness — measure on your hardware.
+status: stable
+order: 50
+locale: en
+section: performance
+since: "1.0"
+---
+
+## Build
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DNEXUSDATA_BUILD_BENCH=ON
+cmake --build build --target bench_suite
+```
+
+## Harness
+
+`nexusdata/bench/harness.hpp` provides `Timer`, `time_best`, and `print_result` helpers used by `bench_suite`.
+
+## Measured run
+
+The numbers from 23 Sep 2026, including the machine, the commands, and what was not measured, are on [Benchmarks](/docs/performance/benchmarks). Those charts compare NexusData’s own scalar loops with the AVX2 kernels. They do not include other libraries.
+
+## Honesty
+
+A published figure is the best of a few timed calls after one warmup on one CPU. Re-run before citing it. `stddev` in the JSON is 0 because the harness keeps only the best time.

@@ -1,0 +1,59 @@
+---
+title: Metin
+description: TextLineDataset, akışlı TextLineIterable ve demo tokenizer'lar.
+status: stable
+order: 110
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## TextLineDataset (map-style)
+
+Tüm satırları belleğe yükler (**TextDataset** akışı için map-style giriş noktası):
+
+```cpp
+TextOptions opt;
+opt.max_length = 512;   // 0 = sınırsız
+opt.skip_empty = true;
+
+TextLineDataset lines("corpus.txt", opt);
+Sample s = lines.get(0);
+// input: UInt8 UTF-8 baytları [L]
+// label: demo denetimi için satır indeksi (skaler)
+```
+
+| Alan | Etki |
+| --- | --- |
+| `max_length` | Uzun satırları kes |
+| `skip_empty` | Yüklemede boş satırları at |
+
+Değişken uzunlukta batch'ler için [collate_pad_sequence](/docs/concepts/batch-collate) ile eşleştirin.
+
+## TextLineIterable (streaming)
+
+Tüm dosyayı **yüklemez**:
+
+```cpp
+TextLineIterable stream("huge.log", opt);
+auto it = stream.make_iterator();
+while (it->has_next()) {
+  Sample s = it->next();
+}
+```
+
+ETL veya özel eğitim döngüleri için kullanın. Map-style `DataLoader` `Dataset` bekler — standart batch için sarmalayın veya buffer'layın.
+
+## Tokenizer kancası
+
+```cpp
+WhitespaceHashTokenizer tok(/*vocab_size=*/10000);
+auto ids = tok.encode("hello world");
+```
+
+`Tokenizer` soyut arayüzdür (model ağırlığı yok). BPE/SentencePiece sarmalayıcınızı alt sınıfla takın.
+
+## İlgili
+
+- [JSON Lines](/docs/sources/json)
+- [Batch ve collate](/docs/concepts/batch-collate)

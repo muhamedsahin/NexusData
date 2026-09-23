@@ -1,0 +1,9 @@
+{
+  "name": "nexusdata",
+  "version-string": "1.0.0",
+  "description": "High-performance C++20 AI data loading and preparation library",
+  "homepage": "https://github.com/nexus-ai/nexusdata",
+  "license": "Apache-2.0",
+  "supports": "!uwp",
+  "dependencies": []
+}

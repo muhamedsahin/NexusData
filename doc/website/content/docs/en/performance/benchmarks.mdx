@@ -1,0 +1,150 @@
+---
+title: Benchmarks
+description: Measurements from bench_suite and bench_phase1 on 23 Sep 2026. Internal baselines only.
+status: stable
+order: 55
+locale: en
+section: performance
+since: "1.0"
+---
+
+These numbers were produced on one laptop by the programs in `bench/`. Each value is the **best** time after one warmup, printed by `nexusdata::bench::time_best`. Standard deviation was not recorded, so the charts store `stddev: 0`. A best-of-N figure is optimistic relative to a mean. Re-run before you cite it.
+
+Nothing here is pandas, Arrow, PyTorch, or any other project. The “v1” bars are the old scalar loops, copied into `bench/bench_phase1.cpp`, running in the same process as the kernels that replaced them. That is a fair comparison of two code paths. It is not a leaderboard.
+
+## Machine
+
+| | |
+| --- | --- |
+| Date | 2026-09-23 |
+| CPU | AMD Ryzen 7 5800H (8 cores, 16 threads), AVX2 and SSE2 reported by `cpu_features()` |
+| RAM | 32 GB (Win32 reported 31.9 GiB) |
+| GPU | NVIDIA GeForce RTX 3070 Laptop GPU is installed. `calibrate_auto_device_policy` printed `cuda=0`. No result below uses the GPU |
+| OS | Windows NT 10.0.26200 |
+| Compiler | GCC 15.2.0, MinGW from CLion 2026.2.1 |
+| Flags | `-O3 -DNDEBUG`, `CMAKE_BUILD_TYPE=Release` |
+| Tree | `git rev-parse --short HEAD` printed `9172965` in this working tree |
+
+Host memcpy calibration from `bench_suite` was **12.96 GiB/s**. The auto-device image threshold printed as 16777216 bytes and the tabular threshold as 33554432 bytes. Those thresholds are a policy on this CPU, not a throughput.
+
+## How to reproduce
+
+From the repository root, with the MinGW `bin` directory on `PATH` so the process can load `libstdc++`:
+
+```bash
+cmake --build build-v2 --config Release --target bench_suite
+cmake --build build-v2 --config Release --target bench_phase1
+./build-v2/bench_suite.exe
+./build-v2/bench_phase1.exe
+```
+
+`bench_phase1` is the comparison suite. `bench_suite` is the smaller scan, CSV-load, collate, and in-memory loader run. A fresh configure is:
+
+```bash
+cmake -S . -B build-v2 -DCMAKE_BUILD_TYPE=Release -DNEXUSDATA_BUILD_BENCH=ON
+```
+
+The charts on this page are loaded from `data/benchmarks/measured-2026-09-23.json`. The homepage shows the first series in that file (standardize).
+
+<BenchmarkSuite />
+
+## Standardize, 32 MiB
+
+`float32` matrix `[262144, 32]`. Best of 5.
+
+| Path | Best seconds | GiB/s | Against the scalar loop |
+| --- | --- | --- | --- |
+| v1 `as_double` / `set_double` | 0.085465 | 0.37 | 1× |
+| v2 scalar kernel | 0.005737 | 5.45 | 14.9× |
+| v2 AVX2 | 0.003620 | 8.63 | 23.6× |
+
+The element-wise formula is `(x - mean) / scale` with a per-column mean and scale. The v1 loop calls the generic double accessors once per element, which is why it sits under 0.4 GiB/s on a machine whose memcpy calibration is 13 GiB/s. The AVX2 kernel is in the same neighborhood as that memcpy number. It is not faster than memory.
+
+## Clip, 8,388,608 floats
+
+Best of 5. Working set is 32 MiB.
+
+| Path | Best seconds | GiB/s | Against the scalar loop |
+| --- | --- | --- | --- |
+| v1 `as_double` loop | 0.081896 | 0.38 | 1× |
+| v2 `simd::clip_inplace` | 0.002120 | 14.74 | 38.6× |
+
+14.74 GiB/s is slightly above the 12.96 GiB/s memcpy calibration. Both are single-buffer best-of-N numbers. Treat the gap as noise around memory bandwidth, not as clip being faster than a copy in general.
+
+## Four tabular steps, batch `[65536, 64]`
+
+Clip to `[0, 8]`, `log1p`, standardize, min-max. Best of 3. Input is about 16 MiB.
+
+| Path | Best seconds | GiB/s | Against v1 |
+| --- | --- | --- | --- |
+| v1, four allocating scalar passes | 0.323145 | 0.05 | 1× |
+| v2 unfused, four SIMD passes (`Compose` with `fuse=false`) | 0.024501 | 0.64 | 13.2× |
+| v2 fused, one multi-threaded pass (default `Compose`) | 0.013560 | 1.15 | 23.8× |
+
+Fusion against the unfused SIMD pipeline is 1.81× on this shape (0.024501 / 0.013560). The fused pass is the one `DatasetChain::map` builds when you stack `ClipTransform`, `Log1pTransform`, `StandardizeTransform`, and `MinMaxTransform`. See [Operators](/docs/examples/operators).
+
+The GiB/s column divides the **input** size by the time. Four passes touch more bytes than that. Compare the seconds when you care about the pipeline, not the GiB/s label.
+
+## Images already in memory
+
+32 images, each `uint8` HWC `[480, 640, 3]`, then `Resize(224, 224)`, `ToTensor`, `NormalizeImage`. Best of 3. No file decode. JPEG time is not in this table.
+
+| Path | Best seconds | Images/s | Against v1 |
+| --- | --- | --- | --- |
+| v1 scalar resize, CHW convert, normalize | 0.237188 | 134.9 | 1× |
+| v2 unfused `Compose` | 0.038320 | 835.1 | 6.2× |
+| v2 fused resize into CHW | 0.024608 | 1300.4 | 9.6× |
+
+A folder of JPEGs will be slower. Decode dominates once the pixels are not already hot in RAM. This row tells you the transform chain, not `ImageFolder`.
+
+## Newline scan, 32 MiB
+
+`bench_suite`. Best of 3. A newline every 64 bytes. The buffer contains no `"` byte, so `find_csv_record_starts` takes the SIMD newline path instead of the quote-aware scalar walk. See [CSV / TSV](/docs/sources/csv).
+
+| Call | Best seconds | GiB/s |
+| --- | --- | --- |
+| `find_bytes_scalar` | 0.007943 | 3.93 |
+| `find_bytes` (dispatches to AVX2) | 0.003608 | 8.66 |
+| `find_csv_record_starts` | 0.037447 | 0.83 |
+
+Recording start offsets is most of the gap between `find_bytes` and `find_csv_record_starts`. A file that contains a quote byte leaves this path and scans quotes scalarly. That case was not timed here.
+
+## CSV load of 20,000 × 16
+
+`bench_suite` writes `bench_v08.csv` (header, 16 feature columns, 1 label, 20,000 data rows) and times `CSVDataset` construction. Best of 3: **1.637337 s**. The harness printed `0.6 ops/s` because it passed `ops = 1`. That figure is `1 / seconds`. It is not rows per second. Rows per second on this run are about `20000 / 1.637337 ≈ 12,200`.
+
+The file is deleted after the measurement. This includes parse, numeric conversion, and the allocation of the in-memory tables. It is one size on one disk. Do not scale it linearly to a multi-gigabyte file without measuring that file.
+
+## Collate of one tiny batch
+
+`collate_stack` of 64 samples, each input length 128 `float32`. Best of 50: **0.000003 s**, printed **9.25 GiB/s** on `64 * 128 * 4` bytes (32 KiB). A 32 KiB copy’s “GiB/s” is a timer-resolution number. It says collate of this shape is noise next to a CSV parse. It does not say collate sustains 9 GiB/s on large batches.
+
+## DataLoader
+
+Two different datasets. Do not mix them up.
+
+**CPU-bound `get`.** `bench_phase1` uses 4096 samples. Each `get` writes 256 floats and runs 6000 square roots, standing in for decode. Batch size 64. Best of 5.
+
+| Workers | Best seconds | Samples/s | Against 0 workers |
+| --- | --- | --- | --- |
+| 0 | 0.133031 | 30,789.9 | 1× |
+| 1 | 0.135839 | 30,153.3 | 0.98× |
+| 2 | 0.067375 | 60,794.0 | 1.97× |
+| 4 | 0.034576 | 118,464.4 | 3.85× |
+| 8 | 0.018597 | 220,255.3 | 7.15× |
+
+One worker is slightly slower than the synchronous loop. The thread is started and the work is the same. Two or more workers overlap the square-root loop. Eight workers on eight cores is 7.15×, not 8×.
+
+**Already-materialized floats.** `bench_suite` loads 4096 samples of 32 floats from an `InMemoryDataset` and only collates. Best of 3: synchronous **0.001737 s** (0.28 GiB/s on `4096 * 32 * 4` bytes), two workers **0.001884 s**. Workers made this one slower. There is nothing to overlap except a copy, and the queue costs more than the copy.
+
+Set `num_workers` when `get` decodes, parses, or otherwise burns CPU. Leave it at 0 when the dataset is already an in-memory numeric table.
+
+## What was not measured
+
+- Another library on the same files.
+- GPU kernels. The binary reported `cuda=0`.
+- A quoted CSV. The newline scan used a buffer with no quote bytes.
+- Disk-cache effects. Best-of-N keeps the fastest run, which is the hot-cache run.
+- `bench_phase3` (Postgres copy payload) and `bench_phase5` (`FunctionDataset`). They were not executed for this page.
+
+Replace `data/benchmarks/measured-2026-09-23.json` when you have a new run. Set `illustrative` to false only together with hardware, date, version, and the command that printed the numbers.

@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "siteName": "MatrixData",
+    "tagline": "Ham veriyi tensöre taşıyan boru hattı",
+    "description": "AI için yüksek performanslı C++20 veri yükleme kütüphanesi — Source → Dataset → Sampler → DataLoader → Batch → NDArray."
+  },
+  "nav": {
+    "home": "Ana sayfa",
+    "docs": "Dokümantasyon",
+    "performance": "Performans",
+    "github": "GitHub",
+    "skipToContent": "İçeriğe atla",
+    "openMenu": "Menüyü aç",
+    "closeMenu": "Menüyü kapat",
+    "primaryNav": "Ana navigasyon"
+  },
+  "locale": {
+    "label": "Dil",
+    "en": "English",
+    "tr": "Türkçe",
+    "switchTo": "{locale} diline geç"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Açık",
+    "dark": "Koyu",
+    "system": "Sistem"
+  },
+  "status": {
+    "stable": "Kararlı",
+    "beta": "Beta",
+    "in-development": "Geliştiriliyor",
+    "planned": "Planlanan",
+    "illustrative": "Örnek veri, gerçek sonuç değildir",
+    "notMeasured": "Henüz ölçülmedi",
+    "designPreview": "Tasarım önizlemesi"
+  },
+  "home": {
+    "title": "MatrixData",
+    "subtitle": "Ham veriyi tensöre taşıyan boru hattı",
+    "ctaStart": "Başla",
+    "ctaDocs": "Dokümantasyon",
+    "ctaExamples": "Örnekler",
+    "lede": "NexusData, dosyaları okuyup satırları bölen, karıştıran ve eğitim döngüne NDArray batch'leri veren bir C++20 kütüphanesidir.",
+    "useTrain": "Eğitim döngüsü — CSV, JSON ve klasördeki görseller, tohumlu ve tekrarlanabilir batch'lere dönüşür.",
+    "useTabular": "Tablo verisi — başlık, eksik değer, clip, log1p, standardize ve min-max.",
+    "useMedia": "Görseller — JPEG, PNG, BMP, TGA ve GIF; resize, crop, flip ve normalize.",
+    "ctaGithub": "GitHub",
+    "statusNote": "Kütüphane ve dokümantasyon sitesi aktif geliştirme aşamasındadır. Özellik rozetleri dürüst durumu yansıtır.",
+    "pipeline": "Source → Dataset → Sampler → DataLoader → Batch → NDArray",
+    "privacyNote": "Ülke başlıkları yalnızca anlık dil kararı için kullanılır; saklanmaz, loglanmaz ve analitiğe gönderilmez.",
+    "ecosystem": "Ekosistem",
+    "scrollHint": "Keşfetmek için kaydır",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı"
+  },
+  "loader": {
+    "aria": "MatrixData deneyimi yükleniyor",
+    "skip": "Atla",
+    "loading": "Yükleniyor…",
+    "waiting": "> başlatılıyor …",
+    "hint": "Atlamak için Esc veya S",
+    "logs": {
+      "mmap": "> mmap assets.bin ... ok",
+      "shaders": "> loading shaders ... ok",
+      "rng": "> seeding rng (seed=42) ... ok",
+      "warmup": "> warming up scene ... ok",
+      "done": "> ready"
+    }
+  },
+  "story": {
+    "sources": {
+      "title": "Her formatı oku",
+      "body": "CSVDataset, JsonDataset ve ImageFolder varsayılan derlemededir. Parquet, SQLite ve HDF5 yalnızca CMake'de o kütüphaneler açılırsa derlenir.",
+      "formats": {
+        "csv": { "label": "CSV / TSV", "hint": "Ayraçlı tablo satırları" },
+        "json": { "label": "JSON / JSONL", "hint": "Yapılı ve satır tabanlı kayıtlar" },
+        "image": { "label": "Image / Folder", "hint": "Decode ve opsiyonel resize" },
+        "parquet": { "label": "Parquet", "hint": "İsteğe bağlı Arrow derlemesi" },
+        "sqlite": { "label": "SQLite", "hint": "İsteğe bağlı SQLite derlemesi" },
+        "npy": { "label": "NumPy npy", "hint": "Dizi dosyaları" }
+      }
+    },
+    "shuffle": {
+      "title": "Dataset, shuffle & seed",
+      "body": "Sampler indeksleri karıştırır — Dataset mutate edilmez. Aynı seed birebir aynı sırayı geri getirir.",
+      "seed": "seed",
+      "note": "Bu görselleştirme referans PCG32 Fisher–Yates'i taklit eder. C++ golden değerleriyle doğrulanana kadar illustrative kalır."
+    },
+    "batch": {
+      "title": "Batch & DataLoader",
+      "body": "İndeksler DataLoader kapısından batch_size gruplarıyla geçer. drop_last ile son eksik batch'i at veya tut."
+    },
+    "gpu": {
+      "title": "Prefetch & GPU",
+      "body": "Batch N tüketilirken N+1 başka buffer'da hazırlanabilir. GPU yalnızca kazandıran prep işlerinde (decode, resize, normalize, collate) kullanılır.",
+      "policy": "GPU yalnızca kazandığı yerde kullanılır; aksi halde kapalı kalır.",
+      "chartEmpty": "CPU/GPU başabaş grafiği: henüz ölçülmedi. Gerçek eğriler data/benchmarks/*.json dosyalarından gelecek."
+    },
+    "ecosystem": {
+      "title": "Tensor olarak teslim",
+      "body": "Batch'ler tüketiciler için NDArray/tensor yüküne dönüşür. MatrixData veri düzlemidir — hesaplama kütüphaneleri ayrı ve opsiyoneldir."
+    },
+    "features": {
+      "title": "Yetenekler",
+      "body": "Dürüst durum rozetleri — hazır olmayan hiçbir şey hazır diye sunulmaz.",
+      "items": {
+        "determinism": {
+          "title": "Determinizm",
+          "body": "Aynı seed, aynı sıra — doğrulanınca thread sayısından bağımsız."
+        },
+        "zerocopy": {
+          "title": "Sıfır kopya görünümler",
+          "body": "Subset ve reshape güvenliyken belleği paylaşır."
+        },
+        "streaming": {
+          "title": "Streaming",
+          "body": "Backpressure'lı iterable kaynaklar (planlanan)."
+        },
+        "preprocessing": {
+          "title": "Preprocessing",
+          "body": "Etiket sızıntısız fit/transform (planlanan)."
+        },
+        "split": {
+          "title": "Split stratejileri",
+          "body": "random_split, stratified ve fold yardımcıları."
+        },
+        "cache": {
+          "title": "Cache",
+          "body": "Geçersizleştirmeli RAM/disk cache (planlanan)."
+        },
+        "formats": {
+          "title": "Çoklu format",
+          "body": "Reader'lar kararlı Dataset arayüzünün arkasında büyür."
+        },
+        "gpu": {
+          "title": "Opsiyonel GPU",
+          "body": "Prep kernel'leri için CUDA — CPU yolu her zaman çalışır."
+        }
+      }
+    },
+    "performance": {
+      "title": "Bu makinede ölçüldü",
+      "body": "Release derleme, 23 Eylül 2026, Ryzen 7 5800H. Çubuklar NexusData’nın kendi skaler döngüsü ile AVX2 çekirdeklerini karşılaştırır. Başka kütüphaneler değildir.",
+      "cta": "Tabloların tamamı"
+    },
+    "code": {
+      "title": "CSV'den DataLoader'a",
+      "hoverHint": "Bu örnekler açık başlık dosyalarıyla aynıdır.",
+      "tabs": {
+        "csv": "CSV",
+        "image": "Image",
+        "gpu": "GPU",
+        "flash": "MatrixFlash"
+      },
+      "snippets": {
+        "csv": "#include \"nexusdata/nexusdata.hpp\"\n\nauto loader = nexusdata::from_csv(\"train.csv\")\n    .shuffle(42)\n    .batches(32)\n    .workers(4)\n    .build();\nfor (const auto& batch : *loader) {\n    const auto& x = batch.inputs; // [B, features]\n    const auto& y = batch.labels;\n}",
+        "image": "#include \"nexusdata/dataset/image_folder.hpp\"\n#include \"nexusdata/dataset/map.hpp\"\n#include \"nexusdata/pipeline/image.hpp\"\n#include \"nexusdata/loading/dataloader.hpp\"\n\nnexusdata::ImageFolder folder(\"data/train\");\nauto mapped = nexusdata::MapDataset(\n    std::move(folder),\n    std::make_shared<nexusdata::Compose>({\n        std::make_shared<nexusdata::Resize>(224, 224),\n        std::make_shared<nexusdata::NormalizeImage>(\n            std::vector<float>{0.485f, 0.456f, 0.406f},\n            std::vector<float>{0.229f, 0.224f, 0.225f}),\n    }));\nnexusdata::DataLoaderOptions opt;\nopt.batch_size = 16;\nopt.shuffle = true;\nopt.seed = 7;\nnexusdata::DataLoader loader(std::move(mapped), opt);",
+        "gpu": "// CUDA derlemesi gerekir. Yoksa device host'ta kalır.\nnexusdata::DataLoaderOptions opt;\nopt.batch_size = 32;\nopt.num_workers = 4;\nopt.pin_memory = true;\nopt.device = nexusdata::Device::cuda();\nopt.transform_device = nexusdata::Device::auto_select();",
+        "flash": "// Planlanan — MatrixFlash Pro adapter (tek yönlü bağımlılık)\n// Durum: planned"
+      }
+    },
+    "cta": {
+      "title": "Hemen başla",
+      "body": "MatrixData'yı CMake projenize alın; doküman bölümleri geldikçe izleyin."
+    }
+  },
+  "docs": {
+    "sidebar": "Dokümantasyon kenar çubuğu",
+    "toc": "İçindekiler",
+    "onThisPage": "Bu sayfada",
+    "docsHome": "Docs ana sayfa",
+    "version": "Sürüm",
+    "searchPlaceholder": "Docs ara…",
+    "searchHint": "Başlık ve içerikte aramak için yazın",
+    "searching": "Aranıyor…",
+    "noResults": "Sonuç yok",
+    "readingTime": "{minutes} dk okuma",
+    "lastUpdated": "Son güncelleme {date}",
+    "editOnGithub": "Bu sayfayı GitHub'da düzenle",
+    "untranslatedTitle": "Bu sayfa henüz Türkçeye çevrilmedi",
+    "untranslatedBody": "İngilizce sürüm gösteriliyor. Türkçe çeviri hazır olunca burada yer alacak.",
+    "feedbackAsk": "Bu sayfa yardımcı oldu mu?",
+    "feedbackYes": "Evet",
+    "feedbackNo": "Hayır",
+    "feedbackThanks": "Teşekkürler — geri bildirim yalnızca bu cihazda tutulur.",
+    "sections": {
+      "getting-started": "Başlangıç",
+      "concepts": "Temel kavramlar",
+      "sources": "Veri kaynakları",
+      "preparation": "Veri hazırlama",
+      "performance": "Performans",
+      "integration": "Entegrasyon",
+      "guides": "Rehberler",
+      "examples": "Örnekler",
+      "reference": "Referans",
+      "about": "Hakkında"
+    }
+  },
+  "banner": {
+    "suggestTr": "Bu sayfayı Türkçe okumak ister misin?",
+    "suggestEn": "Bu sayfayı İngilizce okumak ister misin?",
+    "switch": "Geç",
+    "dismiss": "Kapat"
+  },
+  "footer": {
+    "rights": "MatrixData dokümantasyon sitesi",
+    "license": "Lisans: {license}",
+    "privacy": "Gizlilik notu"
+  },
+  "notFound": {
+    "title": "Sayfa bulunamadı",
+    "body": "Bu sayfa yok veya taşınmış olabilir.",
+    "home": "Ana sayfaya dön"
+  }
+}

@@ -1,0 +1,21 @@
+# ninja log v6
+3332	3654	8118191242283129	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-done	b7b557a03a38c3f9
+3332	3654	8118191242283129	CMakeFiles/nd_lz4-populate-complete	b7b557a03a38c3f9
+2877	3108	8118191236860859	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-install	ed31eb22e3043f0e
+16	259	8118191208370426	nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-mkdir	ed84209a99b146df
+261	1931	8118191225061419	nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-download	46306069a94cd865
+16	259	8118191208370426	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-mkdir	ed84209a99b146df
+261	1931	8118191225061419	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-download	46306069a94cd865
+1933	2189	8118191227666895	nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-update	795853e2d652b8ec
+1933	2189	8118191227666895	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-update	795853e2d652b8ec
+3109	3331	8118191239086161	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-test	c2f4998a8debcd27
+2190	2417	8118191229939660	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-patch	53701fc025b4d4c9
+2190	2417	8118191229939660	nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-patch	53701fc025b4d4c9
+2653	2876	8118191234525262	nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-build	aabd370e7db5842f
+2418	2652	8118191232293157	nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-configure	26afe900e1ddd44f
+2418	2652	8118191232293157	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-configure	26afe900e1ddd44f
+2653	2876	8118191234525262	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-build	aabd370e7db5842f
+2877	3108	8118191236860859	nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-install	ed31eb22e3043f0e
+3109	3331	8118191239086161	nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-test	c2f4998a8debcd27
+3332	3654	8118191242283129	nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/nd_lz4-populate-done	b7b557a03a38c3f9
+3332	3654	8118191242283129	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_lz4-subbuild/CMakeFiles/nd_lz4-populate-complete	b7b557a03a38c3f9

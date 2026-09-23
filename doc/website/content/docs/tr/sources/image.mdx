@@ -1,0 +1,63 @@
+---
+title: Görüntüler
+description: ImageFolder düzeni, decode seçenekleri ve load_image yardımcıları.
+status: stable
+order: 75
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## ImageFolder dataset
+
+**Sınıf başına alt dizin** düzeni beklenir:
+
+```
+root/
+  cat/*.jpg
+  dog/*.png
+```
+
+```cpp
+ImageFolderOptions opt;
+opt.decode.channels = ImageChannels::RGB;
+opt.decode.apply_exif_orientation = true;
+opt.recursive = false;
+opt.extensions = {".jpg", ".png"};
+
+ImageFolder folder("data/train", opt);
+Sample s = folder.get(0);  // input: [H,W,C] UInt8
+```
+
+| Davranış | Ayrıntı |
+| --- | --- |
+| Sınıf sırası | Sıralı klasör adları → tamsayı etiket `0..C-1` |
+| Decode zamanı | Her `get()` çağrısında lazy |
+| Bozuk dosyalar | Taramada `CorruptImagePolicy::Skip` veya `get`'te throw |
+
+## ImageDecodeOptions
+
+| Alan | Varsayılan | Anlam |
+| --- | --- | --- |
+| `channels` | `RGB` | Gray/RGB/RGBA veya `Keep` |
+| `apply_exif_orientation` | `true` | stb ile EXIF yönlendirme |
+| `on_corrupt` | `Throw` | `Skip` ile tarama anında atlama |
+
+## Serbest fonksiyonlar
+
+```cpp
+Image img = load_image("photo.jpg");
+NDArray chw = image_to_tensor(img.data);  // [0,1] float CHW
+```
+
+v1.0 desteklenen konteynerler: **JPEG, PNG, BMP, TGA, GIF** (stb_image). WebP/TIFF isteğe bağlı derlemelerde gelebilir.
+
+## Batch
+
+Decode edilen tüm görüntüler aynı `H×W×C` ise `collate_stack` kullanın. Augmentation için collation öncesinde pipeline'da ön işleme uygulayın (`nexusdata/pipeline/` başlıkları).
+
+## İlgili
+
+- [WebDataset](/docs/sources/webdataset)
+- [MNIST / CIFAR](/docs/sources/mnist-cifar)
+- [NDArray](/docs/concepts/ndarray)

@@ -1,0 +1,9 @@
+#ifndef WEBP_CONFIG_H_
+#define WEBP_CONFIG_H_
+#define HAVE_CONFIG_H 1
+#define HAVE_BUILTIN_BSWAP16 1
+#define HAVE_BUILTIN_BSWAP32 1
+#define HAVE_BUILTIN_BSWAP64 1
+#define HAVE_UNISTD_H 1
+#define WEBP_NEAR_LOSSLESS 1
+#endif

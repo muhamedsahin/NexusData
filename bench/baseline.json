@@ -1,0 +1,6 @@
+{
+  "slack_ratio": 0.5,
+  "budgets_seconds": {
+    "function_dataset_20k_gets": 1.0
+  }
+}

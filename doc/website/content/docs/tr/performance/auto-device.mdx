@@ -1,0 +1,16 @@
+---
+title: Auto cihaz politikası
+description: Device::auto_select, kalibrasyon eşikleri ve Host vs CUDA kararları.
+status: stable
+order: 40
+locale: tr
+section: performance
+since: "1.0"
+---
+
+```cpp
+CalibrationReport report = calibrate_auto_device_policy({});
+Device resolved = resolve_device(Device::auto_select(), GpuOpKind::ImageAugment, nbytes, report.policy);
+```
+
+CUDA yoksa her zaman Host. Eşikler host memcpy ölçümü ve varsayılan PCIe modeliyle ayarlanır — hedef makinede bir kez kalibre edin.

@@ -1,0 +1,26 @@
+---
+title: NumPy npy / npz
+description: NpyFile, NpyDataset, and NpzFile readers.
+status: stable
+order: 90
+locale: en
+section: sources
+since: "1.0"
+---
+
+```cpp
+#include "nexusdata/dataset/npy.hpp"
+
+NpyFile f("batch.npy");
+NpyDataset ds("samples.npy"); // map-style over array rows / leading axis
+NpzFile z("bundle.npz");
+```
+
+## Notes
+
+- Supports common NumPy v1/v2 headers as implemented in-tree
+- Use for bridging Python-exported arrays into C++ loaders
+
+## See also
+
+- [NDArray](/docs/concepts/ndarray)

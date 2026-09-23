@@ -1,0 +1,116 @@
+---
+title: Operators
+description: Tabular transforms, image transforms, map, filter, splits, and loader options.
+status: stable
+order: 50
+locale: en
+section: examples
+since: "1.0"
+---
+
+An operator here is a `Transform` or a dataset/loader method. Transforms implement `apply(sample)` and return a new `Sample`. They do not mutate the stored row. Tabular transforms run through one fused SIMD pass when composed together. Image geometry stays HWC `UInt8` until `ToTensor` or `NormalizeImage`.
+
+## Tabular
+
+Include `nexusdata/pipeline/tabular.hpp`.
+
+| Type | What it does | Construction |
+| --- | --- | --- |
+| `ClipTransform` | Clamp each input element to `[min, max]` | `ClipTransform(0.0, 1.0)` throws if `min > max` |
+| `Log1pTransform` | `log(1 + x)` on the input | `Log1pTransform()` |
+| `StandardizeTransform` | `(x - mean) / scale` per feature | vectors of equal, non-empty length. A 0 or NaN scale becomes 1 |
+| `MinMaxTransform` | Map `[data_min, data_max]` onto `[feature_min, feature_max]` | min/max vectors, then optional feature range (default 0 and 1) |
+
+`StandardizeTransform` throws `ShapeError` unless `sample.input` has exactly `mean.size()` elements. You supply the statistics. The constructors do not scan the dataset.
+
+```cpp
+#include "nexusdata/pipeline/fluent.hpp"
+#include "nexusdata/pipeline/tabular.hpp"
+
+auto loader = nexusdata::from_csv("train.csv")
+    .map(nexusdata::ClipTransform{0.0, 1.0e6})
+    .map(nexusdata::Log1pTransform{})
+    .map(nexusdata::MinMaxTransform{
+        std::vector<double>{0.0, 0.0},
+        std::vector<double>{10.0, 10.0},
+        0.0,
+        1.0})
+    .shuffle(42)
+    .batches(64)
+    .build();
+```
+
+Neighbouring tabular steps inside one `Compose` merge into a single `FusedTransform`: one allocation, one pass, same values as applying each step alone.
+
+## Images
+
+Include `nexusdata/pipeline/image.hpp`. Constructors throw `InvalidArgumentError` on a non-positive size or a negative pad. Channel mismatch in `NormalizeImage` throws `ShapeError`.
+
+| Type | Effect |
+| --- | --- |
+| `Resize(h, w, interp)` | HWC resize. `Bilinear` or `Nearest` |
+| `CenterCrop(h, w)` | Center window |
+| `RandomCrop(h, w)` | Random window. Seedable |
+| `RandomHorizontalFlip(p, seed)` | Flip with probability `p` |
+| `RandomVerticalFlip(p, seed)` | Same, vertical |
+| `Grayscale` | Fewer channels |
+| `Pad(padding, fill)` | Constant border |
+| `ToTensor` | HWC `UInt8` to float CHW in `[0, 1]` |
+| `NormalizeImage(mean, stddev)` | Per-channel `(x - mean) / std`. On HWC `UInt8` this also converts to CHW |
+
+`is_random()` is true for the crop and flips. `Compose` does not fuse those steps with their neighbours, so the seed still reaches each of them.
+
+## map and filter
+
+```cpp
+#include "nexusdata/dataset/compose.hpp"
+
+auto chain = nexusdata::from_csv("train.csv")
+    .filter([](const nexusdata::Sample& s) {
+        return s.input.numel() > 0;
+    })
+    .map(nexusdata::ClipTransform{-1.0, 1.0});
+auto ds = chain.dataset(); // DatasetPtr, no loader yet
+```
+
+`filter` takes `std::function<bool(const Sample&)>`. A null predicate throws. `dataset()` realizes the chain as a `MapDataset` when any `map` was used. `FilterDataset` is applied before later maps in that call, because `filter` rebuilds the chain from the realized dataset.
+
+## Splits
+
+Include `nexusdata/dataset/split.hpp`.
+
+```cpp
+auto [train, val] = nexusdata::random_split(ds, 0.8, 0.2, 42);
+
+auto [strain, sval] = nexusdata::stratified_split(
+    ds, ds.labels(), 0.8, 42);
+
+auto folds = nexusdata::k_fold(ds, /*n_splits=*/5, /*shuffle=*/true, 42);
+// folds[i].train, folds[i].test — each row is in exactly one test fold
+```
+
+`stratified_split` and stratified k-fold need a numeric label array shaped `[N]`. `CSVDataset::labels()` is that array when the label column was numeric. Image labels live on each `Sample`, not on a single `labels()` table.
+
+`Subset` is a dataset. Pass it to `DataLoader` or to another `MapDataset`.
+
+## DataLoader options that change behavior
+
+| Field | Default | Meaning |
+| --- | --- | --- |
+| `batch_size` | 1 | Rows per batch |
+| `shuffle` | false | Sampler permutation. Needs `seed` to repeat |
+| `drop_last` | false | Drop a short final batch |
+| `seed` | 0 | Sampler and random transforms |
+| `num_workers` | 0 | 0 runs on the calling thread |
+| `prefetch_factor` | 2 | Queue depth is about `workers * factor` (at least 2 when workers > 0) |
+| `in_order` | true | Reorder buffer. `false` returns a batch as soon as it is ready. Indices inside a batch do not change |
+| `pin_memory` | false | Page-locked host staging before a CUDA copy |
+| `device` | host | `Device::host()`, `Device::cuda(i)`, or `Device::auto_select()` |
+| `batch_transform` | empty | A transform with `supports_batch()`, run after collate |
+| `transform_device` | auto | Where that batch transform runs |
+| `persistent_workers` | false | Keep workers across epochs |
+| `timeout_ms` | 0 | Wait limit. 0 means no timeout |
+
+`BatchPlan::workers` and `prefetch` set `num_workers` and `prefetch_factor` after `batches()`. `prefetch` requires a factor of at least 1.
+
+Iteration is single-threaded. The destructor joins workers. Call `reset_epoch` before a second pass. `pipeline_stats()` is empty when `num_workers` is 0.

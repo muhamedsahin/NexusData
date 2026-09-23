@@ -1,0 +1,29 @@
+---
+title: Caching
+description: In-memory LRU sample cache, DiskCache blobs, and CachedDataset wrappers.
+status: stable
+order: 70
+locale: en
+section: preparation
+since: "1.0"
+---
+
+## LRU sample cache
+
+`LruSampleCache` + `CachedDataset` memoize `get(i)` by string key (`prefix:index`).
+
+```cpp
+#include "nexusdata/dataset/cached.hpp"
+#include "nexusdata/cache/lru_cache.hpp"
+
+auto cache = std::make_shared<LruSampleCache>(/*capacity=*/1024);
+CachedDataset cached(dataset, cache, "img");
+```
+
+## Disk cache
+
+`DiskCache` stores preprocessed `NDArray` blobs under a directory (`NDCACHE1` magic). Key = hash(content + pipeline id). Use for expensive decode/augment outputs you want across process restarts.
+
+<Callout tone="warning" title="Correctness">
+Invalidate or namespace keys whenever transform parameters or source bytes change.
+</Callout>

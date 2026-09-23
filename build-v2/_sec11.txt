@@ -1,0 +1,44 @@
+## 11. C API VE DİL BAĞLAMALARINI GENİŞLETME
+
+Mevcut `c_api.h` sadece `NDArray` + DLPack kapsıyor. Genişlet:
+- `nexus_dataset_open(uri, config_json) -> NexusDataset*`
+- `nexus_dataset_size`, `nexus_dataset_get(index) -> NexusSample*`
+- `nexus_dataloader_create(dataset, options_json) -> NexusDataLoader*`
+- `nexus_dataloader_next_batch(loader) -> NexusBatch*` (iterator protokolü, `NEXUS_END_OF_EPOCH` durum kodu ile)
+- `nexus_pipeline_from_config(json_or_yaml_path) -> NexusDataLoader*` (Bölüm 9 ile entegre)
+
+Bu, Python (ctypes/pybind11), Rust, Go gibi dillerden binding yazılmasını mümkün kılar — kütüphane "sadece C++ ile sınırlı" olmaktan çıkar.
+
+---
+
+## 12. BUILD SİSTEMİ VE BAĞIMLILIK YÖNETİMİ
+
+- Ana `CMakeLists.txt`'de her opsiyonel özellik için `option(NEXUSDATA_WITH_X "..." OFF)` + `find_package` fallback + net hata mesajı (mevcut desen: derleme zamanı yoksa constructor `throw` — bunu koru, ama artık gerçek implementasyon barındıracak şekilde).
+- Bağımlılık yönetimi için `FetchContent`/`CPM.cmake` ile otomatik indirme desteği (kullanıcı sistemde kurulu olmasa da opsiyonel derleyebilsin), ayrıca `vcpkg.json`/Conan `conanfile.txt` sağla.
+- Her opsiyonel modül **kendi `.cpp`/`.cu` dosyasında izole** olsun, çekirdek kütüphane hiçbir opsiyonel bağımlılığa sıkı bağlı (hard dependency) olmasın.
+- `NEXUSDATA_WITH_CUDA`, `_ARROW`, `_HDF5`, `_SQLITE`, `_POSTGRES`, `_MYSQL`, `_MONGODB`, `_REDIS`, `_S3`, `_FFMPEG`, `_NVDEC`, `_NVJPEG`, `_ZSTD`, `_LZ4`, `_JPEGTURBO`, `_WEBP`, `_SIMDJSON`, `_KAFKA`, `_LMDB`, `_ROCKSDB`, `_IOURING` bayrakları.
+
+---
+
+## 13. TEST, BENCHMARK, FUZZ ALTYAPISI
+
+- Her yeni format okuyucu için: (a) doğruluk testi (bilinen küçük dosya + beklenen NDArray içerik karşılaştırması), (b) `fuzz/harness.hpp` deseninde fuzz entry point (mevcut `try_npy`/`try_wav`/`try_csv_file` desenine uy).
+- `bench/` altına format/transform/GPU-CPU karşılaştırmalı benchmark'lar (mevcut `harness.hpp`'deki `time_best`/`print_result` altyapısını kullan) — **CI'da regresyon tespiti** için bir "performans bütçesi" dosyası (`bench/baseline.json`) ve %X'ten fazla yavaşlama olursa CI'ı kırma mekanizması.
+- Hedef ölçülebilir performans kriterleri (yol gösterici, kesin taahhüt değil — donanıma göre değişir):
+  - CSV sayısal parse: mevcut scalar `strtod` yoluna göre en az 3-5x hızlanma (SIMD float parse ile).
+  - Görüntü decode+resize+normalize pipeline: CPU-only yolda mevcut stb_image+scalar yoluna göre en az 2-4x (libjpeg-turbo+SIMD ile), GPU yolunda (yeterince büyük batch'te) CPU yoluna göre en az 5-10x.
+  - GPU/CPU otomatik geçiş kararı, gerçek ölçülen sürelere göre ±%10 hata payıyla optimal seçim yapmalı (mevcut statik eşiklere göre büyük iyileşme).
+  - Prefetch pipeline'ı, tek üretici-tüketici modeline göre çok çekirdekli sistemlerde çekirdek sayısıyla ölçeklenmeli (N aşamalı pipeline sayesinde).
+
+---
+
+## 14. GERİYE DÖNÜK UYUMLULUK — KIRMIZI ÇİZGİLER
+
+1. `NDArray`, `Shape`, `DType`, `Device`, `Error` hiyerarşisi, `Dataset`/`IterableDataset`/`Transform`/`Transformer`/`Sampler` **soyut arayüzleri** imza düzeyinde değişmeyecek (yeni sanal metotlar eklenebilir ama **varsayılan implementasyonla**, mevcut alt sınıfları bozmadan).
+2. `Sample` struct'ına alan eklemek serbest (Bölüm 7.8) ama mevcut `input`/`label` alanlarının anlamı/sırası değişmeyecek.
+3. Mevcut public fonksiyon imzaları (`collate_stack`, `random_split`, `k_fold`, vs.) korunacak; yeni parametreler **varsayılan değerli** eklenmeli.
+4. Var olan `CMakeLists.txt` hedef adları (varsa) ve kütüphane linkleme arayüzü korunacak; yeni opsiyonel modüller ayrı hedefler (`nexusdata_arrow`, `nexusdata_cuda`, vs.) olarak eklenip ana `nexusdata` hedefine opsiyonel bağlanacak.
+5. Var olan tüm testler (varsa) geçmeye devam etmeli.
+
+---
+

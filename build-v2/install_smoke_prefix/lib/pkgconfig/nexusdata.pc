@@ -1,0 +1,10 @@
+prefix=C:/Program Files (x86)/NexusData
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: nexusdata
+Description: High-performance C++20 AI data loading and preparation library
+Version: 1.0.0
+Libs: -L${libdir} -lnexusdata
+Cflags: -I${includedir}

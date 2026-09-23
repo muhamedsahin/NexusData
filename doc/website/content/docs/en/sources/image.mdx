@@ -1,0 +1,34 @@
+---
+title: Image / ImageFolder
+description: ImageFolder dataset, decode options, and folder layout.
+status: stable
+order: 75
+locale: en
+section: sources
+since: "1.0"
+---
+
+## Layout
+
+```
+root/
+  class_a/img1.jpg
+  class_a/img2.jpg
+  class_b/img3.jpg
+```
+
+```cpp
+#include "nexusdata/dataset/image_folder.hpp"
+ImageFolderDataset ds("data/train"); // labels from folder names
+```
+
+## Notes
+
+- Decoding uses the bundled image helpers (`image/image.hpp`, stb)
+- Pair with transform pipelines under `pipeline/image.hpp` for augmentations
+- GPU decode/resize is optional via CUDA prep when enabled
+
+## See also
+
+- [Transforms overview](/docs/concepts/dataset)
+- [MNIST / CIFAR](/docs/sources/mnist-cifar)

@@ -1,0 +1,44 @@
+---
+title: Image transforms
+description: Resize, crop, flip, grayscale, normalize, ToTensor, and Pad on HWC UInt8 samples.
+status: stable
+order: 20
+locale: en
+section: preparation
+since: "1.0"
+---
+
+## Expectation
+
+Image transforms in `nexusdata/pipeline/image.hpp` expect **`Sample.input` as H×W×C `UInt8`**.
+
+## Catalog
+
+| Class | Notes |
+| --- | --- |
+| `Resize` | Nearest or bilinear |
+| `CenterCrop` / `RandomCrop` | Fixed output H×W |
+| `RandomHorizontalFlip` / `RandomVerticalFlip` | Seeded |
+| `Grayscale` | Keeps channel layout policy of the class |
+| `NormalizeImage` | Per-channel mean/std (float path after ToTensor in typical pipelines) |
+| `ToTensor` | UInt8 HWC → Float32 CHW scaled to \[0,1\] |
+| `Pad` | Border pad to target size |
+
+```cpp
+#include "nexusdata/pipeline/image.hpp"
+
+auto t = std::make_shared<Compose>({
+    std::make_shared<RandomHorizontalFlip>(0.5f, /*seed=*/7),
+    std::make_shared<Resize>(256, 256),
+    std::make_shared<CenterCrop>(224, 224),
+    std::make_shared<ToTensor>(),
+});
+```
+
+## MapDataset pattern
+
+Wrap `ImageFolderDataset` (or similar) with `MapDataset` so augmentation runs at `get()` time — not inside the dataset reader.
+
+<Callout tone="tip" title="GPU note">
+Optional CUDA image kernels exist when built with `NEXUSDATA_WITH_CUDA`. See [CUDA & pin_memory](/docs/performance/cuda-and-pin-memory).
+</Callout>

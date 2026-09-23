@@ -1,0 +1,23 @@
+---
+title: Text
+description: TextDataset for line/document oriented corpora.
+status: stable
+order: 110
+locale: en
+section: sources
+since: "1.0"
+---
+
+```cpp
+#include "nexusdata/dataset/text.hpp"
+TextDataset ds("corpus.txt");
+```
+
+## Notes
+
+- Pair with tokenizers/transforms outside NexusData (or custom Map)
+- Encoding issues should be handled at the Dataset boundary
+
+## See also
+
+- [JSON / JSONL](/docs/sources/json)

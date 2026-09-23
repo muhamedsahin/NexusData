@@ -1,0 +1,127 @@
+---
+title: CSV / TSV
+description: How CSVDataset parses records, chooses the label, stores rows, and fails.
+status: stable
+order: 70
+locale: en
+section: sources
+since: "1.0"
+---
+
+`CSVDataset` turns a delimited text file into a random-access `Dataset`. Construction reads the file, splits records, converts every cell to a number, and stores two arrays. After that, `get(i)` copies one row. The class does not stream: the table lives in memory for the life of the object.
+
+Include `nexusdata/dataset/csv/csv_dataset.hpp`, or the umbrella `nexusdata/nexusdata.hpp`.
+
+## What you get back
+
+A file with a header and four feature columns plus one label column becomes:
+
+| Object | Shape | Dtype | Who owns it |
+| --- | --- | --- | --- |
+| `features()` | `[N, F]` | `feature_dtype` | the dataset |
+| `labels()` | `[N]` | `label_dtype` | the dataset |
+| `get(i).input` | `[F]` | same as features | a new array, bytes copied |
+| `get(i).label` | `[1]` | same as labels | a new array, bytes copied |
+
+`N` is the number of data rows that survived parsing. `F` is `column_count - 1`. The label column is removed from the feature matrix and packed, so feature column `j` is not “file column `j`” once a label sits in the middle.
+
+`column_names()` is the header, including the label name. With `has_header = false` the names are `col0`, `col1`, … in file order. `num_features()` is `F`. `size()` is `N`.
+
+`features()` and `labels()` return references to the stored arrays. `NDArray` copies share storage, so do not write into those arrays if another thread is calling `get`. `get` itself allocates a fresh row and `memcpy`s the bytes. Concurrent `get` is safe because the stored tables are not mutated after construction.
+
+Supported cell dtypes are `Float32`, `Float64`, `Int32`, `Int64`, and `UInt8`. Anything else throws `InvalidArgumentError` from the constructor (`CSVDataset: unsupported dtype for CSV cells`). Integers are parsed as `double` with `strtod` and then cast. A value that does not fit the integer type is truncated by the cast. There is no separate integer parser and no thousands separator.
+
+## A file the parser accepts
+
+```text
+# generated for the loader example
+sepal_length,sepal_width,petal_length,petal_width,species
+5.1,3.5,1.4,0.2,0
+"4.9",3.0,1.4,0.2,0
+5.0,3.6,"1.4
+with a newline inside quotes",0.2,1
+
+```
+
+Walk that file with the defaults plus a named label:
+
+```cpp
+#include "nexusdata/dataset/csv/csv_dataset.hpp"
+
+nexusdata::CSVOptions opt;
+opt.label_column = "species";
+opt.delimiter = ',';
+opt.has_header = true;
+opt.skip_blank_lines = true;
+opt.comment_prefix = '#';
+opt.feature_dtype = nexusdata::DType::Float32;
+opt.label_dtype = nexusdata::DType::Int64;
+opt.error_policy = nexusdata::CSVErrorPolicy::Throw;
+opt.na_values = {"", "NA", "NaN", "null", "NULL"};
+opt.use_mmap = true;
+opt.num_threads = 0;
+
+nexusdata::CSVDataset ds("iris.csv", opt);
+```
+
+What the constructor does, in order:
+
+1. Opens the bytes. `use_mmap = true`, or a compressed suffix, goes through `read_input`. Otherwise it uses an `ifstream` in binary mode. A missing file throws `IOError` with `cannot open file`. An empty mapping throws `empty file`.
+2. Finds record starts. If the bytes contain no `"`, newlines are scanned with the SIMD/SWAR byte scan. If any quote exists, a scalar scan walks the file and ignores newlines that sit inside quotes. `""` inside quotes is an escaped quote and does not toggle the quote state. The iostream path does the same job in `read_record`, so a quoted field may span physical lines on both paths.
+3. Drops a UTF-8 BOM (`EF BB BF`) from the first record only.
+4. Skips a record that is only whitespace when `skip_blank_lines` is true.
+5. Skips a record whose first character is `comment_prefix`. The default `'\0'` disables this. A `#` later in the line is data. A leading space before `#` is data. The comment is not a field-level syntax.
+6. Splits fields on `delimiter` outside quotes. A quote that appears after other characters in an unquoted field throws `unexpected quote in unquoted field`. An open quote at end of file throws `unclosed quoted field`. The quote characters themselves are not part of the field. `""` becomes one `"`.
+7. Treats the first surviving record as the header when `has_header` is true, then continues. The header must contain at least two columns (`features + label`). Fewer throws immediately, even when the error policy is `Skip`.
+8. Resolves the label. `label_column_index`, when set, wins over the name. Otherwise a non-empty `label_column` is searched in the header and a missing name throws `label column "…" not found in header`. If both are unset, the last column is the label. Without a header, names become `colN` and the index defaults to the last column unless `label_column_index` is set. A name is not searched when there is no header.
+9. Requires every later record to have the same field count. `Throw` raises `expected C columns, got K`. `Skip` drops that record and continues.
+10. Converts cells in parallel. Each feature cell and the label cell is checked against `na_values` by exact string match, then parsed with `strtod`. The whole token must be consumed. `1.5meters` fails. `NA` fails as a missing value before `strtod`, because it is in the default list. The message is `missing value (NA)` or `missing label`, with `file:line:col`.
+
+`num_threads = 0` means `max(1, hardware_concurrency)` for both the record slice and the numeric conversion. Set `1` to force a single worker. The pool is only used during construction. It is gone before the constructor returns.
+
+Compressed input (the suffix `read_input` recognizes) is decoded into memory first and always takes the parallel path, even when `use_mmap` is false.
+
+## Error policy, precisely
+
+`CSVErrorPolicy::Throw` is the default. A bad record or a bad cell aborts the constructor with `IOError`. The dataset object does not exist.
+
+`CSVErrorPolicy::Skip` drops a record in two places: the field splitter threw, or the field count did not match the header. Those rows never enter the table.
+
+A numeric failure is different. Conversion runs after the row has already been accepted. The worker catches the exception. With `Throw`, the constructor rethrows after the pool finishes. With `Skip`, the error string is discarded and the row stays. Cells written before the failure keep their values. Cells not yet written keep the zero that `NDArray` starts with. Do not use `Skip` as a filter for missing numbers if you need those rows removed. Filter after load, or fix the file.
+
+Header problems are never skipped: too few columns, and a label name that is not in the header, always throw.
+
+Line numbers in messages are the record index in the split list (1-based), not a count of physical lines after quoted newlines have been joined. A quoted newline makes one record, so the reported line can be earlier than the physical line in an editor.
+
+## Missing values
+
+The default tokens are `""`, `NA`, `NaN`, `null`, and `NULL`. Matching is exact and case-sensitive. `na` is not missing. ` nan` with a space is not missing. A token that is missing throws `missing value (NA)` under `Throw`. It is not stored as a quiet NaN. If you want an actual NaN in the array, the cell text has to be a token `strtod` accepts, such as `nan`, and that token must not be listed in `na_values`.
+
+Empty `na_values` means an empty cell is a parse error (`"" could not be parsed as float`) rather than a missing-value error.
+
+## TSV and odd delimiters
+
+`delimiter` is one `char`. For tabs set `opt.delimiter = '\t'`. The delimiter inside a quoted field is kept as data. There is no multi-character delimiter and no automatic sniffing.
+
+## Memory
+
+The mmap path maps the file, copies each record into a `std::string`, then parses those strings into the two numeric arrays. Peak memory is the mapped file plus the string table plus the numeric tables. After the constructor returns, the map and the string table are gone. What remains is `N * F * sizeof(feature)` plus `N * sizeof(label)`.
+
+`get` adds another `F * sizeof(feature) + sizeof(label)` per call. A `DataLoader` with batch size `B` collates `B` of those copies into `batch.inputs` of shape `[B, F]` and `batch.labels` of shape `[B, 1]` when each label is rank 1. See [Batch & collate](/docs/concepts/batch-collate).
+
+`use_mmap = false` on an uncompressed file reads through `ifstream`. Quoted newlines are still joined. You pay an extra copy into the record vector and you lose the SIMD newline scan. Use it when you need the iostream path specifically. For large files leave mmap on.
+
+## What this reader will not do
+
+- Strings as features. Every non-label cell must parse as a number. A class name in a feature column is an error. Put the class in the label column and store it as an integer, or use [JsonDataset](/docs/sources/json) with `categories`.
+- A file with only a label. Two columns is the minimum, so one feature column is required.
+- Schema evolution. Column count is fixed by the header or the first data row.
+- Incremental append. Construct again to see new bytes.
+
+A full program that splits, scales, and batches this dataset is in [CSV to batches](/docs/examples/csv).
+
+## See also
+
+- [Quick start](/docs/getting-started/quickstart)
+- [Dataset](/docs/concepts/dataset)
+- [Operators](/docs/examples/operators)

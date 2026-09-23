@@ -1,0 +1,20 @@
+---
+title: Pipeline kaydet / yükle
+description: Fitted Transformer ve compose adımları için NEXUSDATA_PIPELINE 1 anlık görüntüsü.
+status: stable
+order: 50
+locale: tr
+section: preparation
+since: "1.0"
+---
+
+`Pipeline` (`persist.hpp`): fitted transformer'lar, isteğe bağlı `Compose`, serileştirilebilir adım dizgileri. Etiket: **`NEXUSDATA_PIPELINE 1`**.
+
+```cpp
+Pipeline pipe;
+pipe.add_transformer(std::make_shared<StandardScaler>());
+pipe.transformers()[0]->fit(train_X);
+pipe.save_file("model_prep.ndpipe");
+```
+
+Özel tipler için `load` fabrikası verin (`make_transformer_by_type` varsayılan).

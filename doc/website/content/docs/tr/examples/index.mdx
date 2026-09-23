@@ -1,0 +1,44 @@
+---
+title: Örnekler
+description: CSV, JSON, görsel klasörü ve DataLoader için kısa NexusData programları.
+status: stable
+order: 10
+locale: tr
+section: examples
+since: "1.0"
+---
+
+Bu sayfalar özellik listesi değil, derlenebilir kısa programlardır. NexusData batch'te durur; model eğitmez.
+
+## Nereden başlamalı
+
+| Elindeki veri | Sayfa |
+| --- | --- |
+| Etiket sütunlu tablo | [CSV'den batch'e](/docs/examples/csv) |
+| JSON satırları veya bir JSON dizisi | [JSON kayıtları](/docs/examples/json) |
+| `kök/sınıf/*.jpg` | [Görsel klasörü](/docs/examples/images) |
+| Kırpma, ölçek, bölme, karıştırma | [Operatörler](/docs/examples/operators) |
+
+## Programın sırası
+
+1. Kaynağı aç. `CSVDataset`, `JsonDataset` veya `ImageFolder` bir `Dataset`'tir: `size()` ve `get(i)` bir `Sample` döndürür.
+2. İstersen sar. `MapDataset` bir `Transform` uygular. `FilterDataset` örnekleri atar. `random_split` `Subset` görünümleri döndürür.
+3. `DataLoader` kur. İndeksleri seçer, örnekleri `Batch` içinde birleştirir, worker thread'lerle önden okuyabilir.
+4. `batch.inputs` ve `batch.labels` oku. İkisi de `NDArray`. Varsayılan collate 0. eksende yığar; ilk boyut batch boyutudur.
+
+```cpp
+#include "nexusdata/nexusdata.hpp"
+
+auto loader = nexusdata::from_csv("train.csv")
+    .shuffle(42)
+    .batches(32)
+    .workers(4)
+    .build();
+
+for (const auto& batch : *loader) {
+    const auto& x = batch.inputs;
+    const auto& y = batch.labels;
+}
+```
+
+`from_csv` bir `DatasetChain` döndürür. `batches` bir `BatchPlan`, `build` ise `std::unique_ptr<DataLoader>` döndürür. `DataLoader` taşınamaz. `reset_epoch(seed)` yeni bir tur başlatır. Aynı tohum ve aynı veri kümesi, `num_workers` sıfırdan büyük olsa bile aynı batch indekslerini üretir. Worker'lar hangi satırın hangi batch'e gireceğini değiştirmez; baytların ne zaman çözüleceğini değiştirir.

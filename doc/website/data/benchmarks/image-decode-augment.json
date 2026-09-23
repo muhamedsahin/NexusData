@@ -1,0 +1,26 @@
+{
+  "id": "image-decode-augment",
+  "title": {
+    "en": "Image decode + augment (illustrative)",
+    "tr": "Görüntü decode + augment (örnek)"
+  },
+  "metric": "images_per_sec",
+  "unit": "img/s",
+  "higherIsBetter": true,
+  "illustrative": true,
+  "date": null,
+  "libraryVersion": null,
+  "commit": null,
+  "hardware": null,
+  "methodology": {
+    "en": "Placeholder series for CPU vs optional CUDA paths. Replace after measuring on your machine.",
+    "tr": "CPU ve opsiyonel CUDA yolları için yer tutucu. Kendi makinenizde ölçüp değiştirin."
+  },
+  "reproduce": "cmake -DNEXUSDATA_BUILD_BENCH=ON --build build --target bench_suite",
+  "chartKind": "bar",
+  "results": [
+    { "name": "CPU decode (illustrative)", "value": 120, "stddev": 0, "runs": 0, "isBaseline": true },
+    { "name": "CPU + augment (illustrative)", "value": 80, "stddev": 0, "runs": 0, "isBaseline": false },
+    { "name": "CUDA path (illustrative)", "value": 200, "stddev": 0, "runs": 0, "isBaseline": false }
+  ]
+}

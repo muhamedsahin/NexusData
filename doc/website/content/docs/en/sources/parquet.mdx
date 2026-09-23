@@ -1,0 +1,28 @@
+---
+title: Parquet / Arrow
+description: ParquetDataset — requires NEXUSDATA_WITH_ARROW.
+status: stable
+order: 100
+locale: en
+section: sources
+since: "1.0"
+---
+
+<Callout tone="warning" title="Optional dependency">
+Enable `NEXUSDATA_WITH_ARROW=ON` and install Apache Arrow to build this reader.
+</Callout>
+
+```cpp
+#include "nexusdata/dataset/parquet.hpp"
+ParquetOptions opt;
+ParquetDataset ds("table.parquet", opt);
+```
+
+## Notes
+
+- Columnar batches map into `Sample`/`NDArray` per options
+- Ideal for large analytics tables feeding training
+
+## See also
+
+- [CSV](/docs/sources/csv)

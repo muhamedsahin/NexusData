@@ -1,0 +1,21 @@
+# ninja log v7
+6	187	8118151661373519	nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-mkdir	a26078596e5568dd
+6	187	8118151661373519	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-mkdir	a26078596e5568dd
+188	2234	8118151681817361	nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-download	f3c38f10fedae06
+188	2234	8118151681817361	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-download	f3c38f10fedae06
+2235	2446	8118151683941773	nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-update	ec50f659be99c1f5
+2235	2446	8118151683941773	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-update	ec50f659be99c1f5
+2447	2666	8118151686155501	nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-patch	4d5b9c5f4eb3f139
+2447	2666	8118151686155501	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-patch	4d5b9c5f4eb3f139
+2666	2826	8118151687765907	nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-configure	915fed8c92466be9
+2666	2826	8118151687765907	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-configure	915fed8c92466be9
+2826	2989	8118151689400403	nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-build	495050ef49fb4f74
+2826	2989	8118151689400403	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-build	495050ef49fb4f74
+2990	3152	8118151691018452	nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-install	eb7c185fb01263d9
+2990	3152	8118151691018452	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-install	eb7c185fb01263d9
+3152	3315	8118151692644573	nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-test	54becc8d36d042f5
+3152	3315	8118151692644573	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-test	54becc8d36d042f5
+3315	3528	8118151694786512	CMakeFiles/nd_zstd-populate-complete	96be312bdf03c181
+3315	3528	8118151694786512	nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-done	96be312bdf03c181
+3315	3528	8118151694786512	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/CMakeFiles/nd_zstd-populate-complete	96be312bdf03c181
+3315	3528	8118151694786512	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-done	96be312bdf03c181

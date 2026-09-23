@@ -1,0 +1,21 @@
+# ninja log v7
+6	178	8118220985083982	nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-mkdir	d887dc07ea1a02d9
+6	178	8118220985083982	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-mkdir	d887dc07ea1a02d9
+179	986	8118220993155364	nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-download	47ecbdaf1fb253da
+179	986	8118220993155364	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-download	47ecbdaf1fb253da
+987	1110	8118220994407600	nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-update	242980dd2a20b33d
+987	1110	8118220994407600	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-update	242980dd2a20b33d
+1110	1243	8118220995729769	nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-patch	84513835bf36f57a
+1110	1243	8118220995729769	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-patch	84513835bf36f57a
+1243	1362	8118220996932992	nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-configure	1c93262dd2033c8f
+1243	1362	8118220996932992	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-configure	1c93262dd2033c8f
+1363	1483	8118220998141573	nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-build	939b40658e89d37d
+1363	1483	8118220998141573	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-build	939b40658e89d37d
+1484	1603	8118220999337796	nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-install	482a38e38d2c155c
+1484	1603	8118220999337796	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-install	482a38e38d2c155c
+1604	1739	8118221000677194	nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-test	78cfef86ebd661cb
+1604	1739	8118221000677194	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-test	78cfef86ebd661cb
+1740	1911	8118221002417123	CMakeFiles/nd_libwebp-populate-complete	583fdd5f48afa190
+1740	1911	8118221002417123	nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-done	583fdd5f48afa190
+1740	1911	8118221002417123	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/nd_libwebp-populate-complete	583fdd5f48afa190
+1740	1911	8118221002417123	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-done	583fdd5f48afa190

@@ -1,0 +1,49 @@
+---
+title: Adding a reader
+description: How to add a new Dataset reader behind the stable map-style interface.
+status: stable
+order: 130
+locale: en
+section: sources
+since: "1.0"
+---
+
+## Checklist
+
+<Steps>
+  <Step title="Implement Dataset">
+    Provide `size()` and `get(i)` returning `Sample`.
+  </Step>
+  <Step title="Own options struct">
+    Document defaults, errors, and thread-safety.
+  </Step>
+  <Step title="Register headers">
+    Add to umbrella `nexusdata.hpp` when public.
+  </Step>
+  <Step title="Tests">
+    Golden files + edge cases (empty, corrupt, large).
+  </Step>
+  <Step title="Optional deps">
+    Gate heavy libraries behind `NEXUSDATA_WITH_*`.
+  </Step>
+</Steps>
+
+```cpp
+class MyFormatDataset : public Dataset {
+public:
+  explicit MyFormatDataset(std::string path, MyOptions opt = {});
+  std::size_t size() const override;
+  Sample get(std::size_t index) const override;
+};
+```
+
+## Design rules
+
+- Do not shuffle inside the reader — leave that to `Sampler`
+- Prefer lazy I/O in `get` for huge corpora; or document eager load
+- Surface `IOError` / `InvalidArgumentError` with context
+
+## See also
+
+- [Dataset](/docs/concepts/dataset)
+- [Contributing](/docs/getting-started/introduction)

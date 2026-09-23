@@ -1,0 +1,68 @@
+---
+title: Documentation
+description: NexusData documentation home — C++20 data loading for AI pipelines.
+status: stable
+order: 0
+locale: en
+section: getting-started
+since: "1.0"
+---
+
+Welcome to the **NexusData** docs. This site is bilingual (EN/TR) and marks every page with a status badge.
+
+<Callout tone="note" title="Phase 4 content">
+Getting started, core concepts, and source readers are documented against **v1.0** public headers. Optional CMake features are flagged on their pages.
+</Callout>
+
+## Pipeline
+
+`Source → Dataset → Sampler → DataLoader → Batch → NDArray`
+
+NexusData prepares and delivers data. It does **not** implement matmul, backprop, models, optimizers, or training loops.
+
+## Getting started
+
+1. [Introduction](/docs/getting-started/introduction)
+2. [Installation](/docs/getting-started/installation)
+3. [Quick start](/docs/getting-started/quickstart)
+4. [Project structure](/docs/getting-started/project-structure)
+
+## Concepts
+
+| Topic | Page |
+| --- | --- |
+| Tensor carrier | [NDArray](/docs/concepts/ndarray) |
+| Random access | [Dataset](/docs/concepts/dataset) |
+| Index order | [Sampler](/docs/concepts/sampler) |
+| Batching | [DataLoader](/docs/concepts/dataloader) |
+| Collate | [Batch & collate](/docs/concepts/batch-collate) |
+| Reproducibility | [Determinism](/docs/concepts/determinism) |
+| Lifetimes | [Memory ownership](/docs/concepts/memory-ownership) |
+
+## Sources
+
+| Format | Page |
+| --- | --- |
+| CSV / TSV | [CSV](/docs/sources/csv) |
+| Images | [Image folder](/docs/sources/image) |
+| JSON Lines | [JSON](/docs/sources/json) |
+| MNIST / CIFAR | [MNIST & CIFAR](/docs/sources/mnist-cifar) |
+| NumPy | [NPY / NPZ](/docs/sources/numpy) |
+| mmap | [Memory-mapped binary](/docs/sources/mmap-binary) |
+| Parquet | [Parquet](/docs/sources/parquet) |
+| SQLite | [SQLite](/docs/sources/sqlite) |
+| Text | [Text](/docs/sources/text) |
+| WAV | [Audio](/docs/sources/audio) |
+| Tar shards | [WebDataset](/docs/sources/webdataset) |
+| HDF5 | [HDF5](/docs/sources/hdf5) |
+| Extend | [Adding readers](/docs/sources/adding-readers) |
+
+## Examples
+
+| Program | Page |
+| --- | --- |
+| Overview | [Examples](/docs/examples) |
+| Table | [CSV to batches](/docs/examples/csv) |
+| Records | [JSON records](/docs/examples/json) |
+| Class folders | [Image folder](/docs/examples/images) |
+| Transforms and splits | [Operators](/docs/examples/operators) |

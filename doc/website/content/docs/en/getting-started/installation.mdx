@@ -1,0 +1,83 @@
+---
+title: Installation
+description: Requirements, CMake FetchContent, find_package, optional feature flags, and common failures.
+status: stable
+order: 20
+locale: en
+section: getting-started
+since: "1.0"
+---
+
+## Requirements
+
+| Tool | Version |
+| --- | --- |
+| Language | C++20 |
+| CMake | 3.20+ |
+| Compilers | GCC 11+, Clang 14+, MSVC 19.3+ |
+
+Optional: CUDA, Arrow (Parquet), SQLite, HDF5, pybind11.
+
+## Build from source
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+ctest --test-dir build --output-on-failure
+cmake --install build --prefix /path/to/prefix
+```
+
+## find_package
+
+```cmake
+find_package(NexusData REQUIRED)
+target_link_libraries(app PRIVATE nexusdata::nexusdata)
+```
+
+Also: `pkg-config --libs nexusdata`, `vcpkg.json`, `conanfile.py`.
+
+## Interactive generator
+
+<InstallCommandGenerator />
+
+## FetchContent
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+  nexusdata
+  GIT_REPOSITORY https://github.com/PLACEHOLDER_ORG/nexusdata.git
+  GIT_TAG        v1.0.0
+)
+FetchContent_MakeAvailable(nexusdata)
+target_link_libraries(my_app PRIVATE nexusdata::nexusdata)
+```
+
+<Callout tone="warning" title="Repository URL">
+Replace `PLACEHOLDER_ORG` once the real Git remote is set in `site.config.ts`.
+</Callout>
+
+## CMake options
+
+| Option | Default | Purpose |
+| --- | --- | --- |
+| `NEXUSDATA_WITH_CUDA` | OFF | GPU data-prep backend |
+| `NEXUSDATA_WITH_PYTHON` | OFF | Python bindings |
+| `NEXUSDATA_WITH_SQLITE` | OFF | SQLite reader |
+| `NEXUSDATA_WITH_ARROW` | OFF | Parquet/Arrow reader |
+| `NEXUSDATA_WITH_HDF5` | OFF | HDF5 reader |
+| `NEXUSDATA_SANITIZER` | `""` | ASan / UBSan / TSan |
+| `NEXUSDATA_BUILD_FUZZ` | ON | Fuzz smoke |
+
+## OS notes
+
+**Linux/macOS:** Ninja + GCC/Clang; enable CUDA toolkit when needed.  
+**Windows:** MSVC 19.3+ / Clang-CL; mmap uses Win32 mapping internally.
+
+## Common failures
+
+| Symptom | Fix |
+| --- | --- |
+| `find_package` not found | Set `CMAKE_PREFIX_PATH` or `NexusData_DIR` |
+| CUDA unresolved | Rebuild with `NEXUSDATA_WITH_CUDA=ON` |
+| Parquet/HDF5/SQLite missing | Enable matching `NEXUSDATA_WITH_*` + install deps |

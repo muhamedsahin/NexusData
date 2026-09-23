@@ -1,0 +1,28 @@
+---
+title: CUDA & pin_memory
+description: Optional CUDA data-prep backend, pinned host staging, and Device placement.
+status: stable
+order: 20
+locale: en
+section: performance
+since: "1.0"
+---
+
+## Build flag
+
+Enable with CMake `-DNEXUSDATA_WITH_CUDA=ON`. Without it, CUDA APIs resolve to host / clear errors — CPU-only builds stay zero-dependency.
+
+## DataLoader fields
+
+```cpp
+lo.pin_memory = true;           // page-locked host staging before H2D
+lo.device = Device::cuda(0);    // or Device::host() / Device::auto_select()
+```
+
+## Scope
+
+CUDA support is for **data preparation and transfers**, not training math (GEMM lives outside NexusData).
+
+## Philox
+
+GPU-side RNG uses Philox when CUDA is enabled — seed streams separately from host `PCG32`. See [Determinism](/docs/concepts/determinism).

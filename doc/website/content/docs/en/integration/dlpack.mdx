@@ -1,0 +1,24 @@
+---
+title: DLPack
+description: Export and import NDArray via DLManagedTensor for framework interop.
+status: stable
+order: 10
+locale: en
+section: integration
+since: "1.0"
+---
+
+```cpp
+#include "nexusdata/adapter/dlpack.hpp"
+
+DLManagedTensor* m = ndarray_to_dlpack(array);
+// consumer must call m->deleter(m) when done (or take ownership)
+
+NDArray back = ndarray_from_dlpack(m, /*take_ownership=*/false);
+```
+
+## Lifetime
+
+`ndarray_to_dlpack` keeps `NDArray` storage alive until the DLPack deleter runs. `ndarray_from_dlpack` deep-copies onto host unless you carefully manage ownership flags.
+
+C consumers: `nexus_ndarray_to_dlpack` / `nexus_ndarray_from_dlpack` in the [C API](/docs/integration/c-api).

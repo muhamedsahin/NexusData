@@ -1,0 +1,55 @@
+---
+title: NumPy NPY ve NPZ
+description: load_npy, NpyDataset, NpyFile yaşam süresi ve NPZ stored üyeleri.
+status: stable
+order: 90
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## Tek `.npy` dosyaları
+
+```cpp
+NpyArray arr = load_npy("matrix.npy", /*copy=*/true);
+NDArray owned = arr.view;
+
+// Zero-copy (mmap) — NpyFile'ı canlı tutun
+NpyFile file("features.npy");
+const NDArray& view = file.array();
+```
+
+| API | Sahiplik |
+| --- | --- |
+| `load_npy(path, copy=true)` | Sahip olunan `NDArray` |
+| `load_npy(path, copy=false)` | View — çağıran mmap desteğini tutmalı |
+| `NpyFile` | `MappedFile` + dizi view'ı |
+| `load_npy_from_buffer` | Her zaman kopyalar (fuzz / gömülü) |
+
+## NpyDataset
+
+**2B feature matrisi** (+ isteğe bağlı 1B etiket dosyası) için map-style dataset:
+
+```cpp
+NpyDataset data("X.npy", "y.npy");
+Sample s = data.get(i);  // paylaşımlı depodan satır dilimleri
+```
+
+Feature matrisi `[N, F]` (veya `[N]`) olmalı. Etiketler `[N]`.
+
+## NPZ arşivleri
+
+**NpzFile** yalnızca **stored (sıkıştırılmamış)** üyeleri okur:
+
+```cpp
+NpzFile npz("bundle.npz");
+auto keys = npz.keys();
+NDArray w = npz.get("weights");
+```
+
+Deflate ZIP girdileri, isteğe bağlı zlib inflate açılana kadar açık mesajla throw eder.
+
+## İlgili
+
+- [Bellek sahipliği](/docs/concepts/memory-ownership)
+- [mmap binary](/docs/sources/mmap-binary)

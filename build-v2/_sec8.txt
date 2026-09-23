@@ -1,0 +1,96 @@
+## 8. EKLENEBİLİRLİK MİMARİSİ: PLUGIN SİSTEMİ
+
+Bu bölüm **en kritik kısım** — geliştirici kütüphanede olmayan bir formatı kendisi ekleyebilmeli ve tüm optimizasyon altyapısından (prefetch, GPU dispatch, caching) otomatik faydalanmalı.
+
+### 8.1 Zaten var olan uzatma noktası: `Dataset`/`IterableDataset`
+Bunu belgelemek ve kolaylaştırmak yeterli olabilir ama daha fazlasını yap:
+
+### 8.2 `DataSourceRegistry` (`core/registry.hpp`)
+Factory-pattern tabanlı bir kayıt sistemi:
+```cpp
+class DataSourceRegistry {
+public:
+    using Factory = std::function<DatasetPtr(const std::string& uri, const std::string& config_json)>;
+    static DataSourceRegistry& instance();
+    void register_scheme(const std::string& scheme, Factory f); // örn. "myformat://"
+    [[nodiscard]] DatasetPtr open(const std::string& uri, const std::string& config_json = "{}") const;
+};
+```
+Böylece kullanıcı `nexusdata::open("myformat:///path/to/data?param=1")` gibi tek bir giriş noktasından, kendi kaydettiği şemayla, tüm yerleşik formatlarla **aynı şekilde** veri açabilir. `NEXUSDATA_REGISTER_DATASOURCE(scheme, FactoryFn)` makrosu ile statik kayıt (init-time, `__attribute__((constructor))` veya static initializer trick) sağla.
+
+### 8.3 Dinamik plugin yükleme (paylaşımlı kütüphane olarak)
+`core/plugin_loader.hpp`: `dlopen`/`LoadLibrary` ile derleme zamanında bağımlı olmadan, çalışma zamanında `.so`/`.dll` plugin yükleme. Plugin ABI sözleşmesi:
+```cpp
+extern "C" {
+    // Her plugin bunu export etmeli
+    void nexusdata_plugin_register(nexusdata::DataSourceRegistry& registry);
+    const char* nexusdata_plugin_abi_version(); // uyumluluk kontrolü için
+}
+```
+`load_plugin(path)` fonksiyonu bunu çağırıp registry'ye otomatik kaydeder. Bu sayede geliştirici NexusData'yı yeniden derlemeden, kendi `.so` dosyasını yazıp `nexusdata::load_plugin("./my_format.so")` diyerek entegre edebilir.
+
+### 8.4 Kolay özel Dataset yazımı için yardımcı şablonlar
+`dataset/function_dataset.hpp`: Sıfırdan sınıf yazmadan, sadece lambda vererek hızlı prototip:
+```cpp
+class FunctionDataset : public Dataset {
+public:
+    using GetFn = std::function<Sample(std::size_t)>;
+    FunctionDataset(std::size_t size, GetFn fn);
+    // ...
+};
+[[nodiscard]] inline DatasetPtr make_dataset(std::size_t n, FunctionDataset::GetFn fn);
+```
+Ve generator-tabanlı `IterableDataset` için benzeri (`GeneratorIterable` — bir C++20 coroutine `generator<Sample>` veya basit `std::function<std::optional<Sample>()>` ile).
+
+### 8.5 Custom Transform / Custom Preprocessor kaydı
+`Transform` ve `Transformer` için de aynı registry deseni (`TransformRegistry`, `TransformerRegistry`) — özellikle Bölüm 9'daki config-driven pipeline'ın custom adımları çözebilmesi için gerekli.
+
+### 8.6 Şema/Reflection tabanlı generic eşleme (opsiyonel ama güçlü)
+Kullanıcının kendi struct'ını (örn. `struct MyRecord { float a; int b; std::string c; }`) otomatik `Sample`'a çevirebilmesi için basit bir alan-tanımlama makro seti (`NEXUSDATA_DESCRIBE_STRUCT(MyRecord, a, b, c)`) — reflection kütüphanesi (Boost.PFR benzeri, header-only, C++17 uyumlu structured-binding tabanlı) ile field'ları otomatik keşfet ve `InMemoryDataset`/JSON/CSV eşlemesinde otomatik kullan.
+
+---
+
+## 9. CONFIG-DRIVEN PIPELINE (YAML/JSON Pipeline DSL)
+
+`pipeline/pipeline_builder.hpp` — tüm pipeline'ı kod yazmadan bir YAML/JSON dosyasıyla tanımlama:
+```yaml
+source:
+  type: csv
+  path: data/train.csv
+  options: { has_header: true, label_column: "target" }
+transforms:
+  - type: standardize
+  - type: clip
+    params: { min: -3, max: 3 }
+loader:
+  batch_size: 256
+  shuffle: true
+  num_workers: 8
+  device: auto
+```
+Bunu parse edip `Dataset`/`Compose`/`DataLoader` nesnelerine derleyen bir `PipelineBuilder::from_yaml(path)` / `from_json(path)` fonksiyonu yaz. Bilinmeyen `type` değerleri Bölüm 8.2/8.5'teki registry'lerden çözülsün — böylece custom plugin'ler de config dosyasından referans verilebilsin.
+
+---
+
+## 10. API / DEVELOPER EXPERIENCE İYİLEŞTİRMELERİ
+
+### 10.1 Akıcı (fluent) API katmanı
+Mevcut `map()`, `take()`, `skip()` gibi serbest fonksiyonların yanına, method-chaining tarzı bir sarmalayıcı:
+```cpp
+auto ds = nexusdata::from_csv("data.csv")
+              .map(StandardizeTransform{...})
+              .filter([](const Sample& s){ return ...; })
+              .shuffle(seed)
+              .batch(256, /*drop_last=*/true)
+              .prefetch(4);
+```
+Bu, mevcut `Dataset`/`Compose`/`DataLoader` sınıflarının üzerine ince bir builder katmanı; çekirdek sınıfları değiştirmez.
+
+### 10.2 Zengin hata mesajları
+`Error` hiyerarşisini koru ama her hata mesajına **bağlam zinciri** ekle (hangi dosya, hangi satır, hangi transform adımı) — özellikle pipeline derinleştikçe hata ayıklamak zorlaşıyor. `format_loc`/`format_index_error` desenini tüm yeni modüllerde tutarlı kullan.
+
+### 10.3 Telemetri/metrik kancaları
+`core/metrics.hpp`: Opsiyonel, sıfır-maliyetli (derleme zamanı `NEXUSDATA_METRICS_ENABLED` ile açılan) sayaçlar — batch başına süre, cache hit-rate, GPU/CPU dispatch oranı, kuyruk doluluk geçmişi. Basit bir `MetricsSink` arayüzü (kullanıcı Prometheus/StatsD'ye bağlayabilsin).
+
+---
+

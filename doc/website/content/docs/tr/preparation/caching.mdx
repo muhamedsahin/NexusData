@@ -1,0 +1,13 @@
+---
+title: Önbellekleme
+description: Bellek içi LRU sample cache, DiskCache blob'ları ve CachedDataset.
+status: stable
+order: 70
+locale: tr
+section: preparation
+since: "1.0"
+---
+
+`CachedDataset` + `LruSampleCache`, `get(i)` sonuçlarını `prefix:index` anahtarıyla saklar.
+
+`DiskCache`, ön işlenmiş `NDArray` blob'larını dizine yazar (`NDCACHE1`). Transform veya kaynak değişince anahtarları geçersiz kılın.

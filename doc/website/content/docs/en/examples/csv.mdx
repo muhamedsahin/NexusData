@@ -1,0 +1,195 @@
+---
+title: CSV to batches
+description: A complete program that loads a labeled CSV, splits it, standardizes features, and iterates batches.
+status: stable
+order: 20
+locale: en
+section: examples
+since: "1.0"
+---
+
+This page is one program, explained at each step. Quote rules, record splitting, and the exact `Skip` behavior are in [CSV / TSV](/docs/sources/csv). Stay here for the objects that exist after a successful load.
+
+## The file
+
+```text
+sepal_length,sepal_width,petal_length,petal_width,species
+5.1,3.5,1.4,0.2,0
+4.9,3.0,1.4,0.2,0
+4.7,3.2,1.3,0.2,0
+7.0,3.2,4.7,1.4,1
+6.4,3.2,4.5,1.5,1
+6.9,3.1,4.9,1.5,1
+6.3,3.3,6.0,2.5,2
+5.8,2.7,5.1,1.9,2
+7.1,3.0,5.9,2.1,2
+```
+
+Nine data rows, four features, one integer label. The label is named and it happens to be last. Naming it still matters. If a column is inserted on the right, `label_column = "species"` keeps the same target. The default “last column” would move.
+
+## Load and read the shapes
+
+```cpp
+#include "nexusdata/nexusdata.hpp"
+
+nexusdata::CSVOptions opt;
+opt.label_column = "species";
+opt.feature_dtype = nexusdata::DType::Float32;
+opt.label_dtype = nexusdata::DType::Int64;
+opt.use_mmap = true;
+opt.num_threads = 0;
+
+auto ds = std::make_shared<nexusdata::CSVDataset>("iris_tiny.csv", opt);
+```
+
+Keep the dataset in a `shared_ptr`. The two-argument `random_split` takes `DatasetConstPtr`, which is `std::shared_ptr<const Dataset>`. A `shared_ptr<CSVDataset>` converts to that. The local pointer stays usable after the split, so you can still read `features()` while fitting a scale. The overload that takes `{0.8, 0.2}` as an initializer list moves the dataset into a new `shared_ptr` and leaves your local object moved-from. Do not call `features()` on that object afterwards.
+
+After construction:
+
+- `ds->size()` is 9.
+- `ds->num_features()` is 4.
+- `ds->features()` is `[9, 4]` `Float32`. The label column is not in this matrix. Feature `j` is packed, so a label that sat in the middle of the file does not leave a hole.
+- `ds->labels()` is `[9]` `Int64`.
+- `ds->column_names()` still has five strings, including `"species"`.
+- `ds->get(0).input` is a new `[4]` array. The bytes are copied out of the matrix. It is not a view.
+- `ds->get(0).label` is a new `[1]` array. For row 0 the value is `0`.
+- `ds->get(9)` throws `IndexError`. The message names the index and the size.
+
+`get` allocates because transforms replace `sample.input` and must not rewrite the stored table. `Sample::with_input` copies the label, extra tensors, and metadata onto the new sample. A `StandardizeTransform` therefore scales features and leaves `species` alone.
+
+`features()` returns a reference. Copying that `NDArray` shares storage. Do not write into it while another thread calls `get`.
+
+## The split does not copy rows
+
+```cpp
+auto [train, val] = nexusdata::random_split(ds, 0.8, 0.2, /*seed=*/42);
+```
+
+`ds` here is the `shared_ptr` from the previous block.
+
+Fractions must sum to 1 within `1e-6`. A negative fraction throws `InvalidArgumentError`. So does an empty list.
+
+Every fraction except the last is turned into a count with `llround(fraction * N)`. The last part receives whatever is left, after overflow is taken back from the earlier parts. For 9 rows, `llround(0.8 * 9)` is 7, so validation gets 2.
+
+Neither `Subset` copies feature bytes. Each one holds a `shared_ptr` to the parent and a `std::vector<std::size_t>` from `indices()`. `train.get(0)` calls `ds.get` on whichever shuffled parent index landed first. `train.size()` is 7. Those seven positions are not file rows `0..6`.
+
+The permutation is a Fisher–Yates from `PCG32(seed)`. Same length and same seed produce the same indices. A different file with the same row count and the same seed gets the same permutation, which is the same rows only when the files match. `num_workers` on the loader does not reshuffle this. The indices already exist.
+
+`random_split(dataset, {0.8, 0.2}, seed)` is a different overload. The initializer list must contain exactly two fractions, and the dataset argument is taken by value and moved into a `shared_ptr`. Use that form when you are finished with the local object. The call on this page uses the `shared_ptr` overload so `ds->features()` still works in the next section.
+
+`stratified_split(ds, ds->labels(), 0.8, 42)` groups integer labels, shuffles inside each class, and cuts each class with `llround`. A class of two or more rows is clamped so each side gets at least one row. This file has three rows per class, so each class contributes two training rows and one validation row, give or take the rounding clamp. Use it when a plain shuffle can miss a rare class. The label array must be numeric, rank 1, and length `size()`. `CSVDataset::labels()` is that array. Image labels are not. They live on each `Sample`.
+
+## Fit the scale on the training indices only
+
+The constructors of `StandardizeTransform` do not scan the dataset. If you measure the mean on all nine rows, the two validation rows change the scale that is later applied to themselves.
+
+```cpp
+const auto& x = ds->features();
+const auto& ids = train.indices();
+std::vector<double> mean(4, 0.0);
+std::vector<double> scale(4, 0.0);
+for (std::size_t col = 0; col < 4; ++col) {
+    double sum = 0.0;
+    for (std::size_t parent : ids) {
+        sum += x.data<float>()[parent * 4 + col];
+    }
+    mean[col] = sum / static_cast<double>(ids.size());
+    double acc = 0.0;
+    for (std::size_t parent : ids) {
+        const double d = x.data<float>()[parent * 4 + col] - mean[col];
+        acc += d * d;
+    }
+    const double s = std::sqrt(acc / static_cast<double>(ids.size()));
+    scale[col] = s;
+}
+```
+
+A zero or NaN scale is rewritten to `1` inside `StandardizeTransform`, so a constant column becomes `x - mean` rather than a division by zero. The throw you do get is `ShapeError` when `sample.input` does not have exactly `mean.size()` elements. Here that count is 4, which matches `num_features()`.
+
+```cpp
+auto scaled = nexusdata::MapDataset(
+    train,
+    std::make_shared<nexusdata::StandardizeTransform>(mean, scale));
+```
+
+`MapDataset` stores the parent and the transform. `size()` is `train.size()`. `get(i)` is `transform.apply(train.get(i))`. Nothing is scaled until something asks for the row. `StandardizeTransform::apply` runs the fused step `(x - mean) / scale` per feature and returns `sample.with_input(...)`.
+
+Apply the same `mean` and `scale` to `val`. Fitting a second transform on the validation rows is a different experiment.
+
+## Batches
+
+```cpp
+nexusdata::DataLoaderOptions load;
+load.batch_size = 4;
+load.shuffle = true;
+load.seed = 42;
+load.drop_last = false;
+load.num_workers = 0;
+
+nexusdata::DataLoader loader(std::move(scaled), load);
+// loader.size() is the number of batches, not the number of rows.
+// 7 rows, batch 4, drop_last false → 2 batches (4 and 3).
+
+for (const nexusdata::Batch& batch : loader) {
+    // batch.inputs: Float32 [B, 4]
+    // batch.labels: Int64   [B, 1]
+    const float* xrow = batch.inputs.data<float>();
+    const std::int64_t* y = batch.labels.data<std::int64_t>();
+    (void)xrow;
+    (void)y;
+}
+```
+
+`shuffle` here is a second permutation, inside the loader, over the 7 subset positions. It is not the split permutation. Its seed is `load.seed`. Batch 0 of epoch 0 is a fixed set of four subset indices for that seed. `num_workers` does not change which indices those are. It changes which thread materializes them.
+
+`drop_last = true` with these sizes yields one batch of 4 and drops the last 3 subset rows for that epoch. They are not removed from the dataset. The next epoch can include them if the shuffle moves them earlier.
+
+`num_workers = 0` runs fetch and collate on the calling thread. The iterator is not safe to advance from two threads. The destructor joins workers when you do set `num_workers > 0`. A second pass needs `loader.reset_epoch(seed)`. Range-for on a finished loader does not restart by itself.
+
+Default collate is `collate_stack`. It stacks `Sample::input` on axis 0. Labels of shape `[1]` become `[B, 1]`. A custom `CollateFn` replaces that. It receives `const std::vector<Sample>&` for one batch and returns a `Batch`.
+
+## The same pipeline as a chain
+
+```cpp
+auto loader2 = nexusdata::from_csv("iris_tiny.csv", opt)
+    .map(nexusdata::ClipTransform{0.0, 10.0})
+    .map(nexusdata::Log1pTransform{})
+    .shuffle(42)
+    .batches(4, /*drop_last=*/false)
+    .workers(2)
+    .prefetch(2)
+    .build();
+
+for (const auto& batch : *loader2) {
+    const auto n = batch.inputs.shape()[0];
+    (void)n;
+}
+```
+
+`from_csv` builds a `CSVDataset` inside a `shared_ptr` and wraps it in a `DatasetChain`. Each `map` appends a transform. At `batches`, the chain calls `realize()`: one transform stays as itself, two or more become a `Compose`. Tabular steps inside a `Compose` fuse into one pass, so clip and `log1p` are not two allocations. The realized object is a `MapDataset` over the CSV. `shuffle` only sets `DataLoaderOptions::shuffle` and `seed`. It does not shuffle at chain-build time. `batches` returns a `BatchPlan` because `DataLoader` is not movable. `workers` and `prefetch` change that plan. `build` returns `std::unique_ptr<DataLoader>`.
+
+`prefetch(0)` throws. `workers(-1)` throws. `batches(0)` throws.
+
+This chain standardizes nothing. Clip and `log1p` do not need training statistics. The moment you insert `StandardizeTransform`, go back to the index loop above and fit on the training subset only. Putting the fit inside `map` on the full file, before `random_split`, leaks validation rows into the scale.
+
+## A second epoch
+
+```cpp
+loader.reset_epoch(42); // same seed → same batch index sets as the first pass
+std::size_t seen = 0;
+for (const auto& batch : loader) {
+    seen += batch.inputs.shape()[0];
+}
+// drop_last false → seen == train.size()
+```
+
+`reset_epoch` rebuilds the sampler order. Random image transforms, if you had any, are reseeded from the loader seed on the next pass. This CSV pipeline has none.
+
+## What to check when the numbers look wrong
+
+- Label dtype `Float32` stores `0`, `1`, `2` as `0.f`, `1.f`, `2.f`. Downstream code that reads `data<std::int64_t>()` on a float label is a type error at the call, or a misread if you cast the pointer. Match the pointer to `label_dtype`.
+- `column_names().size()` is the file width. `num_features()` is one less. A loop over names that also indexes `get(i).input` must skip the label name.
+- `Skip` drops a row whose field count is wrong. It does not drop a row whose numeric conversion failed. That row stays, with zeros in the cells that were not written. Details are in the source page. If a class count looks short, print `size()` before the split.
+- Validation metrics that used a scale fit on all rows are not comparable to a scale fit on `train.indices()` only.
+
+Next: [JSON records](/docs/examples/json) if the file is not a rectangle of numbers, [Operators](/docs/examples/operators) for clip, `log1p`, min-max, and the loader fields.

@@ -1,0 +1,25 @@
+---
+title: Rehber — CSV'den DataLoader'a
+description: Shuffle, worker ve epoch reset ile uçtan uca CSV eğitim döngüsü.
+status: stable
+order: 10
+locale: tr
+section: guides
+since: "1.0"
+---
+
+```cpp
+CSVOptions opt;
+opt.label_column = "target";
+auto ds = std::make_shared<CSVDataset>("train.csv", opt);
+
+DataLoaderOptions lo;
+lo.batch_size = 64;
+lo.shuffle = true;
+lo.seed = 42;
+lo.num_workers = 2;
+DataLoader loader(ds, lo);
+for (const Batch& b : loader) { /* ... */ }
+```
+
+Bkz. [CSV](/docs/sources/csv), [DataLoader](/docs/concepts/dataloader).

@@ -1,0 +1,27 @@
+---
+title: SQLite
+description: SqliteDataset — requires NEXUSDATA_WITH_SQLITE.
+status: stable
+order: 105
+locale: en
+section: sources
+since: "1.0"
+---
+
+<Callout tone="warning" title="Optional dependency">
+Enable `NEXUSDATA_WITH_SQLITE=ON`.
+</Callout>
+
+```cpp
+#include "nexusdata/dataset/sqlite.hpp"
+SqliteDataset ds("data.db", /*query or table options*/);
+```
+
+## Notes
+
+- Useful when samples live in relational stores
+- Keep queries deterministic for reproducible epochs
+
+## See also
+
+- [Adding a reader](/docs/sources/adding-readers)

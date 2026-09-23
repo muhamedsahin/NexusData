@@ -1,0 +1,3 @@
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/nd_libwebp-populate.dir
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/edit_cache.dir
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/rebuild_cache.dir

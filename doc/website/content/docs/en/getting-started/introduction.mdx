@@ -1,0 +1,62 @@
+---
+title: Introduction
+description: What NexusData is, who it is for, hard boundaries, and its place in the Nexus ecosystem.
+status: stable
+order: 10
+locale: en
+section: getting-started
+since: "1.0"
+---
+
+## What NexusData is
+
+**NexusData** is a standalone **C++20** library for AI data ingress. It reads raw inputs, prepares them, shuffles indices, batches samples, and delivers `NDArray` payloads to host or (optionally) CUDA device memory.
+
+```cpp
+#include "nexusdata/nexusdata.hpp"
+using namespace nexusdata;
+```
+
+## Why it exists
+
+Training stacks often glue ad-hoc parsers and batch loops. NexusData standardizes:
+
+- Map-style `Dataset` + `Sampler` + `DataLoader`
+- Deterministic RNG (`PCG32`; GPU-side `Philox` when CUDA is on)
+- Zero-copy friendly views (`Subset`, shared `NDArray` storage)
+- Optional CUDA **data-prep only** — never training math
+
+## Who it is for
+
+- C++ teams wanting DataLoader-like ergonomics without a full ML framework
+- Pipelines that must reproduce batch order across machines and worker counts
+- Projects that may later attach NexusFlash Pro via a one-way adapter
+
+## Hard boundaries
+
+| Out of scope | Belongs elsewhere |
+| --- | --- |
+| GEMM / matmul | NexusFlash Pro (separate) |
+| Autograd | Future compute stack |
+| Models / loss / optim / train loop | Planned Nexus\* modules |
+
+NexusData **does not depend** on those libraries.
+
+## Ecosystem
+
+```
+Sources → Dataset → Sampler → DataLoader → Batch/NDArray → consumer
+                                              ↓ optional
+                                        NexusFlash Pro adapter
+```
+
+## Mental model
+
+1. **Dataset** — `size()` / `get(i)`; never shuffled in place
+2. **Sampler** — index sequence for an epoch
+3. **DataLoader** — fetch, collate, prefetch/pin/device
+4. **NDArray** — shape + dtype + memory carrier (no compute)
+
+<Callout tone="tip" title="API honesty">
+Samples match public headers in NexusData **v1.0**. Optional CMake features (`NEXUSDATA_WITH_SQLITE`, `ARROW`, `HDF5`, `CUDA`) are called out on their pages.
+</Callout>

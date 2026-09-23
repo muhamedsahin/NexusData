@@ -1,0 +1,37 @@
+---
+title: Pipeline save / load
+description: Versioned NEXUSDATA_PIPELINE 1 snapshots for fitted Transformers and compose steps.
+status: stable
+order: 50
+locale: en
+section: preparation
+since: "1.0"
+---
+
+## What is stored
+
+`Pipeline` (`nexusdata/pipeline/persist.hpp`) holds:
+
+- Fitted `Transformer` instances
+- Optional sample-level `Compose`
+- Serializable compose step strings (e.g. `"Clip -1 1"`)
+
+Format tag: **`NEXUSDATA_PIPELINE 1`**.
+
+```cpp
+#include "nexusdata/pipeline/persist.hpp"
+
+Pipeline pipe;
+pipe.add_transformer(std::make_shared<StandardScaler>());
+pipe.transformers()[0]->fit(train_X);
+pipe.add_compose_step("Clip -1 1");
+pipe.save_file("model_prep.ndpipe");
+
+Pipeline loaded;
+loaded.load_file("model_prep.ndpipe"); // default factory: make_transformer_by_type
+NDArray out = loaded.transform_matrix(test_X);
+```
+
+## Custom types
+
+Pass a factory to `load` / `load_file` that maps type name → `shared_ptr<Transformer>` when you register custom transformers.

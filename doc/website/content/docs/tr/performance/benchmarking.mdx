@@ -1,0 +1,18 @@
+---
+title: Benchmark
+description: Mikrobenchmark harness'ini derleyip kendi donanımınızda ölçme.
+status: stable
+order: 50
+locale: tr
+section: performance
+since: "1.0"
+---
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DNEXUSDATA_BUILD_BENCH=ON
+cmake --build build --target bench_suite
+```
+
+23 Eylül 2026 koşusunun makinesi, komutları ve ölçülmeyenleri [Benchmarklar](/docs/performance/benchmarks) sayfasındadır. O grafikler NexusData'nın kendi skaler döngüsü ile AVX2 çekirdeklerini karşılaştırır. Başka kütüphane yoktur.
+
+Yayınlanmış bir sayı, bir CPU'da bir ısınmadan sonraki birkaç ölçümün en iyisidir. Alıntılamadan önce yeniden çalıştır. JSON'daki `stddev` 0'dır çünkü harness yalnızca en iyi süreyi tutar.

@@ -1,0 +1,35 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Threads)
+
+set(NexusData_WITH_CUDA "@NEXUSDATA_WITH_CUDA@")
+set(NexusData_WITH_NVJPEG "@NEXUSDATA_WITH_NVJPEG@")
+if(NexusData_WITH_CUDA)
+  find_dependency(CUDAToolkit)
+endif()
+# Bundled codecs (NEXUSDATA_FETCH_DEPS=ON) are compiled into the library; system
+# packages are link dependencies of a static nexusdata.
+foreach(_nd_dep IN ITEMS @NEXUSDATA_CODEC_DEPS@)
+  if(_nd_dep STREQUAL "zstd" OR _nd_dep STREQUAL "lz4")
+    find_dependency(${_nd_dep} CONFIG)
+  else()
+    find_dependency(${_nd_dep})
+  endif()
+endforeach()
+set(NexusData_WITH_SQLITE "@NEXUSDATA_WITH_SQLITE@")
+set(NexusData_WITH_ARROW "@NEXUSDATA_WITH_ARROW@")
+if(NexusData_WITH_ARROW)
+  find_dependency(Arrow CONFIG)
+  find_dependency(Parquet CONFIG)
+endif()
+set(NexusData_WITH_PYTHON "@NEXUSDATA_WITH_PYTHON@")
+set(NexusData_WITH_MATRIXFLASH "@NEXUSDATA_WITH_MATRIXFLASH@")
+
+include("${CMAKE_CURRENT_LIST_DIR}/NexusDataTargets.cmake")
+
+if(NOT TARGET nexusdata::nexusdata)
+  message(FATAL_ERROR "NexusData: exported target nexusdata::nexusdata missing")
+endif()
+
+check_required_components(NexusData)

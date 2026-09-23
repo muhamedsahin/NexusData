@@ -1,0 +1,54 @@
+---
+title: Memory & ownership
+description: Lifetime rules, shared_ptr datasets, zero-copy views, allocators, and thread-safety.
+status: stable
+order: 65
+locale: en
+section: concepts
+since: "1.0"
+---
+
+## NDArray storage
+
+- Backed by reference-counted aligned buffers
+- Copy is shallow; `clone()` deep-copies
+- Adapters may share storage via `from_shared` / DLPack
+
+## Dataset lifetime
+
+```cpp
+DatasetPtr ds = std::make_shared<CSVDataset>("train.csv", opt);
+auto [train, val] = random_split(ds, {0.8, 0.2}, 42);
+DataLoader loader(train, lo);
+// keep `ds` (or shared ownership inside Subset) alive while iterating
+```
+
+`Subset` holds `DatasetConstPtr` to the parent — destroying the only owner of the parent while views exist is undefined.
+
+## Thread-safety table
+
+| Object | Concurrent reads | Concurrent writes |
+| --- | --- | --- |
+| Immutable `NDArray` | Safe | N/A |
+| `CSVDataset` after load | Safe `get` | Don't mutate |
+| `Sampler` | Not shared across threads | DataLoader-owned |
+| `DataLoader` iteration | **Single** consumer thread | Destructor joins workers |
+
+## Zero-copy patterns
+
+| Pattern | Copies bytes? |
+| --- | --- |
+| `Subset` | No (index remap) |
+| Shallow `NDArray` copy | No |
+| `clone()` | Yes |
+| `cpu()` / `cuda()` across devices | Yes (transfer) |
+| mmap CSV parse into owned buffers | After parse, samples own RAM |
+
+## Allocators
+
+Core allocation goes through aligned allocator helpers (`core/allocator.hpp`). Pinned host buffers use `NDArray::pinned` when CUDA support is compiled in.
+
+## See also
+
+- [NDArray](/docs/concepts/ndarray)
+- [Dataset](/docs/concepts/dataset)

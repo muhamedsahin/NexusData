@@ -1,0 +1,19 @@
+---
+title: Error model
+description: Error hierarchy, message helpers, and C API NexusStatus mapping.
+status: stable
+order: 30
+locale: en
+section: reference
+since: "1.0"
+---
+
+## C++
+
+All library errors derive from `nexusdata::Error` (`core/error.hpp`), including `InvalidArgumentError`, `IndexError`, `ShapeError`, `IOError`, and internal failures.
+
+Catch `Error` at boundaries; use specific types when recovering.
+
+## C API
+
+Functions return `NexusStatus`. Call `nexus_last_error()` for a thread-local detail string after a non-`NEXUS_OK` result.

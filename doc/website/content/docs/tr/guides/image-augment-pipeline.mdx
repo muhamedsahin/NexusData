@@ -1,0 +1,23 @@
+---
+title: Rehber — Görüntü augmentation
+description: ImageFolder + Compose + MapDataset + collate_stack.
+status: stable
+order: 20
+locale: tr
+section: guides
+since: "1.0"
+---
+
+```cpp
+auto raw = std::make_shared<ImageFolderDataset>("data/train");
+auto tfm = std::make_shared<Compose>({
+    std::make_shared<RandomHorizontalFlip>(0.5f, 7),
+    std::make_shared<Resize>(256, 256),
+    std::make_shared<CenterCrop>(224, 224),
+    std::make_shared<ToTensor>(),
+});
+auto ds = std::make_shared<MapDataset>(raw, tfm);
+DataLoader loader(ds, DataLoaderOptions{});
+```
+
+Batch içindeki tüm tensörler aynı CHW şeklinde olmalıdır.

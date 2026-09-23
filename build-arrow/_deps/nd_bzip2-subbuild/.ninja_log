@@ -1,0 +1,21 @@
+# ninja log v6
+5306	5527	8118191307487418	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-install	25217efc6fb98a71
+25	254	8118191254752061	nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-mkdir	b39dfa5b79fd59c5
+5528	5751	8118191309710560	nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-test	eff15a70a45744b2
+25	254	8118191254752061	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-mkdir	b39dfa5b79fd59c5
+257	4389	8118191296099083	nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-download	92a171a8dbf032bd
+257	4389	8118191296099083	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-download	92a171a8dbf032bd
+4394	4611	8118191298332079	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-update	5da9e9e1e38d59ef
+4613	4846	8118191300687279	nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-patch	f62b2f4c37e3116e
+4394	4611	8118191298332079	nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-update	5da9e9e1e38d59ef
+4613	4846	8118191300687279	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-patch	f62b2f4c37e3116e
+4847	5075	8118191302962507	nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-configure	57d942d061ba19d6
+4847	5075	8118191302962507	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-configure	57d942d061ba19d6
+5752	6081	8118191313008691	CMakeFiles/nd_bzip2-populate-complete	666f06590cca6945
+5076	5305	8118191305251399	nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-build	d38d8afa1aea438
+5076	5305	8118191305251399	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-build	d38d8afa1aea438
+5752	6081	8118191313008691	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-done	666f06590cca6945
+5306	5527	8118191307487418	nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-install	25217efc6fb98a71
+5528	5751	8118191309710560	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-test	eff15a70a45744b2
+5752	6081	8118191313008691	nd_bzip2-populate-prefix/src/nd_bzip2-populate-stamp/nd_bzip2-populate-done	666f06590cca6945
+5752	6081	8118191313008691	C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_bzip2-subbuild/CMakeFiles/nd_bzip2-populate-complete	666f06590cca6945

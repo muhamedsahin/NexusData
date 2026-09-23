@@ -1,0 +1,12 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The download step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+method=url
+command=C:/Program Files/JetBrains/CLion 2026.2.1/bin/cmake/win/x64/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/download-nd_lz4-populate.cmake;COMMAND;C:/Program Files/JetBrains/CLion 2026.2.1/bin/cmake/win/x64/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/verify-nd_lz4-populate.cmake;COMMAND;C:/Program Files/JetBrains/CLion 2026.2.1/bin/cmake/win/x64/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_lz4-subbuild/nd_lz4-populate-prefix/src/nd_lz4-populate-stamp/extract-nd_lz4-populate.cmake
+source_dir=C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_lz4-src
+work_dir=C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps
+url(s)=https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz
+hash=SHA256=537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b
+      no_extract=
+

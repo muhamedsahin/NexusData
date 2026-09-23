@@ -1,0 +1,28 @@
+---
+title: Guide — Image augment pipeline
+description: ImageFolder + Compose + MapDataset + collate_stack for fixed-size tensors.
+status: stable
+order: 20
+locale: en
+section: guides
+since: "1.0"
+---
+
+```cpp
+auto raw = std::make_shared<ImageFolderDataset>("data/train");
+auto tfm = std::make_shared<Compose>({
+    std::make_shared<RandomHorizontalFlip>(0.5f, 7),
+    std::make_shared<Resize>(256, 256),
+    std::make_shared<CenterCrop>(224, 224),
+    std::make_shared<ToTensor>(),
+});
+auto ds = std::make_shared<MapDataset>(raw, tfm);
+
+DataLoaderOptions lo;
+lo.batch_size = 32;
+lo.shuffle = true;
+lo.seed = 1;
+DataLoader loader(ds, lo); // default collate_stack
+```
+
+All images in a batch must share the same CHW shape after transforms.

@@ -1,0 +1,14 @@
+# Target labels
+ nd_libwebp-populate
+# Source files and their labels
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/nd_libwebp-populate
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/nd_libwebp-populate.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/CMakeFiles/nd_libwebp-populate-complete.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-build.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-configure.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-download.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-install.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-mkdir.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-patch.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-test.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_libwebp-subbuild/nd_libwebp-populate-prefix/src/nd_libwebp-populate-stamp/nd_libwebp-populate-update.rule

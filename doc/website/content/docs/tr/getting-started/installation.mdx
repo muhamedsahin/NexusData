@@ -1,0 +1,83 @@
+---
+title: Kurulum
+description: Gereksinimler, CMake FetchContent, find_package, isteğe bağlı bayraklar ve sık hatalar.
+status: stable
+order: 20
+locale: tr
+section: getting-started
+since: "1.0"
+---
+
+## Gereksinimler
+
+| Araç | Sürüm |
+| --- | --- |
+| Dil | C++20 |
+| CMake | 3.20+ |
+| Derleyiciler | GCC 11+, Clang 14+, MSVC 19.3+ |
+
+İsteğe bağlı: CUDA, Arrow (Parquet), SQLite, HDF5, pybind11.
+
+## Kaynaktan derleme
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+ctest --test-dir build --output-on-failure
+cmake --install build --prefix /path/to/prefix
+```
+
+## find_package
+
+```cmake
+find_package(NexusData REQUIRED)
+target_link_libraries(app PRIVATE nexusdata::nexusdata)
+```
+
+Ayrıca: `pkg-config --libs nexusdata`, `vcpkg.json`, `conanfile.py`.
+
+## Etkileşimli üretici
+
+<InstallCommandGenerator />
+
+## FetchContent
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+  nexusdata
+  GIT_REPOSITORY https://github.com/PLACEHOLDER_ORG/nexusdata.git
+  GIT_TAG        v1.0.0
+)
+FetchContent_MakeAvailable(nexusdata)
+target_link_libraries(my_app PRIVATE nexusdata::nexusdata)
+```
+
+<Callout tone="warning" title="Depo URL'si">
+Gerçek Git remote `site.config.ts` içinde tanımlandığında `PLACEHOLDER_ORG` değerini güncelleyin.
+</Callout>
+
+## CMake seçenekleri
+
+| Seçenek | Varsayılan | Amaç |
+| --- | --- | --- |
+| `NEXUSDATA_WITH_CUDA` | OFF | GPU veri-hazırlık backend'i |
+| `NEXUSDATA_WITH_PYTHON` | OFF | Python bağlamaları |
+| `NEXUSDATA_WITH_SQLITE` | OFF | SQLite okuyucu |
+| `NEXUSDATA_WITH_ARROW` | OFF | Parquet/Arrow okuyucu |
+| `NEXUSDATA_WITH_HDF5` | OFF | HDF5 okuyucu |
+| `NEXUSDATA_SANITIZER` | `""` | ASan / UBSan / TSan |
+| `NEXUSDATA_BUILD_FUZZ` | ON | Fuzz smoke |
+
+## İşletim sistemi notları
+
+**Linux/macOS:** Ninja + GCC/Clang; gerektiğinde CUDA toolkit'i etkinleştirin.  
+**Windows:** MSVC 19.3+ / Clang-CL; `mmap` dahili olarak Win32 eşlemesini kullanır.
+
+## Sık karşılaşılan hatalar
+
+| Belirti | Çözüm |
+| --- | --- |
+| `find_package` bulunamıyor | `CMAKE_PREFIX_PATH` veya `NexusData_DIR` ayarlayın |
+| CUDA çözümlenmiyor | `NEXUSDATA_WITH_CUDA=ON` ile yeniden derleyin |
+| Parquet/HDF5/SQLite eksik | İlgili `NEXUSDATA_WITH_*` + bağımlılıkları kurun |

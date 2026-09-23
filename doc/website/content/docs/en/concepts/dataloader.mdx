@@ -1,0 +1,76 @@
+---
+title: DataLoader
+description: Batching, shuffle, workers, prefetch, pin_memory, drop_last, and epoch reset.
+status: stable
+order: 50
+locale: en
+section: concepts
+since: "1.0"
+---
+
+## Overview
+
+`DataLoader` pulls indices from a sampler, fetches `Sample`s from a dataset, collates them into `Batch`es, and optionally prefetches on background workers.
+
+```cpp
+DataLoaderOptions lo;
+lo.batch_size = 64;
+lo.shuffle = true;
+lo.drop_last = true;
+lo.seed = 42;
+lo.num_workers = 4;
+lo.prefetch_factor = 2;
+lo.pin_memory = false;
+lo.device = Device::host();
+
+DataLoader loader(dataset, lo); // default collate_stack
+for (const Batch& b : loader) {
+  // use b.inputs / b.labels
+}
+loader.reset_epoch(43);
+```
+
+## Options
+
+| Field | Meaning |
+| --- | --- |
+| `batch_size` | Samples per batch |
+| `shuffle` | Use random sampler |
+| `drop_last` | Drop incomplete final batch |
+| `seed` | Sampler RNG seed |
+| `num_workers` | Parallel fetch+collate (`0` = sync) |
+| `prefetch_factor` | Queue ≈ `num_workers * factor` (min 2 if workers &gt; 0) |
+| `pin_memory` | Page-locked host staging before H2D |
+| `persistent_workers` | Keep workers across epochs |
+| `timeout_ms` | Prefetch wait timeout |
+| `device` | Output placement (`Device::host()` or CUDA / Auto) |
+
+## Determinism contract
+
+Batch *i* always contains the same sample indices for a given seed, **independent of `num_workers`**.
+
+## Lifetime & threading
+
+- Not safe to iterate from multiple threads
+- Destructor joins workers
+- Hold datasets via `shared_ptr` when views must outlive the loader
+
+## drop_last
+
+```
+dataset_size=10, batch_size=4
+drop_last=false → batches of 4,4,2
+drop_last=true  → batches of 4,4  (indices 8,9 dropped)
+```
+
+Interactive visualization: homepage Batch scene.
+
+## Simulator
+
+<DataLoaderSimulator />
+
+## See also
+
+- [Batch & collate](/docs/concepts/batch-collate)
+- [Sampler](/docs/concepts/sampler)
+- [GPU backend guide](/docs/concepts/determinism) (prep determinism notes)

@@ -1,0 +1,22 @@
+---
+title: MatrixFlash adapter
+description: Unidirectional zero-copy FlashTensorView / FlashBatchView hand-off (no Flash dependency).
+status: stable
+order: 30
+locale: en
+section: integration
+since: "1.0"
+---
+
+## Design
+
+NexusData **never includes** MatrixFlash headers. `MatrixFlashAdapter` builds `FlashTensorView` / `FlashBatchView` from `NDArray` / `Batch` for a one-way hand-off.
+
+```cpp
+#include "nexusdata/adapter/matrixflash.hpp"
+
+FlashTensorView v = MatrixFlashAdapter::view(array);
+FlashBatchView b = MatrixFlashAdapter::view_batch(batch);
+```
+
+Optional CMake `-DNEXUSDATA_WITH_MATRIXFLASH=ON` declares a linked Flash SDK for richer integration later; the view helpers work without it.

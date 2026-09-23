@@ -1,0 +1,15 @@
+---
+title: Guide — Streaming IterableDataset
+description: Use IterableDataset when size()/get(i) is impossible — Chain, shuffle buffer, text lines.
+status: stable
+order: 30
+locale: en
+section: guides
+since: "1.0"
+---
+
+Map-style `Dataset` requires random access. For logs, shards, or infinite streams, use **`IterableDataset`** APIs in `dataset/iterable.hpp` and compose helpers (`Chain`, shuffle buffer, take/skip) from `dataset/compose.hpp`.
+
+Do **not** fake `size()` / `get()` on streams — keep the contracts separate.
+
+Pair with appropriate collate (`collate_pad_sequence` for variable-length text/audio).

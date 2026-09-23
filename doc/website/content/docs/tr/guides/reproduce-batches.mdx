@@ -1,0 +1,15 @@
+---
+title: Rehber — Tekrarlanabilir batch'ler
+description: Seed sabitleme, drop_last ve worker sayısından bağımsız indeks doğrulama.
+status: stable
+order: 40
+locale: tr
+section: guides
+since: "1.0"
+---
+
+1. `seed` ve transform seed'lerini açıkça verin  
+2. `reset_epoch` aynı şekilde çağrılsın  
+3. Karşılaştırmada `drop_last = true` tercih edin  
+4. `num_workers` değişse de indeks sırası aynı kalmalı  
+5. Fit yalnızca train; eval'de aynı pipeline dosyası

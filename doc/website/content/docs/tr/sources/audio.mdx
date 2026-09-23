@@ -1,0 +1,47 @@
+---
+title: Ses (WAV)
+description: PCM WAV dosyaları ve dizinler için WavDataset ve load_wav.
+status: stable
+order: 115
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## WavDataset
+
+```cpp
+WavOptions opt;
+opt.target_frames = 16000;  // 0 = doğal uzunluk
+opt.pad_value = 0.0f;
+
+WavDataset audio("clips/", opt);  // dosya veya .wav dizini
+Sample s = audio.get(0);
+// input: Float32 [frames, channels]
+```
+
+| Constructor yolu | `size()` |
+| --- | --- |
+| Tek `.wav` dosyası | `1` |
+| Dizin | Bulunan her `.wav` için bir sample |
+
+## load_wav yardımcıları
+
+```cpp
+WavInfo info;
+NDArray pcm = load_wav("clip.wav", &info);
+// info.sample_rate, channels, bits_per_sample, num_frames
+
+NDArray from_mem = load_wav_from_buffer(bytes, size, &info);
+```
+
+Desteklenen PCM: **16-bit integer** ve **32-bit float**, little-endian.
+
+## Batch
+
+`target_frames` sabitlemedikçe klip uzunlukları değişir. `collate_pad_sequence` veya `WavOptions` içinde kırpma kullanın.
+
+## İlgili
+
+- [Batch ve collate](/docs/concepts/batch-collate)
+- [mmap binary](/docs/sources/mmap-binary)

@@ -1,0 +1,28 @@
+---
+title: Auto device policy
+description: Device::auto_select, calibration thresholds, and break-even Host vs CUDA decisions.
+status: stable
+order: 40
+locale: en
+section: performance
+since: "1.0"
+---
+
+## API
+
+```cpp
+#include "nexusdata/backend/device.hpp"
+
+Device d = Device::auto_select();
+AutoDevicePolicy policy;
+CalibrationReport report = calibrate_auto_device_policy(policy);
+Device resolved = resolve_device(d, GpuOpKind::ImageAugment, nbytes, report.policy);
+```
+
+## Behavior
+
+- Without CUDA build / no device → always Host
+- Thresholds (`image_nbytes_threshold`, `tabular_nbytes_threshold`) come from a break-even model using measured host memcpy and assumed PCIe bandwidth
+- Op kind (`GpuOpKind`) selects which threshold applies
+
+Calibrate once at process start on the target machine.

@@ -1,0 +1,21 @@
+---
+title: Bölme ve istatistik
+description: random_split, k-fold yardımcıları, Subset görünümleri ve DatasetStats.
+status: stable
+order: 60
+locale: tr
+section: preparation
+since: "1.0"
+---
+
+`split.hpp` `Subset` görünümleri döndürür — ebeveyn depolama kopyalanmaz.
+
+```cpp
+auto [train, val] = random_split(dataset, 0.8, 0.2, /*seed=*/42);
+```
+
+## Görselleştirici
+
+<SplitVisualizer />
+
+`stats.hpp` tanı için dağılım özetleri üretir; ön işleme kararlarından önce held-out katlara bakmayın.

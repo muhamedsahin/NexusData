@@ -1,0 +1,109 @@
+---
+title: Operatörler
+description: Tablo dönüşümleri, görsel dönüşümleri, map, filter, bölmeler ve loader seçenekleri.
+status: stable
+order: 50
+locale: tr
+section: examples
+since: "1.0"
+---
+
+Burada operatör bir `Transform` veya veri kümesi / loader metodudur. `apply(sample)` yeni bir `Sample` döndürür; saklanan satırı değiştirmez. Tablo dönüşümleri `Compose` içinde tek bir SIMD geçişine birleşir. Görsel geometri, `ToTensor` veya `NormalizeImage` olana kadar HWC `UInt8` kalır.
+
+## Tablo
+
+Başlık: `nexusdata/pipeline/tabular.hpp`.
+
+| Tür | Etki | Kurulum |
+| --- | --- | --- |
+| `ClipTransform` | Her girdi elemanını `[min, max]` aralığına kıstırır | `min > max` ise fırlatır |
+| `Log1pTransform` | Girdide `log(1 + x)` | `Log1pTransform()` |
+| `StandardizeTransform` | Özellik başına `(x - mean) / scale` | Eşit ve boş olmayan vektörler. 0 veya NaN ölçek 1 olur |
+| `MinMaxTransform` | `[data_min, data_max]` aralığını `[feature_min, feature_max]` üzerine taşır | min/max vektörleri, sonra isteğe bağlı özellik aralığı (varsayılan 0 ve 1) |
+
+`StandardizeTransform`, `sample.input` tam olarak `mean.size()` eleman değilse `ShapeError` fırlatır. İstatistikleri sen verirsin. Kurucular veri kümesini taramaz.
+
+```cpp
+#include "nexusdata/pipeline/fluent.hpp"
+#include "nexusdata/pipeline/tabular.hpp"
+
+auto loader = nexusdata::from_csv("train.csv")
+    .map(nexusdata::ClipTransform{0.0, 1.0e6})
+    .map(nexusdata::Log1pTransform{})
+    .map(nexusdata::MinMaxTransform{
+        std::vector<double>{0.0, 0.0},
+        std::vector<double>{10.0, 10.0},
+        0.0,
+        1.0})
+    .shuffle(42)
+    .batches(64)
+    .build();
+```
+
+Tek `Compose` içindeki komşu tablo adımları tek `FusedTransform` olur: bir ayırma, bir geçiş, adımları ayrı uygulamakla aynı değerler.
+
+## Görseller
+
+Başlık: `nexusdata/pipeline/image.hpp`.
+
+| Tür | Etki |
+| --- | --- |
+| `Resize(h, w, interp)` | HWC boyutlandırma. `Bilinear` veya `Nearest` |
+| `CenterCrop(h, w)` | Merkez pencere |
+| `RandomCrop(h, w)` | Rastgele pencere. Tohumlanır |
+| `RandomHorizontalFlip(p, seed)` | `p` olasılıkla çevir |
+| `RandomVerticalFlip(p, seed)` | Aynı, dikey |
+| `Grayscale` | Kanal sayısını düşürür |
+| `Pad(padding, fill)` | Sabit kenar |
+| `ToTensor` | HWC `UInt8` → `[0, 1]` float CHW |
+| `NormalizeImage(mean, stddev)` | Kanal başına `(x - mean) / std`. HWC `UInt8` üzerinde CHW'ye de çevirir |
+
+`is_random()` crop ve flip'ler için doğrudur. `Compose` bu adımları komşularıyla birleştirmez; tohum her birine ulaşır.
+
+## map ve filter
+
+```cpp
+auto chain = nexusdata::from_csv("train.csv")
+    .filter([](const nexusdata::Sample& s) {
+        return s.input.numel() > 0;
+    })
+    .map(nexusdata::ClipTransform{-1.0, 1.0});
+auto ds = chain.dataset();
+```
+
+`filter`, `std::function<bool(const Sample&)>` alır. Boş predicate fırlatır. `dataset()`, `map` kullanıldıysa zinciri `MapDataset` olarak gerçekleştirir.
+
+## Bölmeler
+
+Başlık: `nexusdata/dataset/split.hpp`.
+
+```cpp
+auto [train, val] = nexusdata::random_split(ds, 0.8, 0.2, 42);
+auto [strain, sval] = nexusdata::stratified_split(ds, ds.labels(), 0.8, 42);
+auto folds = nexusdata::k_fold(ds, /*n_splits=*/5, /*shuffle=*/true, 42);
+```
+
+`stratified_split` ve katmanlı k-fold, `[N]` şekilli sayısal etiket dizisi ister. `CSVDataset::labels()` etiket sütunu sayısalsa bu dizidir. Görsel etiketleri tek bir `labels()` tablosunda durmaz; her `Sample` üzerindedir.
+
+`Subset` bir veri kümesidir. `DataLoader` veya `MapDataset` onu kabul eder.
+
+## Davranışı değiştiren DataLoader seçenekleri
+
+| Alan | Varsayılan | Anlam |
+| --- | --- | --- |
+| `batch_size` | 1 | Batch başına satır |
+| `shuffle` | false | Örnekleyici permütasyonu. Tekrar için `seed` gerekir |
+| `drop_last` | false | Kısa son batch'i at |
+| `seed` | 0 | Örnekleyici ve rastgele dönüşümler |
+| `num_workers` | 0 | 0 çağıran thread'de çalışır |
+| `prefetch_factor` | 2 | Kuyruk derinliği yaklaşık `workers * factor` |
+| `in_order` | true | Yeniden sıralama tamponu. `false` batch'i hazır olur olmaz verir. Batch içindeki indeksler değişmez |
+| `pin_memory` | false | CUDA kopyasından önce sayfa kilitli host alanı |
+| `device` | host | `Device::host()`, `Device::cuda(i)` veya `Device::auto_select()` |
+| `batch_transform` | boş | `supports_batch()` bildiren, collate sonrası çalışan dönüşüm |
+| `persistent_workers` | false | Worker'ları epoch'lar arasında tut |
+| `timeout_ms` | 0 | Bekleme sınırı. 0 zaman aşımı yok |
+
+`BatchPlan::workers` ve `prefetch`, `batches()` sonrasında `num_workers` ve `prefetch_factor` ayarlar. `prefetch` en az 1 ister.
+
+Döngü tek thread'dedir. Yıkıcı worker'ları birleştirir. İkinci turdan önce `reset_epoch` çağır. `num_workers` 0 iken `pipeline_stats()` boştur.

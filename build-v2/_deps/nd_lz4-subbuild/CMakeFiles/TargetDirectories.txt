@@ -1,0 +1,3 @@
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_lz4-subbuild/CMakeFiles/nd_lz4-populate.dir
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_lz4-subbuild/CMakeFiles/edit_cache.dir
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_lz4-subbuild/CMakeFiles/rebuild_cache.dir

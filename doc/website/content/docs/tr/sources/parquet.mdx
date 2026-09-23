@@ -1,0 +1,52 @@
+---
+title: Parquet
+description: NEXUSDATA_WITH_ARROW arkasında ParquetDataset ve Apache Arrow entegrasyonu.
+status: stable
+order: 100
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## CMake özellik bayrağı
+
+Parquet desteği **isteğe bağlıdır**. Yapılandırma sırasında açın:
+
+```bash
+cmake -DNEXUSDATA_WITH_ARROW=ON ...
+```
+
+Arrow **kapalıyken** (birçok derlemede varsayılan):
+
+- `ParquetDataset` constructor'ı açık hata fırlatır
+- `parquet_support_enabled()` `false` döner
+
+<Callout tone="warning" title="NEXUSDATA_WITH_ARROW">
+Dağıtılan başlıklar her zaman `ParquetDataset` bildirir; uygulama bayrakla korunur. Taşınabilir binary'lerde Parquet'e güvenmeden önce `parquet_support_enabled()` kontrol edin.
+</Callout>
+
+## API yüzeyi
+
+```cpp
+ParquetOptions opt;
+opt.columns = "f1,f2,f3";   // boş => tüm sütunlar (açıkken)
+opt.label_column = -1;      // -1 = son sütun etiket
+
+if (parquet_support_enabled()) {
+  ParquetDataset data("train.parquet", opt);
+  Sample s = data.get(0);
+}
+```
+
+| Alan | Anlam |
+| --- | --- |
+| `columns` | Virgülle ayrılmış projeksiyon listesi |
+| `label_column` | Sıfır tabanlı etiket indeksi veya son sütun için `-1` |
+
+Açıkken davranış diğer tabular dataset'lerle aynıdır: `NDArray` feature ve etiket döndüren map-style `size()` / `get()`.
+
+## İlgili
+
+- [CSV](/docs/sources/csv)
+- [SQLite](/docs/sources/sqlite)
+- [Kurulum](/docs/getting-started/installation)

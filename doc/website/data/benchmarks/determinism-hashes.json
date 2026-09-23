@@ -1,0 +1,26 @@
+{
+  "id": "determinism-hashes",
+  "title": {
+    "en": "Determinism check (illustrative)",
+    "tr": "Determinizm kontrolü (örnek)"
+  },
+  "metric": "hash_match",
+  "unit": "match",
+  "higherIsBetter": true,
+  "illustrative": true,
+  "date": null,
+  "libraryVersion": null,
+  "commit": null,
+  "hardware": null,
+  "methodology": {
+    "en": "Placeholder table: same seed must yield identical batch index hashes across worker counts. Replace with golden hashes from your CI.",
+    "tr": "Yer tutucu tablo: aynı seed, worker sayısından bağımsız aynı batch indeks hash'lerini üretmeli. CI golden hash'leriyle değiştirin."
+  },
+  "reproduce": "ctest --test-dir build -R determinism",
+  "chartKind": "table",
+  "results": [
+    { "name": "workers=0", "value": 1, "stddev": 0, "runs": 0, "isBaseline": true },
+    { "name": "workers=2", "value": 1, "stddev": 0, "runs": 0, "isBaseline": false },
+    { "name": "workers=4", "value": 1, "stddev": 0, "runs": 0, "isBaseline": false }
+  ]
+}

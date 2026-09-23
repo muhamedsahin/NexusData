@@ -1,0 +1,77 @@
+---
+title: Görsel klasörü
+description: Sınıf klasörleri, çözme seçenekleri, resize, crop, flip ve batch tensörleri.
+status: stable
+order: 40
+locale: tr
+section: examples
+since: "1.0"
+---
+
+`ImageFolder`, `kök/sınıf_adı/*` düzenini tarar. Sınıf adları sıralanır, etiket sınıf indeksidir. Çözme `get` içinde olur; kurulum yalnızca yolları kaydeder. Dosya sistemi eşzamanlı okumaya izin veriyorsa eşzamanlı `get` güvenlidir. Her çağrı kendi görselini ayırır.
+
+JPEG, PNG, BMP, TGA ve GIF `load_image` ile çözülür. WebP, sıkıştırılmamış TIFF ve isteğe bağlı AVIF, o yol derlendiyse `decode_media_image` üzerinden gider.
+
+## Düzen
+
+```text
+data/train/cat/a.jpg
+data/train/cat/b.png
+data/train/dog/c.jpg
+```
+
+```cpp
+#include "nexusdata/dataset/image_folder.hpp"
+
+nexusdata::ImageFolderOptions opt;
+opt.decode.channels = nexusdata::ImageChannels::RGB; // Gray, RGBA veya Keep
+opt.decode.apply_exif_orientation = true;
+opt.decode.on_corrupt = nexusdata::CorruptImagePolicy::Skip;
+opt.recursive = false;
+opt.extensions = {".jpg", ".jpeg", ".png"};
+
+nexusdata::ImageFolder folder("data/train", opt);
+const auto& classes = folder.classes();
+```
+
+`Skip` bozuk dosyayı tarama sırasında atar. `Throw`, `get` sırasında başarısız olur. Çözülmüş girdi HWC `UInt8`, şekil `[H, W, C]` olur.
+
+`load_image` ve `decode_image` veri kümesi kurmadan tek dosya veya tampon çözer. `image_to_tensor`, HWC `UInt8` değerini `[0, 1]` aralığında float CHW yapar.
+
+## Resize, crop, flip, normalize
+
+Görsel dönüşümleri HWC `UInt8` bekler. `NormalizeImage` float CHW de kabul eder. HWC `UInt8` üzerinde hem tensöre çevirir hem normalize eder ve float CHW yazar.
+
+```cpp
+#include "nexusdata/dataset/map.hpp"
+#include "nexusdata/pipeline/image.hpp"
+#include "nexusdata/pipeline/transform.hpp"
+#include "nexusdata/loading/dataloader.hpp"
+
+auto prep = std::make_shared<nexusdata::Compose>(
+    std::initializer_list<nexusdata::TransformConstPtr>{
+        std::make_shared<nexusdata::Resize>(256, 256, nexusdata::ResizeInterp::Bilinear),
+        std::make_shared<nexusdata::CenterCrop>(224, 224),
+        std::make_shared<nexusdata::RandomHorizontalFlip>(0.5f, /*seed=*/7),
+        std::make_shared<nexusdata::NormalizeImage>(
+            std::vector<float>{0.485f, 0.456f, 0.406f},
+            std::vector<float>{0.229f, 0.224f, 0.225f}),
+    });
+
+nexusdata::MapDataset mapped(std::move(folder), prep);
+
+nexusdata::DataLoaderOptions load;
+load.batch_size = 16;
+load.shuffle = true;
+load.seed = 7;
+load.num_workers = 4;
+nexusdata::DataLoader loader(std::move(mapped), load);
+```
+
+`Resize` pozitif olmayan boyutta `InvalidArgumentError` fırlatır. Diğer kip `ResizeInterp::Nearest`. `RandomVerticalFlip` yatay çevirmeyle aynıdır: olasılık, sonra tohum. `Pad` negatif dolguyu reddeder. `ToTensor` yalnızca HWC'den CHW'ye çevirir.
+
+Rastgele dönüşümler `set_seed` uygular. `DataLoader` onları loader tohumundan yeniden tohumlar. İki loader bağımsız akış istiyorsa aynı rastgele dönüşümü paylaşma.
+
+Bu normalize'dan sonra `batch.inputs` float32 `[B, 3, 224, 224]` olur. `batch.labels` görsel başına sınıf indeksidir. `folder.classes()[label]` klasör adıdır.
+
+`in_order` varsayılanı true'dur. Yavaş bir JPEG geç bitse de batch `i`, örnekleyicinin `i`. grubu olarak kalır.

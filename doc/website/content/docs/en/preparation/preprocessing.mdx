@@ -1,0 +1,47 @@
+---
+title: Preprocessing (fit / transform)
+description: Sklearn-style Transformer API — scalers, encoders, imputer, normalizer, binarizer.
+status: stable
+order: 40
+locale: en
+section: preparation
+since: "1.0"
+---
+
+## Contract
+
+`Transformer` works on tabular matrices **`[N, F]`** as `NDArray`:
+
+1. `fit(X)` — learn parameters
+2. `transform(X)` — apply
+3. `fit_transform(X)` — convenience
+4. `save` / `load` — versioned text state
+
+```cpp
+#include "nexusdata/preprocessing/scaler.hpp"
+
+StandardScaler scaler(/*with_mean=*/true, /*with_std=*/true);
+scaler.fit(train_X);
+NDArray Xn = scaler.transform(val_X);
+scaler.save_file("scaler.txt");
+```
+
+## Scalers
+
+| Class | Formula / notes |
+| --- | --- |
+| `StandardScaler` | `(x - mean) / std` (zero-variance → scale 1) |
+| `MinMaxScaler` | Scale to feature range |
+| `RobustScaler` | Median / IQR style |
+| `MaxAbsScaler` | Divide by max abs |
+
+## Encoders & imputers
+
+| Class | Header |
+| --- | --- |
+| `LabelEncoder`, `OneHotEncoder`, `OrdinalEncoder` | `encoder.hpp` |
+| `Imputer`, `Binarizer`, `Normalizer` | `imputer.hpp` |
+
+## Leakage rule
+
+Fit **only on training folds**. Persist with [Pipeline](/docs/preparation/pipeline-persist) so inference loads the same fitted state.

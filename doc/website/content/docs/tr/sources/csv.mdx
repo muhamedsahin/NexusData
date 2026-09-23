@@ -1,0 +1,126 @@
+---
+title: CSV ve TSV
+description: CSVDataset kayıtları nasıl böler, etiketi nasıl seçer, satırları nasıl saklar ve nerede hata verir.
+status: stable
+order: 70
+locale: tr
+section: sources
+since: "1.0"
+---
+
+`CSVDataset`, ayraçlı bir metin dosyasını rastgele erişimli bir `Dataset`'e çevirir. Kurucu dosyayı okur, kayıtları böler, her hücreyi sayıya çevirir ve iki dizi saklar. Bundan sonra `get(i)` bir satır kopyalar. Sınıf akıtmaz: tablo, nesne yaşadığı sürece bellektedir.
+
+Başlık `nexusdata/dataset/csv/csv_dataset.hpp` ya da şemsiye `nexusdata/nexusdata.hpp`.
+
+## Geri gelen nesneler
+
+Başlığı olan, dört öznitelik ve bir etiket sütunlu dosya şuna döner:
+
+| Nesne | Şekil | Dtype | Sahibi |
+| --- | --- | --- | --- |
+| `features()` | `[N, F]` | `feature_dtype` | veri kümesi |
+| `labels()` | `[N]` | `label_dtype` | veri kümesi |
+| `get(i).input` | `[F]` | öznitelikle aynı | yeni dizi, baytlar kopyalanır |
+| `get(i).label` | `[1]` | etiketle aynı | yeni dizi, baytlar kopyalanır |
+
+`N`, ayrıştırmadan sağ çıkan veri satırı sayısıdır. `F`, `sütun_sayısı - 1` olur. Etiket sütunu öznitelik matrisinden çıkarılıp paketlenir. Etiket dosyanın ortasındaysa öznitelik sütunu `j`, "dosya sütunu `j`" değildir.
+
+`column_names()` başlığı döndürür, etiket adı dahil. `has_header = false` iken adlar dosya sırasıyla `col0`, `col1`, … olur. `num_features()` `F`, `size()` `N`'dir.
+
+`features()` ve `labels()` saklanan dizilerin referansıdır. `NDArray` kopyası depoyu paylaşır. Başka bir iş parçacığı `get` çağırırken bu dizilere yazma. `get` yeni bir satır ayırır ve baytları `memcpy` ile kopyalar. Kurulumdan sonra tablolar değişmediği için eşzamanlı `get` güvenlidir.
+
+Desteklenen hücre dtype'ları `Float32`, `Float64`, `Int32`, `Int64` ve `UInt8`. Başka bir tür kurucuda `InvalidArgumentError` fırlatır (`CSVDataset: unsupported dtype for CSV cells`). Tamsayılar `strtod` ile `double` okunup sonra cast edilir. Tamsayıya sığmayan değer cast ile kırpılır. Ayrı bir tamsayı ayrıştırıcısı ve binlik ayırıcı yoktur.
+
+## Ayrıştırıcının kabul ettiği dosya
+
+```text
+# loader örneği için üretildi
+sepal_length,sepal_width,petal_length,petal_width,species
+5.1,3.5,1.4,0.2,0
+"4.9",3.0,1.4,0.2,0
+5.0,3.6,"1.4
+tırnak içinde satır sonu",0.2,1
+```
+
+Adlı etiketle:
+
+```cpp
+#include "nexusdata/dataset/csv/csv_dataset.hpp"
+
+nexusdata::CSVOptions opt;
+opt.label_column = "species";
+opt.delimiter = ',';
+opt.has_header = true;
+opt.skip_blank_lines = true;
+opt.comment_prefix = '#';
+opt.feature_dtype = nexusdata::DType::Float32;
+opt.label_dtype = nexusdata::DType::Int64;
+opt.error_policy = nexusdata::CSVErrorPolicy::Throw;
+opt.na_values = {"", "NA", "NaN", "null", "NULL"};
+opt.use_mmap = true;
+opt.num_threads = 0;
+
+nexusdata::CSVDataset ds("iris.csv", opt);
+```
+
+Kurucunun sırası:
+
+1. Baytları açar. `use_mmap = true` ya da sıkıştırılmış sonek `read_input` kullanır. Aksi halde ikili kipte `ifstream`. Dosya yoksa `cannot open file` ile `IOError`. Boş eşleme `empty file` fırlatır.
+2. Kayıt başlangıçlarını bulur. Baytlarda `"` yoksa satır sonları SIMD/SWAR taramasıyla bulunur. Herhangi bir tırnak varsa skaler tarama, tırnak içindeki satır sonlarını yok sayar. Tırnak içindeki `""` kaçışlı tırnaktır ve tırnak durumunu değiştirmez. `ifstream` yolu aynı işi `read_record` ile yapar. Tırnaklı alan her iki yolda da fiziksel satırları aşabilir.
+3. UTF-8 BOM'u (`EF BB BF`) yalnızca ilk kayıttan siler.
+4. `skip_blank_lines` doğruysa yalnızca boşluktan oluşan kaydı atlar.
+5. İlk karakteri `comment_prefix` olan kaydı atlar. Varsayılan `'\0'` bunu kapatır. Satırın içindeki `#` veridir. `#` öncesindeki boşluk veridir. Yorum, alan içi sözdizimi değildir.
+6. Tırnak dışındaki `delimiter` üzerinde böler. Tırnaksız alanın ortasında beliren tırnak `unexpected quote in unquoted field` fırlatır. Dosya sonunda açık tırnak `unclosed quoted field` fırlatır. Tırnak karakterlerinin kendisi alana girmez. `""` tek bir `"` olur.
+7. `has_header` doğruysa hayatta kalan ilk kaydı başlık sayar. Başlıkta en az iki sütun olmalıdır (`features + label`). Daha azı, hata politikası `Skip` olsa bile hemen fırlatır.
+8. Etiketi çözer. `label_column_index` doluysa adın önüne geçer. Aksi halde boş olmayan `label_column` başlıkta aranır; ad yoksa `label column "…" not found in header` fırlatır. İkisi de boşsa son sütun etikettir. Başlık yoksa adlar `colN` olur ve indeks, `label_column_index` verilmedikçe son sütundur. Başlık yokken ad aranmaz.
+9. Sonraki her kaydın aynı alan sayısına sahip olmasını ister. `Throw`, `expected C columns, got K` fırlatır. `Skip` o kaydı atar.
+10. Hücreleri paralel çevirir. Her öznitelik ve etiket, `na_values` ile birebir dize eşleşmesiyle kontrol edilir, sonra `strtod` ile okunur. Tüm belirteç tüketilmelidir. `1.5metre` başarısız olur. `NA` varsayılan listede olduğu için `strtod`'dan önce eksik değer olarak başarısız olur. İleti `missing value (NA)` veya `missing label` olur; `dosya:satır:sütun` içerir.
+
+`num_threads = 0`, hem kayıt dilimlemesi hem sayıya çevirme için `max(1, hardware_concurrency)` demektir. Tek worker için `1` ver. Havuz yalnızca kurulum sırasında vardır. Kurucu dönmeden önce biter.
+
+`read_input`'un tanıdığı soneklerle sıkıştırılmış girdi önce belleğe çözülür ve `use_mmap` false olsa bile paralel yola girer.
+
+## Hata politikası, tam olarak
+
+`CSVErrorPolicy::Throw` varsayılandır. Bozuk kayıt veya bozuk hücre kurucuyu `IOError` ile keser. Veri kümesi nesnesi oluşmaz.
+
+`CSVErrorPolicy::Skip` kaydı iki yerde atar: alan bölücü fırlattıysa veya alan sayısı başlıkla uyuşmuyorsa. Bu satırlar tabloya girmez.
+
+Sayısal hata farklıdır. Çevirme, satır kabul edildikten sonra çalışır. Worker istisnayı yakalar. `Throw` ise havuz bitince kurucu yeniden fırlatır. `Skip` ise hata dizesi atılır ve satır kalır. Hatadan önce yazılan hücreler değerini korur. Henüz yazılmayan hücreler `NDArray`'in başladığı sıfırda kalır. Eksik sayıları satırdan silmek istiyorsan `Skip`'i filtre sanma. Yüklemeden sonra filtrele ya da dosyayı düzelt.
+
+Başlık sorunları hiç atlanmaz: iki sütundan az olmak ve başlıkta olmayan etiket adı her zaman fırlatır.
+
+İletilerdeki satır numarası, bölünmüş listedeki kayıt indeksidir (1 tabanlı), tırnaklı satır sonları birleştikten sonraki fiziksel satır sayısı değildir. Tırnaklı satır sonu tek kayıt yapar; bildirilen satır editördeki fiziksel satırdan önce olabilir.
+
+## Eksik değerler
+
+Varsayılan belirteçler `""`, `NA`, `NaN`, `null` ve `NULL`. Eşleşme birebir ve büyük/küçük harf duyarlıdır. `na` eksik değildir. Başında boşluk olan ` nan` eksik değildir. Eksik belirteç `Throw` altında `missing value (NA)` fırlatır. Sessiz NaN olarak saklanmaz. Dizide gerçek NaN istiyorsan hücre metni `strtod`'un kabul ettiği bir belirteç olmalıdır, örneğin `nan`, ve bu belirteç `na_values` içinde olmamalıdır.
+
+`na_values` boşsa boş hücre eksik değer hatası değil, ayrıştırma hatasıdır (`"" could not be parsed as float`).
+
+## TSV
+
+`delimiter` tek bir `char`. Sekme için `opt.delimiter = '\t'`. Tırnak içindeki ayraç veri olarak kalır. Çok karakterli ayraç ve otomatik sezme yoktur.
+
+## Bellek
+
+mmap yolu dosyayı eşler, her kaydı bir `std::string`'e kopyalar, sonra bu dizeleri iki sayısal diziye çevirir. Tepe bellek, eşlenen dosya artı dize tablosu artı sayısal tablolardır. Kurucu dönünce eşleme ve dize tablosu gider. Kalan, `N * F * sizeof(feature)` artı `N * sizeof(label)`.
+
+`get`, çağrı başına bir `F * sizeof(feature) + sizeof(label)` daha ekler. Batch boyutu `B` olan bir `DataLoader`, bu kopyalardan `B` tanesini `batch.inputs` şeklinde `[B, F]` ve etiketler rank 1 ise `batch.labels` şeklinde `[B, 1]` olarak yığar. Bak: [Batch ve collate](/docs/concepts/batch-collate).
+
+Sıkıştırılmamış dosyada `use_mmap = false`, `ifstream` kullanır. Tırnaklı satır sonları yine birleşir. Kayıt vektörüne ek kopya ödersin ve SIMD satır sonu taramasını kaybedersin. Büyük dosyada mmap açık kalsın.
+
+## Bu okuyucunun yapmadığı işler
+
+- Öznitelik olarak dize. Etiket olmayan her hücre sayı olmalıdır. Öznitelik sütunundaki sınıf adı hatadır. Sınıfı etiket sütununa tamsayı olarak koy, ya da `categories` ile [JsonDataset](/docs/sources/json) kullan.
+- Yalnızca etiket. En az iki sütun gerekir, yani bir öznitelik sütunu şarttır.
+- Şema evrimi. Sütun sayısı başlık ya da ilk veri satırıyla sabitlenir.
+- Artımlı ekleme. Yeni baytları görmek için yeniden kur.
+
+Bu veri kümesini bölen, ölçekleyen ve batch'leyen program: [CSV'den batch'e](/docs/examples/csv).
+
+## İlgili
+
+- [Hızlı başlangıç](/docs/getting-started/quickstart)
+- [Dataset](/docs/concepts/dataset)
+- [Operatörler](/docs/examples/operators)

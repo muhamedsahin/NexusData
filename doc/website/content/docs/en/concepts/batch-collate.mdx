@@ -1,0 +1,62 @@
+---
+title: Batch & collate
+description: Batch structure and collate_stack, collate_pad_sequence, collate_ragged.
+status: stable
+order: 55
+locale: en
+section: concepts
+since: "1.0"
+---
+
+## Batch
+
+```cpp
+struct Batch {
+  NDArray inputs; // [B, ...]
+  NDArray labels; // [B] or [B, ...]
+  NDArray mask;   // optional pad mask [B, T]
+};
+```
+
+## Default: collate_stack
+
+Stacks sample inputs/labels along axis 0. All samples must share compatible shapes.
+
+```cpp
+Batch b = collate_stack(samples);
+DataLoader loader(ds, opts, collate_stack);
+```
+
+## Pad sequences
+
+```cpp
+PadCollateOptions p;
+p.pad_value = 0.0;
+p.pad_labels = false;
+p.mask_dtype = DType::UInt8;
+Batch b = collate_pad_sequence(samples, p);
+```
+
+Produces padded `inputs` and a validity `mask` (1 = valid, 0 = pad).
+
+## Ragged
+
+```cpp
+RaggedBatch r = collate_ragged(samples);
+// r.inputs — vector<NDArray> (no stack)
+// r.labels — stacked when possible
+```
+
+## Custom collate
+
+```cpp
+CollateFn my_collate = [](const std::vector<Sample>& s) -> Batch {
+  // build Batch
+};
+DataLoader loader(ds, opts, my_collate);
+```
+
+## See also
+
+- [DataLoader](/docs/concepts/dataloader)
+- [NDArray](/docs/concepts/ndarray)

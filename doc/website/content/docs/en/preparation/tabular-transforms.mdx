@@ -1,0 +1,33 @@
+---
+title: Tabular transforms
+description: Sample-level Clip, Log1p, Standardize, and MinMax-style scaling for feature vectors.
+status: stable
+order: 30
+locale: en
+section: preparation
+since: "1.0"
+---
+
+## Headers
+
+`nexusdata/pipeline/tabular.hpp` — operate on `Sample.input` (feature vector or row).
+
+| Class | Behavior |
+| --- | --- |
+| `ClipTransform` | Clamp each element to \[min, max\] |
+| `Log1pTransform` | `log1p(x)` element-wise |
+| `StandardizeTransform` | `(x - mean) / scale` with fitted vectors |
+| `MinMaxTransform` | Scale using fitted data min/max to a target range |
+
+```cpp
+#include "nexusdata/pipeline/tabular.hpp"
+
+auto t = std::make_shared<Compose>({
+    std::make_shared<ClipTransform>(-10.0, 10.0),
+    std::make_shared<Log1pTransform>(),
+});
+```
+
+## Fit vs apply
+
+Sample-level tabular transforms that need statistics should be fed **pre-fitted** mean/scale (or use sklearn-style `Transformer`s under [Preprocessing](/docs/preparation/preprocessing) and then export constants into these transforms).

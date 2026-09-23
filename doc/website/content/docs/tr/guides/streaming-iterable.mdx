@@ -1,0 +1,13 @@
+---
+title: Rehber — IterableDataset akışı
+description: size()/get(i) yokken IterableDataset, Chain ve shuffle buffer.
+status: stable
+order: 30
+locale: tr
+section: guides
+since: "1.0"
+---
+
+Rastgele erişim yoksa map-style `Dataset` yerine **`IterableDataset`** kullanın. Akışlarda sahte `size()`/`get()` yazmayın.
+
+Değişken uzunluk için `collate_pad_sequence` tercih edin.

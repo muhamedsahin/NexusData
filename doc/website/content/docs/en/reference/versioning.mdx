@@ -1,0 +1,20 @@
+---
+title: Versioning
+description: SemVer 1.0.0, SOVERSION, version.hpp macros, and package compatibility.
+status: stable
+order: 40
+locale: en
+section: reference
+since: "1.0"
+---
+
+NexusData **1.0.0** uses SemVer with CMake `SameMajorVersion` package compatibility and shared-library `SOVERSION 1`.
+
+```cpp
+#include "nexusdata/version.hpp"
+// NEXUSDATA_VERSION_MAJOR / MINOR / PATCH and string helpers
+```
+
+C API: `nexus_version()` returns the version string.
+
+Breaking public C++ API changes require a major bump. See `CHANGELOG.md` and `doc/api_stability_v1.0.md`.

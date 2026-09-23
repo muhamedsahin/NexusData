@@ -1,0 +1,14 @@
+# Target labels
+ nd_zstd-populate
+# Source files and their labels
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/CMakeFiles/nd_zstd-populate
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/CMakeFiles/nd_zstd-populate.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/CMakeFiles/nd_zstd-populate-complete.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-build.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-configure.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-download.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-install.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-mkdir.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-patch.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-test.rule
+C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-update.rule

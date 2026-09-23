@@ -1,0 +1,19 @@
+---
+title: Python bindings
+description: Optional pybind11 module (NEXUSDATA_WITH_PYTHON) for NDArray-centric interop.
+status: beta
+order: 40
+locale: en
+section: integration
+since: "1.0"
+---
+
+## Enable
+
+```bash
+cmake -S . -B build -DNEXUSDATA_WITH_PYTHON=ON
+```
+
+Builds the `nexusdata_py` module when pybind11 is available. Treat the Python surface as **beta** relative to the C++ v1.0 headers — prefer C++ or C API for production ABI stability.
+
+Prefer DLPack / NumPy bridges in your binding layer rather than re-implementing Dataset I/O in Python.

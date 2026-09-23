@@ -1,0 +1,38 @@
+---
+title: Project structure & concepts
+description: Layered architecture — core, dataset, sampling, loading, backend, adapters.
+status: stable
+order: 35
+locale: en
+section: getting-started
+since: "1.0"
+---
+
+## Layers
+
+```
+Adapters (DLPack, MatrixFlash, C API, Python)
+Loading (DataLoader, Batch, collate)
+Sampling (Sequential, Random, Weighted, …)
+Dataset (CSV, Image, JSONL, … + compose)
+Pipeline / Preprocessing
+Core (NDArray, DType, Shape, RNG, errors)
+Backend (CPU dispatch, CUDA, pinned, pools)
+```
+
+## Data flow
+
+Source/Dataset → Sampler indices → DataLoader materialize → `Batch`/`NDArray` → **your** compute.
+
+## Header map
+
+| Area | Key headers |
+| --- | --- |
+| Core | `core/ndarray.hpp`, `dtype.hpp`, `shape.hpp`, `random.hpp` |
+| Dataset | `dataset/*.hpp`, `dataset/csv/csv_dataset.hpp` |
+| Sampling | `sampling/sampler.hpp`, `random.hpp`, `advanced.hpp` |
+| Loading | `loading/dataloader.hpp`, `batch.hpp` |
+| Backend | `backend/device.hpp`, `cuda_api.hpp` |
+| Adapters | `adapter/dlpack.hpp`, `matrixflash.hpp`, `c_api.h` |
+
+Umbrella: `#include "nexusdata/nexusdata.hpp"`.

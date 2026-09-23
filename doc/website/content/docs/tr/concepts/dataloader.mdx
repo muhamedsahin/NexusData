@@ -1,0 +1,100 @@
+---
+title: DataLoader
+description: Batching, shuffle, worker, prefetch, drop_last ve cihaz yerleşimi.
+status: in-development
+order: 50
+locale: tr
+section: concepts
+---
+
+## Sorumluluklar
+
+**DataLoader**, **Sampler**'dan indeks alır, **Dataset**'ten sample çeker, collate ile batch üretir ve isteğe bağlı prefetch yapar.
+
+Shuffle, `Dataset`'e değil **Sampler** katmanına aittir.
+
+## DataLoaderOptions
+
+| Seçenek | Varsayılan | Anlam |
+| --- | --- | --- |
+| `batch_size` | 1 | Batch başına sample |
+| `shuffle` | false | Rastgele sampler |
+| `drop_last` | false | Eksik son batch'i at |
+| `seed` | 0 | İndeks permütasyonu tohumu |
+| `num_workers` | 0 | Arka plan fetch worker'ları; 0 = senkron |
+| `prefetch_factor` | 2 | Kuyruk kapasitesi ≈ workers × factor |
+| `pin_memory` | false | Host batch'leri page-locked (H2D) |
+| `persistent_workers` | false | Epoch'lar arası worker'ları tut |
+| `timeout_ms` | 0 | Worker bekleme süresi |
+| `device` | host | Batch çıktı cihazı (`Device::host()` / CUDA) |
+
+```cpp
+#include "nexusdata/loading/dataloader.hpp"
+
+DataLoaderOptions lo;
+lo.batch_size = 64;
+lo.shuffle = true;
+lo.drop_last = true;
+lo.seed = 42;
+lo.num_workers = 2;
+lo.prefetch_factor = 2;
+lo.pin_memory = true;
+
+DataLoader loader(dataset, lo);
+// veya özel collate:
+DataLoader loader2(dataset, lo, collate_pad_sequence);
+```
+
+## Range-for ve boyut
+
+```cpp
+for (const Batch& b : loader) {
+  // b.inputs: [B, ...], b.labels: [B] veya [B, ...]
+}
+std::size_t num_batches = loader.size();
+const DataLoaderOptions& opts = loader.options();
+```
+
+Iterator, batch indeksini ilerletir; `operator*` materialize edilmiş `Batch` döndürür. Prefetch açıksa worker kuyruğu sıralı tüketilir.
+
+## Determinism sözleşmesi
+
+Header açıkça belirtir: verilen `seed` için batch *i* her zaman aynı sample indekslerini içerir — **`num_workers`'tan bağımsız**. Worker'lar yalnızca fetch/collate paralelleştirir.
+
+Yeni epoch:
+
+```cpp
+loader.reset_epoch(base_seed + epoch_index);
+```
+
+## Collate
+
+Varsayılan `collate_stack`: sample `input` ve `label` tensor'larını eksen 0'da yığar. Özel `CollateFn`:
+
+```cpp
+using CollateFn = std::function<Batch(const std::vector<Sample>&)>;
+```
+
+Pad'li diziler için [Batch ve collate](/docs/concepts/batch-collate) sayfasına bakın.
+
+## Thread güvenliği ve yaşam döngüsü
+
+- Aynı `DataLoader` üzerinde birden fazla thread ile iterate **desteklenmez**
+- Destructor worker thread'lerini join eder
+- Kopya devre dışı (`delete`); tek sahiplik
+
+## CUDA ve pin_memory
+
+CUDA build ile `device` CUDA seçilebilir; büyük görüntü batch'lerinde otomatik seçim politikası uygulanabilir. `pin_memory` host tarafında page-locked buffer hazırlar, ardından H2D kopya hızlanır.
+
+Ana sayfadaki Batch sahnesinde `drop_last` için interaktif görselleştirme bulunur.
+
+## Simülatör
+
+<DataLoaderSimulator />
+
+## İlgili sayfalar
+
+- [Sampler](/docs/concepts/sampler)
+- [Batch ve collate](/docs/concepts/batch-collate)
+- [Determinism](/docs/concepts/determinism)

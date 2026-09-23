@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/muham/Desktop/Nexus/lib/NexusData/build-cuda/cmake_install.cmake",
+		"C:/Users/muham/Desktop/Nexus/lib/NexusData/build-cuda/_deps/doctest-build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

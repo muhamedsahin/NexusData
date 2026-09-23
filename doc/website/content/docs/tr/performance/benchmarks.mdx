@@ -1,0 +1,150 @@
+---
+title: Benchmarklar
+description: 23 Eylül 2026 bench_suite ve bench_phase1 ölçümleri. Yalnızca kütüphanenin kendi taban çizgileri.
+status: stable
+order: 55
+locale: tr
+section: performance
+since: "1.0"
+---
+
+Bu sayılar `bench/` altındaki programların bir dizüstü bilgisayarda ürettiği değerlerdir. Her değer, bir ısınmadan sonraki **en iyi** süredir; `nexusdata::bench::time_best` böyle basar. Standart sapma kaydedilmedi, grafiklerde `stddev` 0'dır. En iyi N koşu, ortalamadan iyimserdir. Alıntılamadan önce kendi makinede yeniden çalıştır.
+
+Burada pandas, Arrow, PyTorch veya başka bir proje yok. "v1" çubukları, `bench/bench_phase1.cpp` içine kopyalanmış eski skaler döngülerdir ve yerlerini alan çekirdeklerle aynı süreçte çalışır. Bu, iki kod yolunun dürüst karşılaştırmasıdır. Sıralama tablosu değildir.
+
+## Makine
+
+| | |
+| --- | --- |
+| Tarih | 2026-09-23 |
+| CPU | AMD Ryzen 7 5800H (8 çekirdek, 16 iş parçacığı). `cpu_features()` AVX2 ve SSE2 bildirdi |
+| RAM | 32 GB (Win32 31,9 GiB bildirdi) |
+| GPU | NVIDIA GeForce RTX 3070 Laptop GPU takılı. `calibrate_auto_device_policy` çıktısı `cuda=0`. Aşağıdaki hiçbir sonuç GPU kullanmaz |
+| OS | Windows NT 10.0.26200 |
+| Derleyici | GCC 15.2.0, CLion 2026.2.1 ile gelen MinGW |
+| Bayraklar | `-O3 -DNDEBUG`, `CMAKE_BUILD_TYPE=Release` |
+| Ağaç | Bu çalışma ağacında `git rev-parse --short HEAD` çıktısı `9172965` |
+
+`bench_suite` host memcpy kalibrasyonu **12,96 GiB/s**. Otomatik aygıt eşiği görsel için 16777216 bayt, tablo için 33554432 bayt basıldı. Bunlar bu CPU üzerindeki bir politikadır, bir hız değildir.
+
+## Yeniden üretmek
+
+Depo kökünden, sürecin `libstdc++` yükleyebilmesi için MinGW `bin` dizini `PATH` üzerindeyken:
+
+```bash
+cmake --build build-v2 --config Release --target bench_suite
+cmake --build build-v2 --config Release --target bench_phase1
+./build-v2/bench_suite.exe
+./build-v2/bench_phase1.exe
+```
+
+`bench_phase1` karşılaştırma paketidir. `bench_suite` tarama, CSV yükleme, collate ve bellek içi loader koşusudur. Sıfırdan yapılandırma:
+
+```bash
+cmake -S . -B build-v2 -DCMAKE_BUILD_TYPE=Release -DNEXUSDATA_BUILD_BENCH=ON
+```
+
+Bu sayfadaki grafikler `data/benchmarks/measured-2026-09-23.json` dosyasından gelir. Ana sayfa o dosyadaki ilk seriyi (standardize) gösterir.
+
+<BenchmarkSuite />
+
+## Standardize, 32 MiB
+
+`float32` matris `[262144, 32]`. 5 ölçümün en iyisi.
+
+| Yol | En iyi saniye | GiB/s | Skaler döngüye göre |
+| --- | --- | --- | --- |
+| v1 `as_double` / `set_double` | 0,085465 | 0,37 | 1× |
+| v2 skaler çekirdek | 0,005737 | 5,45 | 14,9× |
+| v2 AVX2 | 0,003620 | 8,63 | 23,6× |
+
+Formül sütun başına `(x - mean) / scale`. v1 döngüsü her elemanda genel double erişimcilerini çağırır. Memcpy kalibrasyonu 13 GiB/s olan makinede 0,4 GiB/s altında kalmasının nedeni budur. AVX2 çekirdeği o memcpy sayısının civarındadır. Bellekten hızlı değildir.
+
+## Clip, 8.388.608 float
+
+5 ölçümün en iyisi. Çalışma kümesi 32 MiB.
+
+| Yol | En iyi saniye | GiB/s | Skaler döngüye göre |
+| --- | --- | --- | --- |
+| v1 `as_double` döngüsü | 0,081896 | 0,38 | 1× |
+| v2 `simd::clip_inplace` | 0,002120 | 14,74 | 38,6× |
+
+14,74 GiB/s, 12,96 GiB/s memcpy kalibrasyonunun biraz üstündedir. İkisi de tek tamponluk en-iyi-N sayılarıdır. Aralığı, clip'in kopyadan genel olarak hızlı olduğu şeklinde okuma. Bellek bant genişliği etrafındaki gürültüdür.
+
+## Dört tablo adımı, batch `[65536, 64]`
+
+`[0, 8]` aralığına clip, `log1p`, standardize, min-max. 3 ölçümün en iyisi. Girdi yaklaşık 16 MiB.
+
+| Yol | En iyi saniye | GiB/s | v1'e göre |
+| --- | --- | --- | --- |
+| v1, dört ayırmalı skaler geçiş | 0,323145 | 0,05 | 1× |
+| v2 birleşmemiş, dört SIMD geçişi (`fuse=false`) | 0,024501 | 0,64 | 13,2× |
+| v2 birleşik, çok iş parçacıklı tek geçiş (varsayılan `Compose`) | 0,013560 | 1,15 | 23,8× |
+
+Birleşmemiş SIMD hattına göre füzyon 1,81× (0,024501 / 0,013560). Birleşik geçiş, `ClipTransform`, `Log1pTransform`, `StandardizeTransform` ve `MinMaxTransform` üst üste konduğunda `DatasetChain::map`'in kurduğu geçiştir. Bak: [Operatörler](/docs/examples/operators).
+
+GiB/s sütunu **girdi** boyutunu süreye böler. Dört geçiş bundan daha çok bayta dokunur. Hattın kendisi önemliyse saniyeleri karşılaştır.
+
+## Bellekte hazır görseller
+
+32 görsel, her biri `uint8` HWC `[480, 640, 3]`, sonra `Resize(224, 224)`, `ToTensor`, `NormalizeImage`. 3 ölçümün en iyisi. Dosya çözümü yok. JPEG süresi bu tabloda değildir.
+
+| Yol | En iyi saniye | Görsel/s | v1'e göre |
+| --- | --- | --- | --- |
+| v1 skaler resize, CHW, normalize | 0,237188 | 134,9 | 1× |
+| v2 birleşmemiş `Compose` | 0,038320 | 835,1 | 6,2× |
+| v2 birleşik resize → CHW | 0,024608 | 1300,4 | 9,6× |
+
+JPEG klasörü daha yavaş olur. Pikseller RAM'de sıcak değilse çözüm süresi baskındır. Bu satır dönüşüm zincirini anlatır, `ImageFolder`'ı değil.
+
+## Satır sonu taraması, 32 MiB
+
+`bench_suite`. 3 ölçümün en iyisi. Her 64 baytta bir satır sonu. Tamponda `"` baytı yok, bu yüzden `find_csv_record_starts` tırnak farkındalıklı skaler yürüyüş yerine SIMD satır sonu yolunu kullanır. Bak: [CSV / TSV](/docs/sources/csv).
+
+| Çağrı | En iyi saniye | GiB/s |
+| --- | --- | --- |
+| `find_bytes_scalar` | 0,007943 | 3,93 |
+| `find_bytes` (AVX2'ye dağılır) | 0,003608 | 8,66 |
+| `find_csv_record_starts` | 0,037447 | 0,83 |
+
+`find_bytes` ile `find_csv_record_starts` arasındaki farkın çoğu, başlangıç ofsetlerini kaydetmektir. Tırnak içeren dosya bu yoldan çıkar. O durum burada ölçülmedi.
+
+## 20.000 × 16 CSV yüklemesi
+
+`bench_suite`, `bench_v08.csv` yazar (başlık, 16 öznitelik, 1 etiket, 20.000 veri satırı) ve `CSVDataset` kurulumunu ölçer. 3 ölçümün en iyisi: **1,637337 s**. Harness `0,6 ops/s` bastı çünkü `ops = 1` geçildi. Bu `1 / saniye` değeridir, satır/saniye değildir. Bu koşudaki satır/saniye yaklaşık `20000 / 1,637337 ≈ 12.200`.
+
+Ölçümden sonra dosya silinir. Süreye ayrıştırma, sayıya çevirme ve bellek içi tabloların ayırımı dahildir. Tek boy, tek disk. Çok gigabaytlık dosyaya doğrusal ölçekleme.
+
+## Tek küçük batch collate
+
+64 örnek, her girdi 128 `float32`. 50 ölçümün en iyisi: **0,000003 s**, `64 * 128 * 4` bayt (32 KiB) üzerinde basılan **9,25 GiB/s**. 32 KiB'lık kopyanın "GiB/s" değeri zamanlayıcı çözünürlüğüdür. Bu boyuttaki collate'in CSV ayrıştırmasının yanında gürültü olduğunu söyler. Büyük batch'lerde 9 GiB/s sürdüğü anlamına gelmez.
+
+## DataLoader
+
+İki ayrı veri kümesi. Karıştırma.
+
+**CPU'ya bağlı `get`.** `bench_phase1`, 4096 örnek. Her `get` 256 float yazar ve çözümün yerine geçsin diye 6000 karekök çalıştırır. Batch boyutu 64. 5 ölçümün en iyisi.
+
+| Worker | En iyi saniye | Örnek/s | 0 worker'a göre |
+| --- | --- | --- | --- |
+| 0 | 0,133031 | 30.789,9 | 1× |
+| 1 | 0,135839 | 30.153,3 | 0,98× |
+| 2 | 0,067375 | 60.794,0 | 1,97× |
+| 4 | 0,034576 | 118.464,4 | 3,85× |
+| 8 | 0,018597 | 220.255,3 | 7,15× |
+
+Tek worker, eşzamanlı döngüden biraz yavaştır. İş parçacığı açılır, iş aynıdır. İki ve daha fazlası karekök döngüsünü üst üste bindirir. Sekiz çekirdekte sekiz worker 8× değil 7,15×'tir.
+
+**Zaten sayılar.** `bench_suite`, `InMemoryDataset` içindeki 4096 örnek × 32 float'ı yalnızca collate eder. 3 ölçümün en iyisi: eşzamanlı **0,001737 s** (`4096 * 32 * 4` baytta 0,28 GiB/s), iki worker **0,001884 s**. Worker bu koşuda yavaşlattı. Üst üste bindirilecek bir kopyadan başka iş yok, kuyruk kopyadan pahalı.
+
+`get` çözüyor, ayrıştırıyor veya CPU yakıyorsa `num_workers` ver. Veri kümesi zaten bellek içi sayı tablosuysa 0 bırak.
+
+## Ölçülmeyenler
+
+- Aynı dosyada başka bir kütüphane.
+- GPU çekirdekleri. İkili `cuda=0` bildirdi.
+- Tırnaklı CSV. Satır sonu taraması tırnaksız tampon kullandı.
+- Disk önbelleği. En-iyi-N, en hızlı koşuyu tutar; o da sıcak önbellektir.
+- `bench_phase3` (Postgres kopya yükü) ve `bench_phase5` (`FunctionDataset`). Bu sayfa için çalıştırılmadılar.
+
+Yeni bir koşun varsa `data/benchmarks/measured-2026-09-23.json` dosyasını değiştir. `illustrative` alanını false yapmak, donanım, tarih, sürüm ve sayıları basan komutla birlikte olur.

@@ -1,0 +1,77 @@
+---
+title: Özel reader ekleme
+description: Dataset uygulama, yaşam süresi kuralları ve DataLoader entegrasyonu.
+status: stable
+order: 130
+locale: tr
+section: sources
+since: "1.0"
+---
+
+## Minimum uygulama
+
+```cpp
+class MyDataset : public nexusdata::Dataset {
+public:
+  [[nodiscard]] std::size_t size() const override { return n_; }
+  [[nodiscard]] nexusdata::Sample get(std::size_t index) const override {
+    nexusdata::Sample s;
+    s.input = /* NDArray feature satırı veya tensor */;
+    s.label = /* NDArray skaler veya vektör */;
+    return s;
+  }
+private:
+  std::size_t n_ = 0;
+};
+```
+
+Gereksinimler:
+
+- `get` **`const`** olmalı ve worker > 0 iken eşzamanlı çağrılar için güvenli olmalı
+- **Değer döndürün** (`Sample` paylaşımlı `NDArray` depolamasını ucuz taşır)
+- `get`'in allocate edip etmediğini (görüntü/ses) veya mmap view döndürüp döndürmediğini (binary) belgeleyin
+
+## Yaşam süresi kontrol listesi
+
+| Uygulama | Neden |
+| --- | --- |
+| Dataset içinde `MappedFile` tutun | mmap view'ları geçerli kalır |
+| Bileşimlerde `DatasetConstPtr` kullanın | `Subset` ebeveyni canlı tutmalı |
+| Geçici buffer'dan `from_blob` döndürmeyin | Dangling depolama |
+| `DataLoader`'da `shared_ptr` dataset tercih edin | Constructor API ile uyum |
+
+[Bellek sahipliği](/docs/concepts/memory-ownership) sayfasına bakın.
+
+## DataLoader bağlama
+
+```cpp
+auto ds = std::make_shared<MyDataset>(/*...*/);
+nexusdata::DataLoaderOptions opt;
+opt.batch_size = 32;
+opt.shuffle = true;
+opt.seed = 42;
+
+nexusdata::DataLoader loader(ds, opt);
+```
+
+Özel collation:
+
+```cpp
+nexusdata::DataLoader loader(ds, opt, nexusdata::collate_pad_sequence);
+```
+
+## Iterable kaynaklar
+
+Yalnızca sıralı veri için **IterableDataset** alt sınıflayın (`TextLineIterable` gibi `make_iterator()` kalıbı). Map-style'a köprü için indeks dosyası materialize edin veya uygulama kodunda batch'leyin.
+
+## Determinism testi
+
+- Birim testlerde `PCG32` seed'lerini sabitleyin
+- `num_workers` 0 vs 4 ile batch indekslerini karşılaştırın
+- Collate doğrulaması için küçük public fixture'lar (MNIST/CIFAR) kullanın
+
+## İlgili
+
+- [Dataset kavramı](/docs/concepts/dataset)
+- [Determinism](/docs/concepts/determinism)
+- `include/nexusdata/dataset/` altındaki public başlıklar

@@ -1,0 +1,12 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The download step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+method=url
+command=C:/Program Files/JetBrains/CLion 2026.2.1/bin/cmake/win/x64/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/download-nd_zlib-populate.cmake;COMMAND;C:/Program Files/JetBrains/CLion 2026.2.1/bin/cmake/win/x64/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/verify-nd_zlib-populate.cmake;COMMAND;C:/Program Files/JetBrains/CLion 2026.2.1/bin/cmake/win/x64/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zlib-subbuild/nd_zlib-populate-prefix/src/nd_zlib-populate-stamp/extract-nd_zlib-populate.cmake
+source_dir=C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps/nd_zlib-src
+work_dir=C:/Users/muham/Desktop/Nexus/lib/NexusData/build-v2/_deps
+url(s)=https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz
+hash=SHA256=9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23
+      no_extract=
+

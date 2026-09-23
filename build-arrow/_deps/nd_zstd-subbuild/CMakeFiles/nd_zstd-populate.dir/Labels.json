@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/CMakeFiles/nd_zstd-populate"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/CMakeFiles/nd_zstd-populate.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/CMakeFiles/nd_zstd-populate-complete.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-build.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-configure.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-download.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-install.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-patch.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-test.rule"
+		},
+		{
+			"file" : "C:/Users/muham/Desktop/Nexus/lib/NexusData/build-arrow/_deps/nd_zstd-subbuild/nd_zstd-populate-prefix/src/nd_zstd-populate-stamp/nd_zstd-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"nd_zstd-populate"
+		],
+		"name" : "nd_zstd-populate"
+	}
+}
