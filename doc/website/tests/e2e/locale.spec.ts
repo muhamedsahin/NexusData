@@ -54,7 +54,7 @@ test.describe("locale negotiation", () => {
     });
     await page.goto("/en");
     await expect(
-      page.getByRole("heading", { name: /MatrixData|NexusData/i, level: 1 }),
+      page.getByRole("heading", { name: /NexusData/i, level: 1 }),
     ).toBeVisible({ timeout: 15_000 });
     await page
       .getByRole("button", { name: /Switch to Türkçe|Türkçe diline/i })
@@ -71,11 +71,11 @@ test.describe("locale negotiation", () => {
     });
     await page.goto("/en");
     await expect(
-      page.getByRole("heading", { name: /MatrixData|NexusData/i, level: 1 }),
+      page.getByRole("heading", { name: /NexusData/i, level: 1 }),
     ).toBeVisible({ timeout: 15_000 });
     await page.goto("/tr");
     await expect(
-      page.getByRole("heading", { name: /MatrixData|NexusData/i, level: 1 }),
+      page.getByRole("heading", { name: /NexusData/i, level: 1 }),
     ).toBeVisible({ timeout: 15_000 });
   });
 

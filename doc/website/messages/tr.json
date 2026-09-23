@@ -1,6 +1,6 @@
 {
   "meta": {
-    "siteName": "MatrixData",
+    "siteName": "NexusData",
     "tagline": "Ham veriyi tensöre taşıyan boru hattı",
     "description": "AI için yüksek performanslı C++20 veri yükleme kütüphanesi — Source → Dataset → Sampler → DataLoader → Batch → NDArray."
   },
@@ -36,7 +36,7 @@
     "designPreview": "Tasarım önizlemesi"
   },
   "home": {
-    "title": "MatrixData",
+    "title": "NexusData",
     "subtitle": "Ham veriyi tensöre taşıyan boru hattı",
     "ctaStart": "Başla",
     "ctaDocs": "Dokümantasyon",
@@ -55,7 +55,7 @@
     "copied": "Kopyalandı"
   },
   "loader": {
-    "aria": "MatrixData deneyimi yükleniyor",
+    "aria": "NexusData deneyimi yükleniyor",
     "skip": "Atla",
     "loading": "Yükleniyor…",
     "waiting": "> başlatılıyor …",
@@ -99,7 +99,7 @@
     },
     "ecosystem": {
       "title": "Tensor olarak teslim",
-      "body": "Batch'ler tüketiciler için NDArray/tensor yüküne dönüşür. MatrixData veri düzlemidir — hesaplama kütüphaneleri ayrı ve opsiyoneldir."
+      "body": "Batch'ler tüketiciler için NDArray/tensor yüküne dönüşür. NexusData veri düzlemidir — hesaplama kütüphaneleri ayrı ve opsiyoneldir."
     },
     "features": {
       "title": "Yetenekler",
@@ -162,7 +162,7 @@
     },
     "cta": {
       "title": "Hemen başla",
-      "body": "MatrixData'yı CMake projenize alın; doküman bölümleri geldikçe izleyin."
+      "body": "NexusData'yı CMake projenize alın; doküman bölümleri geldikçe izleyin."
     }
   },
   "docs": {
@@ -204,7 +204,7 @@
     "dismiss": "Kapat"
   },
   "footer": {
-    "rights": "MatrixData dokümantasyon sitesi",
+    "rights": "NexusData dokümantasyon sitesi",
     "license": "Lisans: {license}",
     "privacy": "Gizlilik notu"
   },

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "siteName": "MatrixData",
+    "siteName": "NexusData",
     "tagline": "The pipeline that turns raw data into tensors",
     "description": "High-performance C++20 data loading library for AI — Source → Dataset → Sampler → DataLoader → Batch → NDArray."
   },
@@ -36,7 +36,7 @@
     "designPreview": "Design preview"
   },
   "home": {
-    "title": "MatrixData",
+    "title": "NexusData",
     "subtitle": "The pipeline that turns raw data into tensors",
     "ctaStart": "Get Started",
     "ctaDocs": "Documentation",
@@ -55,7 +55,7 @@
     "copied": "Copied"
   },
   "loader": {
-    "aria": "Loading MatrixData experience",
+    "aria": "Loading NexusData experience",
     "skip": "Skip",
     "loading": "Loading…",
     "waiting": "> initializing …",
@@ -99,7 +99,7 @@
     },
     "ecosystem": {
       "title": "Delivered as tensors",
-      "body": "Batches become NDArray/tensor payloads for consumers. MatrixData is the data plane — computation libraries remain separate and optional."
+      "body": "Batches become NDArray/tensor payloads for consumers. NexusData is the data plane — computation libraries remain separate and optional."
     },
     "features": {
       "title": "Capabilities",
@@ -162,7 +162,7 @@
     },
     "cta": {
       "title": "Start building",
-      "body": "Pull MatrixData into your CMake project and follow the docs as chapters land."
+      "body": "Pull NexusData into your CMake project and follow the docs as chapters land."
     }
   },
   "docs": {
@@ -204,7 +204,7 @@
     "dismiss": "Dismiss"
   },
   "footer": {
-    "rights": "MatrixData documentation site",
+    "rights": "NexusData documentation site",
     "license": "License: {license}",
     "privacy": "Privacy note"
   },

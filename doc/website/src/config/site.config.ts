@@ -25,8 +25,8 @@ export function resolvePublicLink(value: string | undefined | null): string | nu
 }
 
 export const siteConfig = {
-  name: "MatrixData",
-  shortName: "MatrixData",
+  name: "NexusData",
+  shortName: "NexusData",
   tagline: {
     en: "The pipeline that turns raw data into tensors",
     tr: "Ham veriyi tensöre taşıyan boru hattı",
@@ -66,8 +66,8 @@ export const ecosystemNodes = [
     status: "planned" as FeatureStatus,
   },
   {
-    id: "matrixdata",
-    name: "MatrixData",
+    id: "nexusdata",
+    name: "NexusData",
     role: { en: "Data I/O", tr: "Veri I/O" },
     status: "in-development" as FeatureStatus,
   },

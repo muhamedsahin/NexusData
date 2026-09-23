@@ -119,7 +119,7 @@ export function EcosystemSection({ locale }: { locale: string }) {
               key={node.id}
               className={cn(
                 "rounded-xl border p-4 transition-all duration-300",
-                node.id === "matrixdata"
+                node.id === "nexusdata"
                   ? "border-[rgba(0,245,220,0.35)] bg-[rgba(0,245,220,0.07)] shadow-[inset_0_0_30px_rgba(0,245,220,0.05)]"
                   : "border-white/8 bg-white/[0.03] opacity-75 hover:opacity-90 hover:border-white/15",
               )}
@@ -127,7 +127,7 @@ export function EcosystemSection({ locale }: { locale: string }) {
               <div className="flex items-center justify-between gap-2">
                 <p className={cn(
                   "font-semibold",
-                  node.id === "matrixdata" ? "text-[color:var(--accent)]" : "text-[color:var(--fg)]"
+                  node.id === "nexusdata" ? "text-[color:var(--accent)]" : "text-[color:var(--fg)]"
                 )}>
                   {node.name}
                 </p>

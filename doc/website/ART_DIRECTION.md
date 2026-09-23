@@ -1,7 +1,7 @@
-# ART DIRECTION & ARCHITECTURAL MANIFESTO: MATRIXDATA
+# ART DIRECTION & ARCHITECTURAL MANIFESTO: NEXUSDATA
 **Doküman Sürümü:** 1.0.0 (R0 Fazı)  
 **Tarih:** 21 Eylül 2026  
-**Kapsam:** MatrixData Ana Sayfası & 3D WebGL Katmanı Görsel Yeniden Tasarımı  
+**Kapsam:** NexusData Ana Sayfası & 3D WebGL Katmanı Görsel Yeniden Tasarımı  
 
 ---
 
@@ -11,7 +11,7 @@
 
 | Kare | Dosya | Gözlemlenen Mevcut Durum | Neden Kötü? | Yapılacak Değişiklik |
 | :--- | :--- | :--- | :--- | :--- |
-| **Hero** (p=0.00) | `desktop_p000.png` | Sol taraf metin, butonlar ve 15 satırlık dev `CMakeLists.txt` koduyla tıka basa dolu; sağ taraf boş. Ekran genelinde rastgele pembe (`#e879f9`) ve camgöbeği (`#2dd4bf`) düz sprite noktalar dönüyor. Noktalar metnin üzerinden geçiyor. Başlıkta ve navbar'da hala **NexusData** yazıyor. | Tipografik kontrast sıfıra iniyor, alt başlık ve pipeline satırı parçacık gürültüsünden okunamıyor. Odak noktası yok. Dev kod bloğu hero zarafetini yok ediyor. | - H1 ve brand **MatrixData** olarak güncellenecek.<br>- 3D nesne `camera.setViewOffset` ile sağ 7 kolona ortalanacak.<br>- Sol metin arkasına gradyan maske konacak, metin arkasında parçacık olmayacak.<br>- Dev kod bloğu kalkacak, yerine kompakt tek satırlık "Kurulum Hapı" (pill) gelecek.<br>- Noktalar yerine 8×8×8 yuvarlak hücreli, nefes alan tekil bir kafes (lattice) gelecek. |
+| **Hero** (p=0.00) | `desktop_p000.png` | Sol taraf metin, butonlar ve 15 satırlık dev `CMakeLists.txt` koduyla tıka basa dolu; sağ taraf boş. Ekran genelinde rastgele pembe (`#e879f9`) ve camgöbeği (`#2dd4bf`) düz sprite noktalar dönüyor. Noktalar metnin üzerinden geçiyor. | Tipografik kontrast sıfıra iniyor, alt başlık ve pipeline satırı parçacık gürültüsünden okunamıyor. Odak noktası yok. Dev kod bloğu hero zarafetini yok ediyor. | - H1 ve brand **NexusData** olarak korunacak.<br>- 3D nesne `camera.setViewOffset` ile sağ 7 kolona ortalanacak.<br>- Sol metin arkasına gradyan maske konacak, metin arkasında parçacık olmayacak.<br>- Dev kod bloğu kalkacak, yerine kompakt tek satırlık "Kurulum Hapı" (pill) gelecek.<br>- Noktalar yerine 8×8×8 yuvarlak hücreli, nefes alan tekil bir kafes (lattice) gelecek. |
 | **Kaynaklar** (p=0.08) | `desktop_p008.png` | Hero'daki CMake bloğunun alt kenarı yukarıda asılı kalırken, alttan dev bir cam kart giriyor. 3D noktalar rastgele eğriliyor; formatları veya akışı temsil eden hiçbir nesne yok. | İki bölüm birbirine biniyor. 3D katmanının neyi anlattığı anlaşılmıyor; salt gürültü. Kart 3D alanını boğuyor. | - Büyük kart yerine sağ tarafa hizalı kompakt başlık altyazısı konacak.<br>- 6 format (CSV, JPG, JSON, PARQUET, SQLITE, NPY) 3D cam çipler ve hunide birleşen kübik veri akışları olarak modellenecek. |
 | **Shuffle** (p=0.24-0.32) | `desktop_p024.png` | Ekranın %40'ını kaplayan soluk cam kartın yanında rastgele kıvrılmış pembe/mavi çift nokta dizileri var. Slider standart HTML çubuğu, thumb soluk. Ortada yeşil bir imleç dairesi asılı kalmış. Sol altta rastgele 'N' harfli bir düğme var. | Hücre veya veri sırası algısı yok. Rastgele kıvrımlar shuffle hissi vermiyor. Slider kullanılamaz derecede silik. | - 64 hücreli 8×8 düzlem.<br>- Her hücre üzerinde digit atlas ile index numarası.<br>- Seed değişiminde Bezier yaylarıyla z-ekseninde sıçrayarak yer değiştirme.<br>- Büyük thumb'lı, doldurulmuş izli, zar butonlu, klavye destekli HUD slider. |
 | **Batch/GPU** (p=0.40-0.48) | `desktop_p040.png`, `desktop_p048.png` | Ekranda boşlukta süzülen 5 adet eğik neon çizgi (parçacık şeritleri) dışında hiçbir şey yok. Kartlar ekran sınırlarından dışarı taşıyor ve kesiliyor. | Ne batch anlaşılıyor, ne de GPU. Görsel bir hikâye veya donanım hissi yok. | - Hücreler levhalara (slabs) ayrılacak.<br>- Emissive torus kapısından (DataLoader ring) geçecekler.<br>- GPU sahnesinde prosedürel çip kalıbı ve animasyonlu çift buffer şeridi (GPU vs CPU) yer alacak. |
@@ -91,10 +91,10 @@ Scroll ilerlemesi `p ∈ [0.0, 1.0]` Lenis (lerp: 0.08) ve GSAP ScrollTrigger ü
 ### Bölüm 0 — Hero: "NDArray Kafesi"
 ```
 +-----------------------------------------------------------------------------------+
-| [MatrixData [dev]]                  [Docs]  [Perf]  [GitHub]  [EN|TR] [Theme]     |
+| [NexusData [dev]]                   [Docs]  [Perf]  [GitHub]  [EN|TR] [Theme]     |
 |                                                                                   |
 |  [Status] [Preview]                           . . * .                             |
-|  # MatrixData                           .  +---+---+---+                          |
+|  # NexusData                            .  +---+---+---+                          |
 |                                          / |   |   |   | \                        |
 |  The pipeline that turns raw data       +---+---+---+---+ |                       |
 |  into tensors                           |   | 8x8x8 |   | +   <-- 3D Odak:        |
@@ -103,12 +103,12 @@ Scroll ilerlemesi `p ∈ [0.0, 1.0]` Lenis (lerp: 0.08) ve GSAP ScrollTrigger ü
 |                                         +---+---+---+---+         Nefes dalgası   |
 |  [ Get Started ]  [ Documentation ]            \     /            Fare etkileşimi |
 |                                                 +---+                             |
-|  [>_ FetchContent: MatrixData v1.0 [Copy]]    ----------------- (Faded Grid Plane)|
+|  [>_ FetchContent: NexusData v1.0 [Copy]]     ----------------- (Faded Grid Plane)|
 |                                                                                   |
 |  v SCROLL TO EXPLORE                                                              |
 +-----------------------------------------------------------------------------------+
 ```
-- **Sol Taraf (Kolon 1–5):** `MatrixData` başlığı, animasyonlu SVG pipeline darbesi, CTA butonları, tek satırlık kompakt Kurulum Hapı (tıklayınca CMake/FetchContent açılır).
+- **Sol Taraf (Kolon 1–5):** `NexusData` başlığı, animasyonlu SVG pipeline darbesi, CTA butonları, tek satırlık kompakt Kurulum Hapı (tıklayınca CMake/FetchContent açılır).
 - **Sağ Taraf (Kolon 6–12):** 8×8×8 yuvarlak köşeli instanced hücre kafesi. Fare yaklaşımında hücreler yükselip yaylanarak dalga üretir. Tıklamada shockwave halkası geçer.
 - **Etkileşim:** Hücre hover'ında mini bilimsel HUD tooltip: `[3, 5, 1] = 0.842 · float32`.
 
@@ -199,15 +199,15 @@ Scroll ilerlemesi `p ∈ [0.0, 1.0]` Lenis (lerp: 0.08) ve GSAP ScrollTrigger ü
 |                         [planned]         |        [planned]                      |
 |                                 \         |        /                              |
 |   05 / 06                        \        |       /                               |
-|   Ecosystem                       *(MatrixData)*  <-- En parlak merkez düğüm      |
-|   Tensörler MatrixFlash Pro'ya    /   [Active]    \                               |
+|   Ecosystem                       *(NexusData)*   <-- En parlak merkez düğüm      |
+|   Tensörler NexusFlash Pro'ya     /   [Active]    \                               |
 |   ve ekosisteme akar.            /        |        \                              |
 |                        (NexusTrain)       |     (NexusFlash Pro)                  |
 |                         [planned]         |        [planned]                      |
 |                                      (AI Engine)                                  |
 +-----------------------------------------------------------------------------------+
 ```
-- Kamera geri çekilir: 7 düğümlü 3D takımyıldız. Merkezde en parlak elektrik mavisi ile `MatrixData` durur. Diğer 6 düğüm (`MatrixFlash Pro`, `NexusLoss`, `NexusModel`, `NexusOptim`, `NexusTrain`, `AI Engine`) daha soluk, cam küreler olarak ışık darbeleriyle bağlıdır. Hover edilen düğüm parlar ve rol açıklaması belirir.
+- Kamera geri çekilir: 7 düğümlü 3D takımyıldız. Merkezde en parlak elektrik mavisi ile `NexusData` durur. Diğer 6 düğüm (`NexusFlash Pro`, `NexusLoss`, `NexusModel`, `NexusOptim`, `NexusTrain`, `AI Engine`) daha soluk, cam küreler olarak ışık darbeleriyle bağlıdır. Hover edilen düğüm parlar ve rol açıklaması belirir.
 
 ---
 
@@ -229,7 +229,7 @@ Scroll ilerlemesi `p ∈ [0.0, 1.0]` Lenis (lerp: 0.08) ve GSAP ScrollTrigger ü
 5. **3D'yi Kapatan Dev Cam Kartlar:** Ekranın %40'ını kaplayan hantal kutular kaldırılacak; karşı tarafa yerleşen kompakt HUD elemanları kullanılacak.
 6. **Bozuk Range Slider:** Thumb'ı görünmeyen, erişilebilirliği olmayan HTML slider kaldırılacak.
 7. **Köşede Takılan Custom Cursor:** Fare ayrıldığında kaybolmayan ve takılan imleç bug'ı düzeltilecek.
-8. **NexusData İsim Kalıntıları:** Kodda ve arayüzde kütüphane adı olarak kalan "NexusData" ifadeleri **MatrixData** olarak düzeltilecek.
+8. **Eski İsim Kalıntıları:** Kodda ve arayüzde kalan tüm eski isimler **NexusData** olarak düzeltilecek.
 9. **Mobildeki Yatay Taşıntı:** Mobilde sayfanın sola kayıp taşmasına neden olan tüm CSS genişlik hataları temizlenecek.
 
 ### 5.2 Kesinlikle Korunacaklar (Preserve List)
@@ -258,7 +258,7 @@ Scroll ilerlemesi `p ∈ [0.0, 1.0]` Lenis (lerp: 0.08) ve GSAP ScrollTrigger ü
 ## 7. FAZ PLANI VE ONAY KRİTERLERİ
 
 - [x] **R0 — Art Direction & Teşhis:** Mevcut ekran görüntüleri incelendi, `ART_DIRECTION.md` tamamlandı. (Şu anki aşama — Onay bekleniyor).
-- [ ] **R1 — Hero:** Yükleme→Hero geçişi, MatrixData NDArray kafesi, fare/touch etkileşimi, tipografi, kompakt kurulum hapı, animated SVG pipeline, nav rayı. (3 tur görsel kontrol).
+- [ ] **R1 — Hero:** Yükleme→Hero geçişi, NexusData NDArray kafesi, fare/touch etkileşimi, tipografi, kompakt kurulum hapı, animated SVG pipeline, nav rayı. (3 tur görsel kontrol).
 - [ ] **R2 — Bölüm 1–2:** Kaynaklar (Format çipleri & huni) + Shuffle&Seed (İndeksli 8×8 düzlem, Bezier sıçramaları, yeni HUD slider).
 - [ ] **R3 — Bölüm 3–4:** Batch&DataLoader (Levhalar, torus kapı, drop_last kehribar dissolve) + Prefetch&GPU (Çip kalıbı, çift buffer şeritleri).
 - [ ] **R4 — Bölüm 5 + Sakin Bölümler + CTA:** Takımyıldız, 3D tilt yetenek kartları, performans önizlemesi, kod sekmeleri, toparlanan kafes CTA.

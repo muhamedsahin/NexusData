@@ -19,9 +19,9 @@ export function prefersReducedMotion(): boolean {
 
 export const CMAKE_SNIPPET = `include(FetchContent)
 FetchContent_Declare(
-  matrixdata
-  GIT_REPOSITORY https://github.com/PLACEHOLDER_ORG/matrixdata.git
+  nexusdata
+  GIT_REPOSITORY https://github.com/PLACEHOLDER_ORG/nexusdata.git
   GIT_TAG        v1.0.0
 )
-FetchContent_MakeAvailable(matrixdata)
-target_link_libraries(my_app PRIVATE matrixdata::matrixdata)`;
+FetchContent_MakeAvailable(nexusdata)
+target_link_libraries(my_app PRIVATE nexusdata::nexusdata)`;

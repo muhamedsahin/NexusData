@@ -7,7 +7,7 @@ test.describe("homepage phase 1-2", () => {
     });
     await page.goto("/en");
     await expect(
-      page.getByRole("heading", { name: /MatrixData|NexusData/i, level: 1 }),
+      page.getByRole("heading", { name: /NexusData/i, level: 1 }),
     ).toBeVisible({ timeout: 15_000 });
     await expect(
       page.locator("#scene-hero").getByText(/CMakeLists\.txt|FetchContent/i),
@@ -23,7 +23,7 @@ test.describe("homepage phase 1-2", () => {
     await expect(skip).toBeVisible();
     await skip.click();
     await expect(
-      page.getByRole("heading", { name: /MatrixData|NexusData/i, level: 1 }),
+      page.getByRole("heading", { name: /NexusData/i, level: 1 }),
     ).toBeVisible({ timeout: 15_000 });
   });
 
@@ -33,7 +33,7 @@ test.describe("homepage phase 1-2", () => {
     });
     await page.goto("/en");
     await expect(
-      page.getByRole("heading", { name: /MatrixData|NexusData/i, level: 1 }),
+      page.getByRole("heading", { name: /NexusData/i, level: 1 }),
     ).toBeVisible({ timeout: 15_000 });
     await expect(
       page.getByRole("heading", { name: "Read every format" }),

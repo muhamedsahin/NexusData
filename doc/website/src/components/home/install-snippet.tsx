@@ -11,13 +11,13 @@ type InstallSnippetProps = {
   className?: string;
 };
 
-const VCPKG_SNIPPET = `vcpkg install matrixdata
+const VCPKG_SNIPPET = `vcpkg install nexusdata
 # CMakeLists.txt:
-find_package(matrixdata CONFIG REQUIRED)
-target_link_libraries(my_app PRIVATE matrixdata::matrixdata)`;
+find_package(nexusdata CONFIG REQUIRED)
+target_link_libraries(my_app PRIVATE nexusdata::nexusdata)`;
 
 const CONAN_SNIPPET = `[requires]
-matrixdata/1.0.0
+nexusdata/1.0.0
 
 [generators]
 CMakeDeps
@@ -42,7 +42,7 @@ export function InstallSnippet({ className }: InstallSnippetProps) {
         ? VCPKG_SNIPPET
         : CONAN_SNIPPET;
 
-  const quickPillText = "FetchContent_Declare(matrixdata v1.0.0)";
+  const quickPillText = "FetchContent_Declare(nexusdata v1.0.0)";
 
   async function onCopy(textToCopy: string) {
     try {
