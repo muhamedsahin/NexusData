@@ -13,6 +13,6 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DNEXUSDATA_BUILD_BENCH=ON
 cmake --build build --target bench_suite
 ```
 
-23 Eylül 2026 koşusunun makinesi, komutları ve ölçülmeyenleri [Benchmarklar](/docs/performance/benchmarks) sayfasındadır. O grafikler NexusData'nın kendi skaler döngüsü ile AVX2 çekirdeklerini karşılaştırır. Başka kütüphane yoktur.
+23 Eylül 2026 koşusunun makinesi, komutları ve ölçülmeyenleri [Benchmarklar](/docs/performance/benchmarks) sayfasındadır. Ölçülmüş seriler NexusData'nın kendi skaler döngüsü ile AVX2 çekirdeklerini karşılaştırır. Başka kütüphane yoktur. O sayfada illustrative işaretli JSON dosyaları, görüntü çözme img/s serisi dahil, ölçülmemiştir.
 
 Yayınlanmış bir sayı, bir CPU'da bir ısınmadan sonraki birkaç ölçümün en iyisidir. Alıntılamadan önce yeniden çalıştır. JSON'daki `stddev` 0'dır çünkü harness yalnızca en iyi süreyi tutar.

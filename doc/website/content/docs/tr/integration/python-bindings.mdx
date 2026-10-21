@@ -1,6 +1,6 @@
 ---
 title: Python bağları
-description: Opsiyonel pybind11 modülü (NEXUSDATA_WITH_PYTHON).
+description: Nexus kabuğundaki görüntü yükleme/kaydetme ile isteğe bağlı nexusdata_py modülü. Postgres, ODBC, Parquet, uzak dosya ve tokenizer C++'ta kalır.
 status: beta
 order: 40
 locale: tr
@@ -8,4 +8,51 @@ section: integration
 since: "1.0"
 ---
 
-`-DNEXUSDATA_WITH_PYTHON=ON` ile `nexusdata_py` derlenir. C++ v1.0'a göre **beta** kabul edin; üretim ABI'si için C++/C API tercih edin.
+İki Python yüzeyi vardır. Birbirinin yerine geçmez ve ikisi de C++ veri kümesi API'si değildir.
+
+## Nexus Python kabuğu
+
+Kabuk, üst Nexus paketidir: `import nexus`, sonra `nexus.data`. Nexus deposunun kökünden `-DNEXUS_BUILD_PYTHON=ON` ve `_core` hedefiyle derlenir. `NEXUSDATA_WITH_PYTHON` bu modülü üretmez.
+
+```python
+import nexus
+
+goruntu = nexus.data.load_image("foto.jpg", channels=3, height=224, width=224)
+nexus.data.save_image(
+    "cikti.png",
+    goruntu["chw"],
+    goruntu["height"],
+    goruntu["width"],
+    goruntu["channels"],
+)
+```
+
+`load_image(path, channels=3, height=0, width=0)` JPEG, PNG, BMP, TGA ve GIF dosyalarını stb ile çözer. Dönüş bir sözlüktür:
+
+| Anahtar | Anlam |
+| --- | --- |
+| `chw` | Düz float listesi, CHW düzeni, değerler \[0, 1\] |
+| `height`, `width`, `channels` | Bu tamponun şekli |
+
+`channels` için `0` dosyadaki kanal sayısını korur; diğer geçerli değerler `1`, `3` ve `4`'tür. Bilinear `resize_to_chw_f32` ancak `height` ve `width` ikisi birden 0'dan büyükse çalışır. Aksi halde `image_to_tensor` çözülen boyutu korur.
+
+`save_image(path, chw, height, width, channels)` PNG, JPEG veya BMP yazar. `.jpg` ve `.jpeg` JPEG, `.bmp` BMP, `.png` dahil diğer her uzantı PNG'dir. `channels` 1, 3 veya 4 olmalıdır. Liste uzunluğu `height * width * channels` olmalıdır. Değerler \[0, 1\] aralığına kırpılır ve 8 bit yazılır. C++ kütüphanesinde bu yazıcı yoktur.
+
+Aynı alt modülde `read_csv`, `Table`, `DataLoader` ve `make_loader` da vardır. Son sütunu etiket olan düz sayısal tablo içindir. Bu ayrıştırıcı `CSVDataset` değildir.
+
+## `nexusdata_py`
+
+```bash
+cmake -S . -B build -DNEXUSDATA_WITH_PYTHON=ON
+cmake --build build --target nexusdata_py
+```
+
+Bu isteğe bağlı pybind11 modülü `NDArray` (float32, float64 ve int64 NumPy kopyaları) ile `to_dlpack` sarar. Görüntü yüklemez ve kaydetmez. `Dataset` veya `DataLoader` kurmaz. C++ başlıklarının yanında dar bir aktarım yardımcısı olarak kullanın.
+
+## Yalnızca C++
+
+PostgreSQL (`PostgresDataset`, `PostgresIterable`; libpq COPY BINARY, `NEXUSDATA_WITH_POSTGRES`), ODBC (`OdbcDataset`, `NEXUSDATA_WITH_ODBC`), Parquet (`ParquetDataset`) ve Arrow IPC (`ArrowIpcDataset`, `NEXUSDATA_WITH_ARROW`), uzak dosyalar (`RemoteFile`: `http`, `https`, `s3`, `gs`, `az`) ve tokenizer'lar (`Tokenizer`, `WhitespaceHashTokenizer`, `BpeTokenizer`, `WordPieceTokenizer`, `UnigramTokenizer`) C++ API'leridir.
+
+Python kabuğu bunları çağırmaz. Python paketi bunları sunmaz. `nexusdata_py` de bunları sunmaz.
+
+`PostgresCopyDataset`, libpq olmadan bir COPY BINARY tamponunu çözebilir. Canlı sunucu bağlantısı yine Postgres bayrağını ister.

@@ -58,5 +58,15 @@ Sources → Dataset → Sampler → DataLoader → Batch/NDArray → tüketici
 4. **NDArray** — shape + dtype + bellek taşıyıcısı (compute yok)
 
 <Callout tone="tip" title="API dürüstlüğü">
-Örnekler NexusData **v1.0** public header'larıyla uyumludur. İsteğe bağlı CMake özellikleri (`NEXUSDATA_WITH_SQLITE`, `ARROW`, `HDF5`, `CUDA`) ilgili sayfalarda belirtilir.
+Örnekler NexusData **v1.0** public header'larıyla uyumludur. İsteğe bağlı CMake özellikleri (`NEXUSDATA_WITH_SQLITE`, `ARROW`, `HDF5`, `CUDA`, `POSTGRES`, `ODBC`) ilgili sayfalarda belirtilir.
 </Callout>
+
+## Python ve C++
+
+Kamu API'si C++'tır. İki Python yüzeyi vardır ve aynı modül değildirler.
+
+Nexus kabuğu (`import nexus`, alt modül `nexus.data`) `load_image` ve `save_image` çağırabilir. Bkz. [Görsel klasörü](/docs/examples/images).
+
+`NEXUSDATA_WITH_PYTHON` ile derlenen `nexusdata_py` yalnızca `NDArray` ve DLPack sarar. Görüntü yüklemez ve veri kümesi açmaz.
+
+PostgreSQL, ODBC, Parquet, uzak dosyalar ve tokenizer'lar C++ API'leridir. Python kabuğu bunları çağırmaz. Python paketi bunları sunmaz. Ayrıntı: [Python bağları](/docs/integration/python-bindings).

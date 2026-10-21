@@ -81,7 +81,7 @@ Scroll ilerlemesi `p ∈ [0.0, 1.0]` Lenis (lerp: 0.08) ve GSAP ScrollTrigger ü
 | **2. Shuffle & Seed** | `0.30 .. 0.46` | `(1.4, 0.2, 6.2)` | `(1.0, 0.0, 0.0)` | 36° | Sağa kaydırma: `X: -280, Y: 0` | `uSorted: 0.0..1.0`, `uPlane: 1.0` |
 | **3. Batch/DataLoader**| `0.46 .. 0.62` | `(-1.2, 0.6, 6.5)` | `(-0.6, 0.0, 0.0)` | 38° | Sola kaydırma: `X: 240, Y: 0` | `uBatchSlabs: 1.0`, `uGateActive: 1.0` |
 | **4. Prefetch & GPU** | `0.62 .. 0.76` | `(1.1, 0.8, 5.8)` | `(0.7, 0.1, 0.0)` | 35° | Sağa kaydırma: `X: -240, Y: 0` | `uChipGlow: 1.0`, `uBufferSync: 1.0` |
-| **5. Tensör & Eko** | `0.76 .. 0.88` | `(0.0, 1.5, 9.2)` | `(0.0, 0.2, 0.0)` | 44° | Merkez: `X: 0, Y: 0` | `uConstellation: 1.0`, `uMatrixDataGlow: 1.5` |
+| **5. Tensör & Eko** | `0.76 .. 0.88` | `(0.0, 1.5, 9.2)` | `(0.0, 0.2, 0.0)` | 44° | Merkez: `X: 0, Y: 0` | `uConstellation: 1.0`, `uNexusDataGlow: 1.5` |
 | **Sakinler & CTA** | `0.88 .. 1.00` | `(0.0, 0.0, 10.5)` | `(0.0, 0.0, 0.0)` | 42° | Merkez: `X: 0, Y: 0` | `uLattice: 1.0`, `uBackgroundDim: 0.35` |
 
 ---

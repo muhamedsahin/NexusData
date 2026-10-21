@@ -204,6 +204,7 @@
     "dismiss": "Dismiss"
   },
   "footer": {
+    "attribution": "Bu yazılım ekosistemi Bursa Teknik Üniversitesi Bilgisayar Mühendisliği 1. sınıf öğrencisi Muhammed Fatih Şahin tarafından yapay zeka destekli olarak geliştirilmiştir.",
     "rights": "NexusData documentation site",
     "license": "License: {license}",
     "privacy": "Privacy note"

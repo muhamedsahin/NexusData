@@ -1,6 +1,6 @@
 ---
 title: Image folder
-description: Class folders, decode options, resize, crop, flip, and batched tensors.
+description: Class folders, decode, resize, and the Python shell load_image / save_image pair.
 status: stable
 order: 40
 locale: en
@@ -78,3 +78,39 @@ Random transforms implement `set_seed`. `DataLoader` reseeds them from the loade
 `batch.inputs` is float32 `[B, 3, 224, 224]` after the normalize above. `batch.labels` is the class index, one per image. `folder.classes()[label]` is the folder name.
 
 Workers decode in parallel. `in_order` defaults to true, so batch `i` is still the `i`-th sample group from the sampler even if a slow JPEG finishes later.
+
+## Load and save one file
+
+C++ decodes and resizes. It does not write PNG, JPEG, or BMP.
+
+`resize_hwc_u8` resizes HWC `uint8` and keeps that layout. `resize_to_chw_f32` resizes and writes CHW float32 in one pass. Null mean and stddev means `src / 255`. `ResampleMode` is `Nearest` or `Bilinear`.
+
+```cpp
+#include "nexusdata/image/image.hpp"
+#include "nexusdata/simd/image_ops.hpp"
+
+nexusdata::Image image = nexusdata::load_image("photo.jpg");
+nexusdata::NDArray chw = nexusdata::image_to_tensor(image.data);
+
+std::vector<float> resized(static_cast<std::size_t>(image.channels) * 224 * 224);
+nexusdata::simd::resize_to_chw_f32(
+    image.data.data<std::uint8_t>(),
+    static_cast<std::size_t>(image.height),
+    static_cast<std::size_t>(image.width),
+    static_cast<std::size_t>(image.channels),
+    resized.data(), 224, 224,
+    nexusdata::simd::ResampleMode::Bilinear);
+```
+
+The Nexus Python shell is `import nexus`, then `nexus.data`. It is not the optional `nexusdata_py` module.
+
+```python
+import nexus
+
+img = nexus.data.load_image("photo.jpg", channels=3, height=224, width=224)
+nexus.data.save_image("out.png", img["chw"], img["height"], img["width"], img["channels"])
+```
+
+`load_image(path, channels=3, height=0, width=0)` returns a dict. `chw` is a flat float list in CHW order, values in \[0, 1\]. `channels` is `0` (keep), `1`, `3`, or `4`. Both `height` and `width` must be greater than 0 for a bilinear resize; otherwise the decoded size is kept. `save_image(path, chw, height, width, channels)` writes PNG, JPEG, or BMP from the extension (`.jpg` / `.jpeg`, `.bmp`, otherwise PNG). `channels` is 1, 3, or 4, and the list length is `height * width * channels`.
+
+PostgreSQL, ODBC, Parquet, remote files, and the C++ tokenizers are not called from this shell. See [Python bindings](/docs/integration/python-bindings).

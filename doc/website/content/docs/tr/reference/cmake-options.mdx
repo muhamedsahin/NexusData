@@ -8,4 +8,6 @@ section: reference
 since: "1.0"
 ---
 
-Varsayılan derleme **zorunlu üçüncü parti bağımlılık istemez**. Öne çıkan bayraklar: `NEXUSDATA_WITH_CUDA`, `_SQLITE`, `_ARROW`, `_HDF5`, `_PYTHON`, `_MATRIXFLASH`, `NEXUSDATA_ENABLE_AVX2`, `NEXUSDATA_BUILD_BENCH` / `TESTS` / `FUZZ`.
+Varsayılan derleme **zorunlu üçüncü parti bağımlılık istemez**. Öne çıkan bayraklar: `NEXUSDATA_WITH_CUDA`, `_SQLITE`, `_ARROW`, `_POSTGRES`, `_ODBC`, `_HDF5`, `_PYTHON`, `_MATRIXFLASH`, `NEXUSDATA_ENABLE_AVX2`, `NEXUSDATA_BUILD_BENCH` / `TESTS` / `FUZZ`.
+
+`NEXUSDATA_WITH_PYTHON`, Nexus kabuğunu derlemez. Kabuktaki görüntü I/O'su üst depodaki `nexus.data.load_image` ve `save_image` fonksiyonlarıdır. PostgreSQL, ODBC, Parquet, `RemoteFile` ve tokenizer'lar C++ API'leridir. Python kabuğu bunları çağırmaz. Bkz. [Python bağları](/docs/integration/python-bindings).

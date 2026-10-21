@@ -58,5 +58,15 @@ Sources → Dataset → Sampler → DataLoader → Batch/NDArray → consumer
 4. **NDArray** — shape + dtype + memory carrier (no compute)
 
 <Callout tone="tip" title="API honesty">
-Samples match public headers in NexusData **v1.0**. Optional CMake features (`NEXUSDATA_WITH_SQLITE`, `ARROW`, `HDF5`, `CUDA`) are called out on their pages.
+Samples match public headers in NexusData **v1.0**. Optional CMake features (`NEXUSDATA_WITH_SQLITE`, `ARROW`, `HDF5`, `CUDA`, `POSTGRES`, `ODBC`) are called out on their pages.
 </Callout>
+
+## Python and C++
+
+The public API is C++. Two Python surfaces exist, and they are not the same module.
+
+The Nexus shell (`import nexus`, submodule `nexus.data`) can `load_image` and `save_image`. See [Image folder](/docs/examples/images).
+
+`nexusdata_py`, built with `NEXUSDATA_WITH_PYTHON`, only wraps `NDArray` and DLPack. It does not load images and it does not open datasets.
+
+PostgreSQL, ODBC, Parquet, remote files, and tokenizers are C++ APIs. The Python shell does not call them. The Python package does not expose them. Details: [Python bindings](/docs/integration/python-bindings).

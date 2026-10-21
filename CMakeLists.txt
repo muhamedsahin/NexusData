@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
+
+# Ayni yapida ikinci kez add_subdirectory edilirse hedefler yeniden tanimlanmaz.
+if(TARGET nexusdata)
+    return()
+endif()
+
 project(NexusData VERSION 1.0.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)

@@ -49,6 +49,8 @@ since: "1.0"
 
 NexusData veriyi hazırlar ve teslim eder; matmul, backprop, model veya training loop **içermez**.
 
+Görüntü çözme ve yeniden boyutlandırma C++'tadır (`load_image`, `resize_hwc_u8`, `resize_to_chw_f32`). Nexus kabuğu `nexus.data.load_image` ve `save_image` ekler. PostgreSQL, ODBC, Parquet, uzak dosyalar ve tokenizer'lar C++ API'leridir. Python kabuğu bunları çağırmaz. Bkz. [Python bağları](/docs/integration/python-bindings).
+
 <Callout tone="note" title="Opsiyonel backend'ler">
 Parquet, SQLite ve HDF5 için ilgili CMake bayrakları gerekir (`NEXUSDATA_WITH_ARROW`, `NEXUSDATA_WITH_SQLITE`, `NEXUSDATA_WITH_HDF5`).
 </Callout>

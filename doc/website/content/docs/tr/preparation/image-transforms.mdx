@@ -24,7 +24,9 @@ since: "1.0"
 | `ToTensor` | UInt8 HWC → Float32 CHW \[0,1\] |
 | `Pad` | Hedef boyuta kenar dolgu |
 
-Augmentation'ı reader içinde değil, `MapDataset` ile `get()` zamanında uygulayın.
+Augmentation'ı reader içinde değil, `ImageFolder` üzerine `MapDataset` sararak `get()` zamanında uygulayın.
+
+`resize_hwc_u8` HWC `uint8` yeniden boyutlandırır. `resize_to_chw_f32` bunu CHW float32 ile birleştirir. PNG, JPEG veya BMP yazmak Python kabuğundaki `nexus.data.save_image` fonksiyonudur. Bkz. [Görsel klasörü](/docs/examples/images).
 
 <Callout tone="tip" title="GPU">
 `NEXUSDATA_WITH_CUDA` ile opsiyonel CUDA görüntü çekirdekleri. Bkz. [CUDA ve pin_memory](/docs/performance/cuda-and-pin-memory).

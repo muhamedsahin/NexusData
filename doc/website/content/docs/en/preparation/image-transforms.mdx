@@ -37,7 +37,9 @@ auto t = std::make_shared<Compose>({
 
 ## MapDataset pattern
 
-Wrap `ImageFolderDataset` (or similar) with `MapDataset` so augmentation runs at `get()` time — not inside the dataset reader.
+Wrap `ImageFolder` with `MapDataset` so augmentation runs at `get()` time, outside the dataset reader.
+
+`resize_hwc_u8` resizes HWC `uint8`. `resize_to_chw_f32` fuses that resize into CHW float32. Writing PNG, JPEG, or BMP is `nexus.data.save_image` on the Python shell. See [Image folder](/docs/examples/images).
 
 <Callout tone="tip" title="GPU note">
 Optional CUDA image kernels exist when built with `NEXUSDATA_WITH_CUDA`. See [CUDA & pin_memory](/docs/performance/cuda-and-pin-memory).

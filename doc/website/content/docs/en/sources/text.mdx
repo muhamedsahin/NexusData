@@ -1,6 +1,6 @@
 ---
 title: Text
-description: TextDataset for line/document oriented corpora.
+description: TextLineDataset, streaming TextLineIterable, and C++ tokenizers.
 status: stable
 order: 110
 locale: en
@@ -8,15 +8,29 @@ section: sources
 since: "1.0"
 ---
 
+`TextLineDataset` loads lines into memory. `TextLineIterable` streams them and does not keep the whole file. Sample input is UTF-8 bytes (`UInt8`, shape `[L]`). The label is the line index.
+
 ```cpp
 #include "nexusdata/dataset/text.hpp"
-TextDataset ds("corpus.txt");
+
+nexusdata::TextOptions opt;
+opt.max_length = 512; // 0 = unlimited
+opt.skip_empty = true;
+nexusdata::TextLineDataset lines("corpus.txt", opt);
 ```
 
-## Notes
+Variable-length batches need [collate_pad_sequence](/docs/concepts/batch-collate). `DataLoader` expects a map-style `Dataset`; wrap or buffer a stream before that path.
 
-- Pair with tokenizers/transforms outside NexusData (or custom Map)
-- Encoding issues should be handled at the Dataset boundary
+## Tokenizers (C++ only)
+
+`Tokenizer` is an abstract C++ interface. Built-in types are `WhitespaceHashTokenizer`, `BpeTokenizer` (vocab file plus merges file), `WordPieceTokenizer`, and `UnigramTokenizer`.
+
+```cpp
+nexusdata::WhitespaceHashTokenizer tok(10000);
+auto ids = tok.encode("hello world");
+```
+
+The Nexus Python shell does not call these types. The Python package does not expose them. `nexusdata_py` does not expose them either. See [Python bindings](/docs/integration/python-bindings).
 
 ## See also
 

@@ -20,6 +20,8 @@ Getting started, core concepts, and source readers are documented against **v1.0
 
 NexusData prepares and delivers data. It does **not** implement matmul, backprop, models, optimizers, or training loops.
 
+Image decode and resize are C++ (`load_image`, `resize_hwc_u8`, `resize_to_chw_f32`). The Nexus shell adds `nexus.data.load_image` and `save_image`. PostgreSQL, ODBC, Parquet, remote files, and tokenizers are C++ APIs. The Python shell does not call them. See [Python bindings](/docs/integration/python-bindings).
+
 ## Getting started
 
 1. [Introduction](/docs/getting-started/introduction)

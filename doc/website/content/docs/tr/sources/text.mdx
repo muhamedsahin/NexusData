@@ -44,14 +44,16 @@ while (it->has_next()) {
 
 ETL veya özel eğitim döngüleri için kullanın. Map-style `DataLoader` `Dataset` bekler — standart batch için sarmalayın veya buffer'layın.
 
-## Tokenizer kancası
+## Tokenizer'lar (yalnızca C++)
 
 ```cpp
 WhitespaceHashTokenizer tok(/*vocab_size=*/10000);
-auto ids = tok.encode("hello world");
+auto ids = tok.encode("merhaba dunya");
 ```
 
-`Tokenizer` soyut arayüzdür (model ağırlığı yok). BPE/SentencePiece sarmalayıcınızı alt sınıfla takın.
+`Tokenizer` soyut bir C++ arayüzüdür; model ağırlığı taşımaz. Hazır türler `WhitespaceHashTokenizer`, `BpeTokenizer` (vocab dosyası ve merges dosyası), `WordPieceTokenizer` ve `UnigramTokenizer` olur.
+
+Nexus Python kabuğu bu türleri çağırmaz. Python paketi bunları sunmaz. `nexusdata_py` de sunmaz. Bkz. [Python bağları](/docs/integration/python-bindings).
 
 ## İlgili
 

@@ -1,6 +1,6 @@
 ---
 title: Görsel klasörü
-description: Sınıf klasörleri, çözme seçenekleri, resize, crop, flip ve batch tensörleri.
+description: Sınıf klasörleri, çözme, yeniden boyutlandırma ve Python kabuğunda load_image / save_image.
 status: stable
 order: 40
 locale: tr
@@ -75,3 +75,45 @@ Rastgele dönüşümler `set_seed` uygular. `DataLoader` onları loader tohumund
 Bu normalize'dan sonra `batch.inputs` float32 `[B, 3, 224, 224]` olur. `batch.labels` görsel başına sınıf indeksidir. `folder.classes()[label]` klasör adıdır.
 
 `in_order` varsayılanı true'dur. Yavaş bir JPEG geç bitse de batch `i`, örnekleyicinin `i`. grubu olarak kalır.
+
+## Tek dosya yükleme ve kaydetme
+
+C++ çözer ve yeniden boyutlandırır. PNG, JPEG veya BMP yazmaz.
+
+`resize_hwc_u8`, HWC `uint8` bırakır. `resize_to_chw_f32` tek geçişte CHW float32 yazar. Ortalama ve standart sapma boşsa ölçek `src / 255` olur. `ResampleMode` `Nearest` veya `Bilinear` olur.
+
+```cpp
+#include "nexusdata/image/image.hpp"
+#include "nexusdata/simd/image_ops.hpp"
+
+nexusdata::Image image = nexusdata::load_image("foto.jpg");
+nexusdata::NDArray chw = nexusdata::image_to_tensor(image.data);
+
+std::vector<float> resized(static_cast<std::size_t>(image.channels) * 224 * 224);
+nexusdata::simd::resize_to_chw_f32(
+    image.data.data<std::uint8_t>(),
+    static_cast<std::size_t>(image.height),
+    static_cast<std::size_t>(image.width),
+    static_cast<std::size_t>(image.channels),
+    resized.data(), 224, 224,
+    nexusdata::simd::ResampleMode::Bilinear);
+```
+
+Nexus Python kabuğu `import nexus`, sonra `nexus.data` olur. İsteğe bağlı `nexusdata_py` modülü değildir.
+
+```python
+import nexus
+
+goruntu = nexus.data.load_image("foto.jpg", channels=3, height=224, width=224)
+nexus.data.save_image(
+    "cikti.png",
+    goruntu["chw"],
+    goruntu["height"],
+    goruntu["width"],
+    goruntu["channels"],
+)
+```
+
+`load_image(path, channels=3, height=0, width=0)` bir sözlük döndürür. `chw` CHW düzeninde düz bir float listesidir, değerler \[0, 1\] aralığındadır. `channels` için `0` dosyadaki sayıyı korur; diğerleri `1`, `3` ve `4`'tür. Bilinear boyutlandırma için `height` ve `width` ikisi birden 0'dan büyük olmalıdır; aksi halde çözülen boyut kalır. `save_image(path, chw, height, width, channels)` uzantıya göre PNG, JPEG veya BMP yazar (`.jpg` / `.jpeg`, `.bmp`, diğerleri PNG). `channels` 1, 3 veya 4 olur; liste uzunluğu `height * width * channels` olur.
+
+PostgreSQL, ODBC, Parquet, uzak dosyalar ve C++ tokenizer'ları bu kabuktan çağrılmaz. Bkz. [Python bağları](/docs/integration/python-bindings).

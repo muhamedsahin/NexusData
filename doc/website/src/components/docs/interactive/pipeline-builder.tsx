@@ -34,7 +34,7 @@ const LABELS = {
 const OPTIONS: Record<NodeId, { id: string; label: string }[]> = {
   source: [
     { id: "csv", label: "CSVDataset" },
-    { id: "image", label: "ImageFolderDataset" },
+    { id: "image", label: "ImageFolder" },
     { id: "mnist", label: "MNIST" },
   ],
   transform: [
@@ -63,7 +63,7 @@ function generateCpp(sel: Record<NodeId, string>): string {
     lines.push('CSVOptions opt; opt.label_column = "target";');
     lines.push('auto raw = std::make_shared<CSVDataset>("train.csv", opt);');
   } else if (sel.source === "image") {
-    lines.push('auto raw = std::make_shared<ImageFolderDataset>("data/train");');
+    lines.push('auto raw = std::make_shared<ImageFolder>("data/train");');
   } else {
     lines.push('auto raw = std::make_shared<MNIST>("data/mnist");');
   }

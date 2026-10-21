@@ -1,6 +1,6 @@
 ---
 title: Image / ImageFolder
-description: ImageFolder dataset, decode options, and folder layout.
+description: ImageFolder layout, stb decode, HWC resize, and the Python shell load/save pair.
 status: stable
 order: 75
 locale: en
@@ -13,22 +13,50 @@ since: "1.0"
 ```
 root/
   class_a/img1.jpg
-  class_a/img2.jpg
+  class_a/img2.png
   class_b/img3.jpg
 ```
 
+The class is `ImageFolder`, not a separate dataset type name.
+
 ```cpp
 #include "nexusdata/dataset/image_folder.hpp"
-ImageFolderDataset ds("data/train"); // labels from folder names
+
+nexusdata::ImageFolderOptions opt;
+opt.decode.channels = nexusdata::ImageChannels::RGB;
+opt.extensions = {".jpg", ".jpeg", ".png"};
+nexusdata::ImageFolder folder("data/train", opt);
+nexusdata::Sample s = folder.get(0); // input: [H, W, C] UInt8
 ```
 
-## Notes
+Class folder names are sorted. The label is that index. Decode runs inside `get`. JPEG, PNG, BMP, TGA, and GIF go through `load_image` (stb). WebP and uncompressed TIFF go through `decode_media_image` when that file is selected. AVIF needs `NEXUSDATA_WITH_AVIF`.
 
-- Decoding uses the bundled image helpers (`image/image.hpp`, stb)
-- Pair with transform pipelines under `pipeline/image.hpp` for augmentations
-- GPU decode/resize is optional via CUDA prep when enabled
+## Load, resize, and save
+
+C++ decodes and can resize. It does not write PNG, JPEG, or BMP.
+
+```cpp
+#include "nexusdata/image/image.hpp"
+#include "nexusdata/simd/image_ops.hpp"
+
+nexusdata::Image image = nexusdata::load_image("photo.jpg");
+nexusdata::NDArray chw = nexusdata::image_to_tensor(image.data);
+
+std::vector<std::uint8_t> hwc(224 * 224 * static_cast<std::size_t>(image.channels));
+nexusdata::simd::resize_hwc_u8(
+    image.data.data<std::uint8_t>(),
+    static_cast<std::size_t>(image.height),
+    static_cast<std::size_t>(image.width),
+    hwc.data(), 224, 224,
+    static_cast<std::size_t>(image.channels),
+    nexusdata::simd::ResampleMode::Bilinear);
+```
+
+`resize_hwc_u8` stays HWC `uint8`. `resize_to_chw_f32` writes CHW float32 in one pass (`src / 255` when mean and stddev are null). Full batch example: [Image folder](/docs/examples/images).
+
+The Nexus Python shell (`nexus.data.load_image` / `save_image`) is documented on that page and on [Python bindings](/docs/integration/python-bindings). PostgreSQL, ODBC, Parquet, remote files, and tokenizers are C++ APIs. The Python shell does not call them.
 
 ## See also
 
-- [Transforms overview](/docs/concepts/dataset)
+- [Image transforms](/docs/preparation/image-transforms)
 - [MNIST / CIFAR](/docs/sources/mnist-cifar)

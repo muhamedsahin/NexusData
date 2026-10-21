@@ -16,7 +16,7 @@ since: "1.0"
 | CMake | 3.20+ |
 | Compilers | GCC 11+, Clang 14+, MSVC 19.3+ |
 
-Optional: CUDA, Arrow (Parquet), SQLite, HDF5, pybind11.
+Optional: CUDA, Arrow (Parquet), Postgres, ODBC, SQLite, HDF5, and pybind11 for `nexusdata_py` only.
 
 ## Build from source
 
@@ -62,9 +62,11 @@ Replace `PLACEHOLDER_ORG` once the real Git remote is set in `site.config.ts`.
 | Option | Default | Purpose |
 | --- | --- | --- |
 | `NEXUSDATA_WITH_CUDA` | OFF | GPU data-prep backend |
-| `NEXUSDATA_WITH_PYTHON` | OFF | Python bindings |
+| `NEXUSDATA_WITH_PYTHON` | OFF | `nexusdata_py`: `NDArray` and DLPack only |
 | `NEXUSDATA_WITH_SQLITE` | OFF | SQLite reader |
-| `NEXUSDATA_WITH_ARROW` | OFF | Parquet/Arrow reader |
+| `NEXUSDATA_WITH_ARROW` | OFF | Parquet / Arrow IPC |
+| `NEXUSDATA_WITH_POSTGRES` | OFF | Postgres COPY BINARY (`libpq`) |
+| `NEXUSDATA_WITH_ODBC` | OFF | ODBC reader |
 | `NEXUSDATA_WITH_HDF5` | OFF | HDF5 reader |
 | `NEXUSDATA_SANITIZER` | `""` | ASan / UBSan / TSan |
 | `NEXUSDATA_BUILD_FUZZ` | ON | Fuzz smoke |
@@ -80,4 +82,8 @@ Replace `PLACEHOLDER_ORG` once the real Git remote is set in `site.config.ts`.
 | --- | --- |
 | `find_package` not found | Set `CMAKE_PREFIX_PATH` or `NexusData_DIR` |
 | CUDA unresolved | Rebuild with `NEXUSDATA_WITH_CUDA=ON` |
-| Parquet/HDF5/SQLite missing | Enable matching `NEXUSDATA_WITH_*` + install deps |
+| Parquet/HDF5/SQLite/Postgres/ODBC missing | Enable matching `NEXUSDATA_WITH_*` and install that dependency |
+
+<Callout tone="note" title="Python is two modules">
+`NEXUSDATA_WITH_PYTHON` builds `nexusdata_py`. Image `load_image` / `save_image` live on the Nexus shell (`nexus.data`), built from the parent repository with `NEXUS_BUILD_PYTHON`. PostgreSQL, ODBC, Parquet, remote files, and tokenizers are C++ APIs. The Python shell does not call them. See [Python bindings](/docs/integration/python-bindings).
+</Callout>

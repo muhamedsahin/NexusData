@@ -11,7 +11,7 @@ since: "1.0"
 ## Layers
 
 ```
-Adapters (DLPack, MatrixFlash, C API, Python)
+Adapters (DLPack, MatrixFlash, C API, optional nexusdata_py)
 Loading (DataLoader, Batch, collate)
 Sampling (Sequential, Random, Weighted, …)
 Dataset (CSV, Image, JSONL, … + compose)
@@ -36,3 +36,5 @@ Source/Dataset → Sampler indices → DataLoader materialize → `Batch`/`NDArr
 | Adapters | `adapter/dlpack.hpp`, `matrixflash.hpp`, `c_api.h` |
 
 Umbrella: `#include "nexusdata/nexusdata.hpp"`.
+
+`nexusdata_py` only wraps `NDArray` and DLPack. The Nexus Python shell is built from the parent repository and is limited, for images, to `load_image` and `save_image`. PostgreSQL, ODBC, Parquet, remote files, and tokenizers stay on the C++ side. See [Python bindings](/docs/integration/python-bindings).

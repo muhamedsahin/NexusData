@@ -44,7 +44,9 @@ cmake --build build-v2 --config Release --target bench_phase1
 cmake -S . -B build-v2 -DCMAKE_BUILD_TYPE=Release -DNEXUSDATA_BUILD_BENCH=ON
 ```
 
-Bu sayfadaki grafikler `data/benchmarks/measured-2026-09-23.json` dosyasından gelir. Ana sayfa o dosyadaki ilk seriyi (standardize) gösterir.
+Aşağıdaki ölçülmüş tablolar 23 Eylül 2026 koşusudur ve `data/benchmarks/measured-2026-09-23.json` içindedir. Ana sayfa o dosyadaki ilk seriyi (standardize) gösterir.
+
+Grafik bloğu klasördeki diğer JSON dosyalarını da yükler. `image-decode-augment.json`, `cpu-gpu-breakeven.json`, `dataloader-thread-scaling.json` ve `determinism-hashes.json` dosyalarında `illustrative: true` vardır. Bu dosyalardaki img/s ve benzeri sayılar ölçülmemiştir. Kaynak göstermeyin. Bu sayfa NexusData'yı başka bir kütüphaneyle karşılaştırmaz.
 
 <BenchmarkSuite />
 

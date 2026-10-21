@@ -17,10 +17,14 @@ since: "1.0"
 | `NEXUSDATA_ENABLE_AVX2` | ON | Compile AVX2 scan kernels |
 | `NEXUSDATA_WITH_CUDA` | OFF | CUDA data-prep backend |
 | `NEXUSDATA_WITH_SQLITE` | OFF | SqliteDataset |
-| `NEXUSDATA_WITH_ARROW` | OFF | Parquet/Arrow |
+| `NEXUSDATA_WITH_ARROW` | OFF | Parquet / Arrow IPC |
+| `NEXUSDATA_WITH_POSTGRES` | OFF | `PostgresDataset` via libpq |
+| `NEXUSDATA_WITH_ODBC` | OFF | `OdbcDataset` |
 | `NEXUSDATA_WITH_HDF5` | OFF | HDF5 dataset |
-| `NEXUSDATA_WITH_PYTHON` | OFF | pybind11 module |
+| `NEXUSDATA_WITH_PYTHON` | OFF | `nexusdata_py` (`NDArray`, DLPack only) |
 | `NEXUSDATA_WITH_MATRIXFLASH` | OFF | Declare Flash SDK link |
 | `NEXUSDATA_WARNINGS_AS_ERRORS` | OFF | `-Werror` style |
 
 Default build aims for **zero required third-party deps**.
+
+`NEXUSDATA_WITH_PYTHON` does not build the Nexus shell. Shell image I/O is `nexus.data.load_image` and `save_image`, from the parent repository. PostgreSQL, ODBC, Parquet, `RemoteFile`, and the tokenizers are C++ APIs. The Python shell does not call them. See [Python bindings](/docs/integration/python-bindings).

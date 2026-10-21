@@ -9,20 +9,25 @@ since: "1.0"
 ---
 
 ```cpp
-auto raw = std::make_shared<ImageFolderDataset>("data/train");
-auto tfm = std::make_shared<Compose>({
+#include "nexusdata/nexusdata.hpp"
+using namespace nexusdata;
+
+auto raw = std::make_shared<ImageFolder>("data/train");
+auto tfm = std::make_shared<Compose>(std::initializer_list<TransformConstPtr>{
     std::make_shared<RandomHorizontalFlip>(0.5f, 7),
     std::make_shared<Resize>(256, 256),
     std::make_shared<CenterCrop>(224, 224),
     std::make_shared<ToTensor>(),
 });
-auto ds = std::make_shared<MapDataset>(raw, tfm);
+MapDataset ds(raw, tfm);
 
 DataLoaderOptions lo;
 lo.batch_size = 32;
 lo.shuffle = true;
 lo.seed = 1;
-DataLoader loader(ds, lo); // default collate_stack
+DataLoader loader(std::move(ds), lo); // default collate_stack
 ```
 
-All images in a batch must share the same CHW shape after transforms.
+All images in a batch must share the same CHW shape after transforms. The class name is `ImageFolder`.
+
+Single-file decode uses `load_image` plus `resize_hwc_u8` or `resize_to_chw_f32`. PNG, JPEG, and BMP writes are `nexus.data.save_image` on the Python shell, not a C++ function. See [Image folder](/docs/examples/images).

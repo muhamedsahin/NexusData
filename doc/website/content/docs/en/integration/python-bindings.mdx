@@ -1,6 +1,6 @@
 ---
 title: Python bindings
-description: Optional pybind11 module (NEXUSDATA_WITH_PYTHON) for NDArray-centric interop.
+description: Nexus shell image load/save versus the optional nexusdata_py module. Postgres, ODBC, Parquet, remote files, and tokenizers stay in C++.
 status: beta
 order: 40
 locale: en
@@ -8,12 +8,45 @@ section: integration
 since: "1.0"
 ---
 
-## Enable
+There are two Python surfaces. They are not interchangeable, and neither one is the C++ dataset API.
+
+## Nexus Python shell
+
+The shell is the parent Nexus package: `import nexus`, then `nexus.data`. Build it from the Nexus repository root with `-DNEXUS_BUILD_PYTHON=ON` and the `_core` target. `NEXUSDATA_WITH_PYTHON` does not build this module.
+
+```python
+import nexus
+
+img = nexus.data.load_image("photo.jpg", channels=3, height=224, width=224)
+nexus.data.save_image("out.png", img["chw"], img["height"], img["width"], img["channels"])
+```
+
+`load_image(path, channels=3, height=0, width=0)` decodes JPEG, PNG, BMP, TGA, and GIF with stb. It returns a dict:
+
+| Key | Meaning |
+| --- | --- |
+| `chw` | Flat float list, CHW order, values in \[0, 1\] |
+| `height`, `width`, `channels` | Shape of that buffer |
+
+`channels` is `0` (keep the file's count), `1`, `3`, or `4`. Bilinear resize through `resize_to_chw_f32` runs only when both `height` and `width` are greater than 0. Otherwise `image_to_tensor` keeps the decoded size.
+
+`save_image(path, chw, height, width, channels)` writes PNG, JPEG, or BMP. `.jpg` and `.jpeg` are JPEG, `.bmp` is BMP, and every other extension, including `.png`, is PNG. `channels` is 1, 3, or 4. The list length must be `height * width * channels`. Values are clamped to \[0, 1\] and stored as 8-bit. The C++ library does not have this writer.
+
+The same submodule also exposes `read_csv`, `Table`, `DataLoader`, and `make_loader` for a flat numeric table whose last column is the label. That parser is not `CSVDataset`.
+
+## `nexusdata_py`
 
 ```bash
 cmake -S . -B build -DNEXUSDATA_WITH_PYTHON=ON
+cmake --build build --target nexusdata_py
 ```
 
-Builds the `nexusdata_py` module when pybind11 is available. Treat the Python surface as **beta** relative to the C++ v1.0 headers — prefer C++ or C API for production ABI stability.
+This optional pybind11 module wraps `NDArray` (float32, float64, and int64 NumPy copies) and `to_dlpack`. It does not load or save images. It does not construct a `Dataset` or a `DataLoader`. Treat it as a narrow interop helper next to the C++ headers.
 
-Prefer DLPack / NumPy bridges in your binding layer rather than re-implementing Dataset I/O in Python.
+## C++ only
+
+PostgreSQL (`PostgresDataset`, `PostgresIterable`; libpq COPY BINARY, `NEXUSDATA_WITH_POSTGRES`), ODBC (`OdbcDataset`, `NEXUSDATA_WITH_ODBC`), Parquet (`ParquetDataset`) and Arrow IPC (`ArrowIpcDataset`, `NEXUSDATA_WITH_ARROW`), remote files (`RemoteFile` for `http`, `https`, `s3`, `gs`, and `az`), and the tokenizers (`Tokenizer`, `WhitespaceHashTokenizer`, `BpeTokenizer`, `WordPieceTokenizer`, `UnigramTokenizer`) are C++ APIs.
+
+The Python shell does not call them. The Python package does not expose them. `nexusdata_py` does not expose them either.
+
+`PostgresCopyDataset` can decode a COPY BINARY buffer without libpq. A live server connection still needs the Postgres flag.

@@ -16,7 +16,7 @@ since: "1.0"
 | CMake | 3.20+ |
 | Derleyiciler | GCC 11+, Clang 14+, MSVC 19.3+ |
 
-İsteğe bağlı: CUDA, Arrow (Parquet), SQLite, HDF5, pybind11.
+İsteğe bağlı: CUDA, Arrow (Parquet), Postgres, ODBC, SQLite, HDF5 ve yalnızca `nexusdata_py` için pybind11.
 
 ## Kaynaktan derleme
 
@@ -62,9 +62,11 @@ Gerçek Git remote `site.config.ts` içinde tanımlandığında `PLACEHOLDER_ORG
 | Seçenek | Varsayılan | Amaç |
 | --- | --- | --- |
 | `NEXUSDATA_WITH_CUDA` | OFF | GPU veri-hazırlık backend'i |
-| `NEXUSDATA_WITH_PYTHON` | OFF | Python bağlamaları |
+| `NEXUSDATA_WITH_PYTHON` | OFF | `nexusdata_py`: yalnızca `NDArray` ve DLPack |
 | `NEXUSDATA_WITH_SQLITE` | OFF | SQLite okuyucu |
-| `NEXUSDATA_WITH_ARROW` | OFF | Parquet/Arrow okuyucu |
+| `NEXUSDATA_WITH_ARROW` | OFF | Parquet / Arrow IPC |
+| `NEXUSDATA_WITH_POSTGRES` | OFF | Postgres COPY BINARY (`libpq`) |
+| `NEXUSDATA_WITH_ODBC` | OFF | ODBC okuyucu |
 | `NEXUSDATA_WITH_HDF5` | OFF | HDF5 okuyucu |
 | `NEXUSDATA_SANITIZER` | `""` | ASan / UBSan / TSan |
 | `NEXUSDATA_BUILD_FUZZ` | ON | Fuzz smoke |
@@ -80,4 +82,8 @@ Gerçek Git remote `site.config.ts` içinde tanımlandığında `PLACEHOLDER_ORG
 | --- | --- |
 | `find_package` bulunamıyor | `CMAKE_PREFIX_PATH` veya `NexusData_DIR` ayarlayın |
 | CUDA çözümlenmiyor | `NEXUSDATA_WITH_CUDA=ON` ile yeniden derleyin |
-| Parquet/HDF5/SQLite eksik | İlgili `NEXUSDATA_WITH_*` + bağımlılıkları kurun |
+| Parquet/HDF5/SQLite/Postgres/ODBC eksik | İlgili `NEXUSDATA_WITH_*` bayrağını ve bağımlılığı kurun |
+
+<Callout tone="note" title="Python iki modüldür">
+`NEXUSDATA_WITH_PYTHON`, `nexusdata_py` derler. Görüntü `load_image` / `save_image` fonksiyonları Nexus kabuğundadır (`nexus.data`); üst depoda `NEXUS_BUILD_PYTHON` ile kurulur. PostgreSQL, ODBC, Parquet, uzak dosyalar ve tokenizer'lar C++ API'leridir. Python kabuğu bunları çağırmaz. Bkz. [Python bağları](/docs/integration/python-bindings).
+</Callout>

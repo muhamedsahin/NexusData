@@ -11,7 +11,7 @@ since: "1.0"
 ## Katmanlar
 
 ```
-Adapters (DLPack, MatrixFlash, C API, Python)
+Adapters (DLPack, MatrixFlash, C API, isteğe bağlı nexusdata_py)
 Loading (DataLoader, Batch, collate)
 Sampling (Sequential, Random, Weighted, …)
 Dataset (CSV, Image, JSONL, … + compose)
@@ -36,6 +36,8 @@ Source/Dataset → Sampler indeksleri → DataLoader materialize → `Batch`/`ND
 | Adapters | `adapter/dlpack.hpp`, `matrixflash.hpp`, `c_api.h` |
 
 Şemsiye include: `#include "nexusdata/nexusdata.hpp"`.
+
+`nexusdata_py` yalnızca `NDArray` ve DLPack sarar. Nexus Python kabuğu üst depodan derlenir; görüntü tarafında `load_image` ve `save_image` ile sınırlıdır. PostgreSQL, ODBC, Parquet, uzak dosyalar ve tokenizer'lar C++ tarafında kalır. Bkz. [Python bağları](/docs/integration/python-bindings).
 
 ## Kavram sayfaları
 

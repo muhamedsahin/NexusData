@@ -1,6 +1,6 @@
 ---
 title: Görüntüler
-description: ImageFolder düzeni, decode seçenekleri ve load_image yardımcıları.
+description: ImageFolder düzeni, stb ile çözme, HWC yeniden boyutlandırma ve Python kabuğunda yükleme/kaydetme.
 status: stable
 order: 75
 locale: tr
@@ -8,9 +8,9 @@ section: sources
 since: "1.0"
 ---
 
-## ImageFolder dataset
+## ImageFolder
 
-**Sınıf başına alt dizin** düzeni beklenir:
+**Sınıf başına alt dizin** beklenir. Sınıf adı `ImageFolder`'dır.
 
 ```
 root/
@@ -19,6 +19,10 @@ root/
 ```
 
 ```cpp
+#include "nexusdata/dataset/image_folder.hpp"
+
+using namespace nexusdata;
+
 ImageFolderOptions opt;
 opt.decode.channels = ImageChannels::RGB;
 opt.decode.apply_exif_orientation = true;
@@ -31,30 +35,48 @@ Sample s = folder.get(0);  // input: [H,W,C] UInt8
 
 | Davranış | Ayrıntı |
 | --- | --- |
-| Sınıf sırası | Sıralı klasör adları → tamsayı etiket `0..C-1` |
-| Decode zamanı | Her `get()` çağrısında lazy |
-| Bozuk dosyalar | Taramada `CorruptImagePolicy::Skip` veya `get`'te throw |
+| Sınıf sırası | Sıralı klasör adları, etiket `0..C-1` |
+| Çözme | Her `get()` çağrısında |
+| Bozuk dosya | Taramada `CorruptImagePolicy::Skip`, aksi halde `get` içinde hata |
 
 ## ImageDecodeOptions
 
 | Alan | Varsayılan | Anlam |
 | --- | --- | --- |
-| `channels` | `RGB` | Gray/RGB/RGBA veya `Keep` |
-| `apply_exif_orientation` | `true` | stb ile EXIF yönlendirme |
-| `on_corrupt` | `Throw` | `Skip` ile tarama anında atlama |
+| `channels` | `RGB` | Gray, RGB, RGBA veya `Keep` |
+| `apply_exif_orientation` | `true` | stb ile EXIF yönü |
+| `on_corrupt` | `Throw` | `Skip` tarama sırasında atlar |
 
-## Serbest fonksiyonlar
+JPEG, PNG, BMP, TGA ve GIF `load_image` (stb) ile çözülür. WebP varsayılan derlemededir; sıkıştırılmamış 8-bit TIFF `decode_media_image` içindedir. AVIF, `NEXUSDATA_WITH_AVIF` ister.
+
+## Yükleme, boyut ve kaydetme
+
+C++ çözer ve yeniden boyutlandırır. PNG, JPEG veya BMP yazmaz.
 
 ```cpp
-Image img = load_image("photo.jpg");
-NDArray chw = image_to_tensor(img.data);  // [0,1] float CHW
+#include "nexusdata/image/image.hpp"
+#include "nexusdata/simd/image_ops.hpp"
+
+using namespace nexusdata;
+
+Image img = load_image("foto.jpg");
+NDArray chw = image_to_tensor(img.data);  // [0, 1] float CHW
+
+std::vector<std::uint8_t> hwc(224 * 224 * static_cast<std::size_t>(img.channels));
+simd::resize_hwc_u8(
+    img.data.data<std::uint8_t>(),
+    static_cast<std::size_t>(img.height),
+    static_cast<std::size_t>(img.width),
+    hwc.data(), 224, 224,
+    static_cast<std::size_t>(img.channels),
+    simd::ResampleMode::Bilinear);
 ```
 
-v1.0 desteklenen konteynerler: **JPEG, PNG, BMP, TGA, GIF** (stb_image). WebP/TIFF isteğe bağlı derlemelerde gelebilir.
+`resize_hwc_u8` HWC `uint8` bırakır. `resize_to_chw_f32` tek geçişte CHW float32 yazar (ortalama ve standart sapma boşsa `src / 255`). Batch örneği: [Görsel klasörü](/docs/examples/images).
 
-## Batch
+Nexus Python kabuğu (`nexus.data.load_image` / `save_image`) o sayfada ve [Python bağları](/docs/integration/python-bindings) sayfasındadır. PostgreSQL, ODBC, Parquet, uzak dosyalar ve tokenizer'lar C++ API'leridir. Python kabuğu bunları çağırmaz.
 
-Decode edilen tüm görüntüler aynı `H×W×C` ise `collate_stack` kullanın. Augmentation için collation öncesinde pipeline'da ön işleme uygulayın (`nexusdata/pipeline/` başlıkları).
+Aynı `H×W×C` ile `collate_stack` kullanılır. Augmentation, reader içinde değil, collation öncesinde uygulanır.
 
 ## İlgili
 
