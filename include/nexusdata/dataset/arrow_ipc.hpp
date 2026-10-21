@@ -36,7 +36,7 @@ struct ArrowIpcOptions {
 /// Thread-safety: read-only after construction; concurrent get() / column() is safe.
 class ArrowIpcDataset : public Dataset {
 public:
-    ArrowIpcDataset(const std::string& path, ArrowIpcOptions opt = {});
+    ArrowIpcDataset(const std::string& path, const ArrowIpcOptions& opt = {});
     ~ArrowIpcDataset() override;
     ArrowIpcDataset(const ArrowIpcDataset&) = delete;
     ArrowIpcDataset& operator=(const ArrowIpcDataset&) = delete;

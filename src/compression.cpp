@@ -33,6 +33,13 @@
 #include <lzma.h>
 #endif
 
+#if defined(NEXUSDATA_WITH_ZLIB) || defined(NEXUSDATA_WITH_ZSTD) || defined(NEXUSDATA_WITH_LZ4) || \
+    defined(NEXUSDATA_WITH_BZIP2) || defined(NEXUSDATA_WITH_LZMA)
+#define NEXUSDATA_HAS_ANY_CODEC 1
+#else
+#define NEXUSDATA_HAS_ANY_CODEC 0
+#endif
+
 namespace nexusdata {
 
 namespace {
@@ -558,7 +565,9 @@ std::string strip_codec_suffix(std::string_view path) {
 
 std::unique_ptr<Decompressor> make_decompressor(Codec codec) {
     require_codec(codec);
+#if NEXUSDATA_HAS_ANY_CODEC
     switch (codec) {
+        case Codec::None: break;
 #if defined(NEXUSDATA_WITH_ZLIB)
         case Codec::Gzip: return std::make_unique<ZlibDecoder>(true);
         case Codec::Zlib: return std::make_unique<ZlibDecoder>(false);
@@ -577,6 +586,7 @@ std::unique_ptr<Decompressor> make_decompressor(Codec codec) {
 #endif
         default: break;
     }
+#endif
     throw InvalidArgumentError("make_decompressor: Codec::None has no decoder");
 }
 
@@ -586,11 +596,16 @@ std::vector<std::uint8_t> compress(Codec codec, const void* data, std::size_t si
     if (data == nullptr && size > 0) {
         throw InvalidArgumentError("compress: null data");
     }
+#if NEXUSDATA_HAS_ANY_CODEC
     const auto* p = static_cast<const std::uint8_t*>(data);
     const int level = options.level;
+    // Codec dallari derlenmemisse bu iki deger kullanilmaz; (void) uyariyi kapatir.
+    (void)p;
+    (void)level;
     std::vector<std::uint8_t> out;
     using Sink = std::vector<std::uint8_t>;
     switch (codec) {
+        case Codec::None: break;
 #if defined(NEXUSDATA_WITH_ZLIB)
         case Codec::Gzip:
             append_frames(out, p, size, options.frame_bytes,
@@ -661,6 +676,9 @@ std::vector<std::uint8_t> compress(Codec codec, const void* data, std::size_t si
 #endif
         default: break;
     }
+#else
+    (void)options;
+#endif
     throw InvalidArgumentError("compress: Codec::None");
 }
 

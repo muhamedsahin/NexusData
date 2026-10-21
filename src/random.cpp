@@ -35,7 +35,8 @@ std::uint32_t PCG32::next_bounded(std::uint32_t bound) {
     std::uint64_t m = r * static_cast<std::uint64_t>(bound);
     std::uint32_t l = static_cast<std::uint32_t>(m);
     if (l < bound) {
-        std::uint32_t t = static_cast<std::uint32_t>(-bound) % bound;
+        // (2^32 - bound) % bound == 2^32 % bound; isaretsiz sarma tanimlidir.
+        std::uint32_t t = (std::uint32_t{0} - bound) % bound;
         while (l < t) {
             r = next_u32();
             m = r * static_cast<std::uint64_t>(bound);

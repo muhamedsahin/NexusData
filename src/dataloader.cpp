@@ -2,8 +2,14 @@
 
 #include <algorithm>
 #include <chrono>
+#include <condition_variable>
 #include <cstring>
+#include <deque>
+#include <functional>
+#include <map>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <utility>
 
 #include "nexusdata/backend/cuda_api.hpp"
@@ -64,7 +70,79 @@ DataLoader::DataLoader(DatasetConstPtr dataset,
     reset_epoch(options_.seed);
 }
 
+struct DataLoader::PersistentPool {
+    explicit PersistentPool(int workers, std::function<Batch(std::size_t)> load) : load_(std::move(load)) {
+        const int count = workers > 0 ? workers : 1;
+        for (int i = 0; i < count; ++i) {
+            threads_.emplace_back([this] { loop(); });
+        }
+    }
+
+    ~PersistentPool() {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            stop_ = true;
+        }
+        cv_.notify_all();
+        for (std::thread& thread : threads_) {
+            if (thread.joinable()) {
+                thread.join();
+            }
+        }
+    }
+
+    void reset(std::size_t batches) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        jobs_.clear();
+        ready_.clear();
+        for (std::size_t i = 0; i < batches; ++i) {
+            jobs_.push_back(i);
+        }
+        cv_.notify_all();
+    }
+
+    Batch take(std::size_t index) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        cv_.wait(lock, [&] { return ready_.count(index) != 0 || stop_; });
+        Batch batch = std::move(ready_.at(index));
+        ready_.erase(index);
+        return batch;
+    }
+
+    void loop() {
+        for (;;) {
+            std::size_t index = 0;
+            {
+                std::unique_lock<std::mutex> lock(mutex_);
+                cv_.wait(lock, [&] { return stop_ || !jobs_.empty(); });
+                if (stop_) {
+                    return;
+                }
+                index = jobs_.front();
+                jobs_.pop_front();
+            }
+            Batch batch = load_(index);
+            {
+                std::lock_guard<std::mutex> lock(mutex_);
+                ready_.emplace(index, std::move(batch));
+            }
+            cv_.notify_all();
+        }
+    }
+
+    std::function<Batch(std::size_t)> load_;
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    std::deque<std::size_t> jobs_;
+    std::map<std::size_t, Batch> ready_;
+    bool stop_ = false;
+    std::vector<std::thread> threads_;
+};
+
 DataLoader::~DataLoader() {
+    if (persistent_) {
+        persistent_.reset();
+    }
     stop_prefetch();
 }
 
@@ -207,6 +285,15 @@ void DataLoader::start_prefetch() {
     if (options_.num_workers <= 0 || num_batches_ == 0) {
         return;
     }
+    if (options_.persistent_workers) {
+        if (!persistent_) {
+            persistent_ = std::make_unique<PersistentPool>(options_.num_workers, [this](std::size_t index) {
+                return materialize_batch(index);
+            });
+        }
+        persistent_->reset(num_batches_);
+        return;
+    }
     if (graph_) {
         return;
     }
@@ -243,6 +330,9 @@ void DataLoader::stop_prefetch() {
 }
 
 Batch DataLoader::next_prefetched(std::size_t expected_index) {
+    if (persistent_) {
+        return persistent_->take(expected_index);
+    }
     if (!graph_) {
         return materialize_batch(expected_index);
     }
@@ -312,7 +402,7 @@ DataLoader::Iterator& DataLoader::Iterator::operator++() {
     }
     cached_.reset();
     ++batch_index_;
-    if (loader_ && batch_index_ >= loader_->num_batches_) {
+    if (loader_ && batch_index_ >= loader_->num_batches_ && !loader_->options_.persistent_workers) {
         loader_->stop_prefetch();
     }
     return *this;

@@ -71,7 +71,7 @@ struct ParquetOptions {
 /// one row. Thread-safety: read-only after construction; concurrent get() is safe.
 class ParquetDataset : public Dataset {
 public:
-    ParquetDataset(const std::string& path, ParquetOptions opt = {});
+    ParquetDataset(const std::string& path, const ParquetOptions& opt = {});
     ~ParquetDataset() override;
     ParquetDataset(const ParquetDataset&) = delete;
     ParquetDataset& operator=(const ParquetDataset&) = delete;

@@ -266,9 +266,48 @@ const KernelTable kAvx2Table{
 
 const KernelTable* avx2_kernels() noexcept { return &kAvx2Table; }
 
+void hwc3_to_chw_lut(const std::uint8_t* src, float* dst, std::size_t hw, const float* lut) {
+    float* plane0 = dst;
+    float* plane1 = dst + hw;
+    float* plane2 = dst + 2 * hw;
+    std::size_t i = 0;
+    for (; i + 8 <= hw; i += 8) {
+        alignas(32) float a[8];
+        alignas(32) float b[8];
+        alignas(32) float c[8];
+        for (int lane = 0; lane < 8; ++lane) {
+            const std::uint8_t* pixel = src + (i + static_cast<std::size_t>(lane)) * 3;
+            a[lane] = lut[pixel[0]];
+            b[lane] = lut[256 + pixel[1]];
+            c[lane] = lut[512 + pixel[2]];
+        }
+        _mm256_storeu_ps(plane0 + i, _mm256_loadu_ps(a));
+        _mm256_storeu_ps(plane1 + i, _mm256_loadu_ps(b));
+        _mm256_storeu_ps(plane2 + i, _mm256_loadu_ps(c));
+    }
+    for (; i < hw; ++i) {
+        const std::uint8_t* pixel = src + i * 3;
+        plane0[i] = lut[pixel[0]];
+        plane1[i] = lut[256 + pixel[1]];
+        plane2[i] = lut[512 + pixel[2]];
+    }
+}
+
 #else
 
 const KernelTable* avx2_kernels() noexcept { return nullptr; }
+
+void hwc3_to_chw_lut(const std::uint8_t* src, float* dst, std::size_t hw, const float* lut) {
+    float* plane0 = dst;
+    float* plane1 = dst + hw;
+    float* plane2 = dst + 2 * hw;
+    for (std::size_t i = 0; i < hw; ++i) {
+        const std::uint8_t* pixel = src + i * 3;
+        plane0[i] = lut[pixel[0]];
+        plane1[i] = lut[256 + pixel[1]];
+        plane2[i] = lut[512 + pixel[2]];
+    }
+}
 
 #endif
 

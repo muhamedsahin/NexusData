@@ -149,6 +149,8 @@ private:
     std::vector<std::size_t> order_;
     std::size_t num_batches_ = 0;
 
+    struct PersistentPool;
+    std::unique_ptr<PersistentPool> persistent_;
     std::unique_ptr<StageGraph<Batch>> graph_;
     std::unique_ptr<BufferPool> pinned_pool_;
     std::size_t next_consume_ = 0;

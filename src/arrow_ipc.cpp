@@ -100,12 +100,23 @@ bool arrow_ipc_support_enabled() {
 #endif
 }
 
-ArrowIpcDataset::ArrowIpcDataset(const std::string& path, ArrowIpcOptions opt) {
+#if !defined(NEXUSDATA_WITH_ARROW)
+#if defined(_MSC_VER)
+__declspec(noinline)
+#else
+__attribute__((noinline))
+#endif
+void arrow_ipc_built_without_arrow() {
+    throw InvalidArgumentError(
+        "ArrowIpcDataset: built without Arrow. Reconfigure with -DNEXUSDATA_WITH_ARROW=ON");
+}
+#endif
+
+ArrowIpcDataset::ArrowIpcDataset(const std::string& path, const ArrowIpcOptions& opt) {
 #if !defined(NEXUSDATA_WITH_ARROW)
     (void)path;
     (void)opt;
-    throw InvalidArgumentError(
-        "ArrowIpcDataset: built without Arrow. Reconfigure with -DNEXUSDATA_WITH_ARROW=ON");
+    arrow_ipc_built_without_arrow();
 #else
     const std::vector<std::string> names = arrow_detail::split_names(opt.columns);
     auto table = read_feather_or_ipc(path, names);

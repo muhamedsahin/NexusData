@@ -390,12 +390,23 @@ bool parquet_support_enabled() {
 #endif
 }
 
-ParquetDataset::ParquetDataset(const std::string& path, ParquetOptions opt) {
+#if !defined(NEXUSDATA_WITH_ARROW)
+#if defined(_MSC_VER)
+__declspec(noinline)
+#else
+__attribute__((noinline))
+#endif
+void parquet_built_without_arrow() {
+    throw InvalidArgumentError(
+        "ParquetDataset: built without Arrow. Reconfigure with -DNEXUSDATA_WITH_ARROW=ON");
+}
+#endif
+
+ParquetDataset::ParquetDataset(const std::string& path, const ParquetOptions& opt) {
 #if !defined(NEXUSDATA_WITH_ARROW)
     (void)path;
     (void)opt;
-    throw InvalidArgumentError(
-        "ParquetDataset: built without Arrow. Reconfigure with -DNEXUSDATA_WITH_ARROW=ON");
+    parquet_built_without_arrow();
 #else
     auto input = take_arrow(arrow::io::ReadableFile::Open(path), path);
     auto reader = take_arrow(parquet::arrow::OpenFile(input, arrow::default_memory_pool()), path);

@@ -134,6 +134,10 @@ void resize_visit(const std::uint8_t* src, std::size_t sh, std::size_t sw, std::
 
 } // namespace
 
+namespace detail {
+void hwc3_to_chw_lut(const std::uint8_t* src, float* dst, std::size_t hw, const float* lut);
+}
+
 void hwc_u8_to_chw_f32(const std::uint8_t* src, float* dst, std::size_t h, std::size_t w,
                        std::size_t c, const float* mean, const float* stddev) noexcept {
     const std::size_t hw = h * w;
@@ -145,7 +149,7 @@ void hwc_u8_to_chw_f32(const std::uint8_t* src, float* dst, std::size_t h, std::
         build_lut(lut, c, mean, stddev);
         switch (c) {
             case 1: hwc_to_chw_lut<1>(src, dst, hw, lut); return;
-            case 3: hwc_to_chw_lut<3>(src, dst, hw, lut); return;
+            case 3: detail::hwc3_to_chw_lut(src, dst, hw, lut); return;
             case 4: hwc_to_chw_lut<4>(src, dst, hw, lut); return;
             default:
                 for (std::size_t i = 0; i < hw; ++i) {
