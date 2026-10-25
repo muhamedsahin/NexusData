@@ -111,6 +111,8 @@ set(NEXUSDATA_SOURCES
     src/media.cpp
     src/audio_codec.cpp
     src/tokenizer.cpp
+    src/bpe.cpp
+    src/token_shard.cpp
     src/video.cpp
 )
 
